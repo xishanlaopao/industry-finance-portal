@@ -80,7 +80,15 @@
 
 ## 运行方式
 
-**双击 `index.html` 即可在浏览器打开**（无需联网、无外部依赖；logo 为本地资源）。移动端工作台双击 `mobile.html` 打开（同为离线单文件）。
+**线上地址（GitHub Pages，可直接分享）**：
+- PC 门户：https://xishanlaopao.github.io/industry-finance-portal/
+- 机会漏斗：https://xishanlaopao.github.io/industry-finance-portal/#/funnel
+- PC 工作台：https://xishanlaopao.github.io/industry-finance-portal/#/workbench
+- 移动端工作台：https://xishanlaopao.github.io/industry-finance-portal/mobile.html
+
+**离线方式**：双击 `index.html` 即可在浏览器打开（无需联网、无外部依赖；logo 为本地资源）。移动端工作台双击 `mobile.html` 打开（同为离线单文件）。
+
+**发布更新**：修改后执行 `python build_inline.py` 重新构建，然后 `git add -A && git commit -m "..." && git push`，Pages 约 1 分钟后自动更新。
 
 ```bash
 cd 02-PC门户原型-V3
