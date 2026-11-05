@@ -150,6 +150,51 @@ textarea.tarea { width:100%; min-height:88px; resize:vertical; line-height:1.7; 
 .mtab .ti.on { color:var(--brand-600); font-weight:700; }
 .mtab .ti.on .ic { transform:translateY(-1px); }
 
+/* 迭代22：访前准备看板（与 PC 端一致结构） */
+.opb-hero { display:flex; justify-content:space-between; align-items:center; gap:10px; background:linear-gradient(115deg,#FDF7F8,#FCF0F1 55%,#FBEBED); border:1px solid #F3D3D6; border-radius:13px; padding:14px 15px; }
+.opb-hero .ey { font-size:10px; letter-spacing:2px; color:#B4525B; }
+.opb-hero h2 { font-size:16.5px; font-weight:800; margin:4px 0 5px; }
+.opb-hero .sb { font-size:11px; color:var(--t2); line-height:1.7; }
+.opb-verdict { flex-shrink:0; background:#fff; color:var(--brand-600); border-radius:11px; padding:8px 12px; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,.08); }
+.opb-verdict .lv { font-size:15px; font-weight:800; }
+.opb-verdict .sm { font-size:9.5px; color:var(--t3); }
+.opb-kpis { display:grid; grid-template-columns:repeat(3,1fr); gap:7px; }
+.opb-kpi { background:#fff; border:1px solid var(--line); border-radius:10px; padding:8px 6px; text-align:center; border-top:2.5px solid #DBA0A6; }
+.opb-kpi .k { font-size:9.5px; color:var(--t3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.opb-kpi .v { font-size:15px; font-weight:800; color:var(--brand-600); margin-top:1px; }
+.opb-sec { display:flex; align-items:center; gap:7px; margin:14px 0 8px; }
+.opb-sec .no { width:22px; height:22px; border-radius:7px; background:var(--brand-50); border:1px solid #F3D3D6; color:var(--brand-600); font-weight:800; font-size:11.5px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.opb-sec b { font-size:13.5px; }
+.opb-cloud { display:flex; flex-wrap:wrap; gap:7px; }
+.opb-cl { border-radius:14px; padding:3.5px 11px; font-size:11px; font-weight:600; }
+.opb-cl.a { background:var(--brand-50); color:var(--brand-600); border:1px solid #F3D3D6; }
+.opb-cl.b { background:#F2F6FF; color:#1A44D6; border:1px solid #D9E4FB; }
+.opb-cl.c { background:#EDF7F2; color:#0F6E56; border:1px solid #D4EEE4; }
+.opb-cl.e { background:var(--danger-50); color:var(--danger-500); border:1px solid #F6D7D8; }
+.opb-biz { border-radius:10px; padding:10px 12px; background:#fff; border:1px solid var(--line); }
+.opb-biz .t { font-size:12.5px; font-weight:800; margin-bottom:3px; }
+.opb-biz .s { font-size:11px; color:var(--t2); line-height:1.65; }
+.opb-person { background:#fff; border:1px solid var(--line); border-top:3px solid #DBA0A6; border-radius:10px; padding:11px 13px; }
+.opb-person .nm { font-size:14px; font-weight:800; }
+.opb-person .rl { font-size:11px; color:var(--brand-600); font-weight:700; margin:2px 0 4px; }
+.opb-person .pt { font-size:11.5px; color:var(--t2); line-height:1.7; }
+.opb-topic { background:#fff; border:1px solid var(--line); border-radius:10px; padding:11px 13px; }
+.opb-topic .hd { display:flex; align-items:center; gap:7px; margin-bottom:5px; }
+.opb-topic .no2 { min-width:21px; height:21px; border-radius:7px; color:#fff; font-weight:800; font-size:10.5px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.opb-topic .q { font-weight:800; font-size:12.5px; }
+.opb-topic .ask { font-size:11.5px; color:var(--t2); margin:3px 0 7px; line-height:1.65; }
+.opb-topic .why { background:#F8F5FC; border:1px dashed #D5CCE8; border-radius:8px; padding:7px 10px; font-size:11px; color:#4E4470; line-height:1.7; }
+.opb-topic .why b { color:#5B54A8; }
+.opb-topic .script { background:#F4F9FD; border-left:3px solid #2458F5; border-radius:0 8px 8px 0; padding:7px 10px; font-size:11px; color:#2A5566; margin-top:8px; line-height:1.75; }
+.opb-topic .script .sl { font-weight:800; color:#1A44D6; font-size:10px; letter-spacing:.5px; display:block; margin-bottom:2px; }
+.opb-note { background:var(--brand-50); border-left:3px solid var(--brand-500); border-radius:0 8px 8px 0; padding:9px 12px; font-size:11.5px; color:#5A3038; line-height:1.8; }
+.opb-note b { color:var(--brand-600); }
+.opb-hbar { display:flex; align-items:center; gap:8px; font-size:11.5px; padding:4px 0; }
+.opb-hbar .bl { width:82px; color:var(--t2); font-weight:600; flex-shrink:0; }
+.opb-hbar .bt { flex:1; height:14px; background:#F6E9EA; border-radius:5px; overflow:hidden; }
+.opb-hbar .bt i { display:block; height:100%; border-radius:5px; background:#D98A92; }
+.opb-hbar .bn { flex-shrink:0; color:var(--brand-600); font-weight:700; }
+
 /* 迭代16：AI 特效 */
 @keyframes mStagIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 @keyframes mFade{from{opacity:0}to{opacity:1}}
@@ -402,109 +447,103 @@ function pageTask(){
 
 /* ---------- 一页纸 ---------- */
 function openOp(coId){ S.opCo=coId; switchTab('op'); }
-/* 访前一页纸（内容结构与 PC 端 AI智能分析·访前一页纸 一致，移动样式） */
-function mbProdType(n){
-  if (/订单|应收|供应链|票据|贸易|保理/.test(n)) return 'trade';
-  if (/项目|固定资产|设备|技改|并购|银团|绿色|水利|债券|出口|租赁/.test(n)) return 'proj';
-  if (/科技|科创|投行|培育|股权/.test(n)) return 'credit';
-  return 'cash';
-}
-function mbSpecs(n){
-  var T=mbProdType(n);
-  if (T==='trade') return [['额度','300万–5000万，按订单/应收核定'],['利率','年化3.2%–5.0%'],['期限','3–12个月'],['担保','信用/保证/应收质押'],['还款','按回款分期或到期还本']];
-  if (T==='proj') return [['额度','1000万–5亿，按项目投资核定'],['利率','3.0%–4.5%，可叠加贴息'],['期限','3–10年，宽限1–2年'],['担保','项目资产抵押/银团份额'],['还款','分期还本，匹配投产']];
-  if (T==='credit') return [['额度','500万–5000万'],['利率','3.5%–5.5%，政策补贴降成本'],['期限','1–3年循环'],['担保','信用为主，可叠知识产权质押'],['还款','按月付息到期还本']];
-  return [['内容','结算归集/代发/资金监管/现金管理'],['费率','按综合贡献定价'],['时效','T+3 开通'],['要求','基本户或监管专户'],['效益','派生存款与个人客群']];
-}
-function mbPlans(c){
-  var pr=(c.prods&&c.prods.length?c.prods.slice(0,3):D.prodByNet[c.net]||['流动资金贷款']);
-  function fit(n){
-    if (/项目|固定资产|技改/.test(n)) return '适配项目资本开支与建设周期资金安排。';
-    if (/设备|租赁/.test(n)) return '适配设备采购分期投入场景。';
-    if (/供应链|订单|应收|票据|保理/.test(n)) return '适配订单与应收周转，盘活链上资金。';
-    if (/科技|科创|投行|培育/.test(n)) return '适配研发投入与科技资质融资。';
-    if (/并购/.test(n)) return '适配产业链整合并购支付。';
-    if (/银团/.test(n)) return '适配大额项目多行分担。';
-    if (/绿色/.test(n)) return '适配绿色项目，可接贴息工具。';
-    if (/出口|跨境/.test(n)) return '适配出口与跨境结算避险。';
-    if (/债券/.test(n)) return '适配直接融资，优化负债结构。';
-    return '适配日常经营与综合金融服务。';
-  }
-  return pr.map(function(n,i){ return { name:n, badge:i===0?'优先沟通':(mbProdType(n)==='cash'?'非信贷先行':'配套方案'),
-    fit:fit(n), tags:[c.net,c.prog,i===0?'主推':'配套'] }; });
+/* 访前准备看板（结构与 PC 端工作台访前准备完全一致） */
+function opTopics(c){
+  var p0=(c.prods||[])[0]||'项目贷款';
+  var OPEN={'新型电网':'"恭喜贵司'+(c.track.indexOf('海上风电')>=0?'海上风电项目核准落地':'电网订单持续放量')+'，我们梳理了绿色信贷与项目融资组合，想了解资金计划。"','算力网':'"智算中心建设进入高峰，可围绕设备采购和项目周期设计资金安排，先从结算和现金管理合作。"','城市地下管网':'"管廊与管网项目的资金监管和专项债配套可出完整方案，想了解项目进度。"','水网':'"水利项目投资大周期长，项目贷+水利专项贷能匹配建设节奏，想了解资本金安排。"','物流网':'"枢纽与运力建设的中长期安排，可按节点设计，先从结算归集做起。"','新一代通信网':'"科技金融和投行服务可匹配研发与资本运作节奏，想了解今年资金安排。"'}[c.net]||'"想了解贵司近期资金安排与项目节奏。"';
+  return [
+    { q:'订单与项目节奏', ask:'问：未来 6—12 个月订单储备/项目进度如何？正式合同与框架协议各占多少？关键交付与验收节点？', why:'这是'+(c.cat==='建设运营商'?'资本开支与融资排期':'收入与垫资规模')+'的直接变量，决定授信上量节奏与期限设计。', plan:p0, script:'「想先了解贵司'+(c.cat==='建设运营商'?'项目核准与资本金安排':'订单能见度与交付节奏')+'——如果四季度到明年有资金过渡需求，我们可以备一笔专项额度，先把通道铺好，节奏由您定。」' },
+    { q:'回款与结算方式', ask:'问：主要客户/业主方的账期多长？电汇、票据、平台结算各占多少？可否确权？', why:c.cat==='上游供应商'?'应收占款是最适合银行工具盘活的板块；链主确权后保理风险极低，是差异化抓手。':'回款结构决定现金流测算与资金监管方案设计。', plan:(c.prods||[]).filter(function(x){return /供应链|票据|应收/.test(x);})[0]||'供应链金融', script:'「应收这块我们做了功课——'+(c.cat==='上游供应商'?'债务人是链主客户，资质很好，能不能走保理或者应收质押？':'业主回款的归集与监管方案我们可以出一版')+'两周内给您一份具体的融资方案，价格放到桌面上谈。」' },
+    { q:'产能与投资安排', ask:'问：现有产能利用率？在建/拟建产线与设备采购的付款计划怎样安排？', why:'资本开支节奏决定中长期融资窗口与产品组合（项目贷/设备更新贷/租赁）。', plan:(c.prods||[]).filter(function(x){return /项目|设备|技改/.test(x);})[0]||p0, script:'「扩产和设备投入的时间表，我们可以按付款节点测算资金方案，让融资进度跟着项目走，不占用日常周转。」' },
+    { q:'存量融资与同业格局', ask:'问：现有授信额度、已用余额与到期安排？合作行里哪类业务体验最差？', why:'正面拼价格无胜算；摸清"体验洼地"（保函时效、异地审批、系统对接）才能找到差异化切入口。', plan:'结算归集 + 非信贷先行', script:'「贵司合作行不少，我们今天不是来拼价格的。想请教：这么多家里哪类业务体验最差？您指哪里，我们改哪里——我们的优势就是决策链短，当天能约到审批人。」' },
+    { q:'政策申报窗口', ask:'问：'+({'新型电网':'绿色信贷贴息/碳减排工具','算力网':'算力基础设施专项贴息','城市地下管网':'专项债配套','水网':'水利专项贷款','物流网':'多式联运与枢纽补贴','新一代通信网':'专精特新与科技补贴'}[c.net]||'产业专项政策')+'是否有申报计划？需要哪些协助？', why:'政策工具可直接降低客户融资成本，协助申报是建立信任、卡位主办行的低成本方式。', plan:(c.prods||[]).filter(function(x){return /绿色|科技|科创/.test(x);})[0]||'政策叠加方案', script:'「这个方向有专项政策窗口，符合条件可以叠加贴息。材料我们可以协助梳理，先把申报资格拿到，融资成本立降。」' },
+    { q:'资本运作计划', ask:'问：是否有再融资、并购整合或资产证券化的中期安排？', why:c.listed.indexOf('是')===0?'上市主体有再融资与资产运作传统，商投行联动是提升综合回报的杠杆。':'Pre-IPO/股权融资窗口值得提前卡位，投行+私行服务可超越信贷关系。', plan:(c.prods||[]).filter(function(x){return /投行|并购|债券|承销/.test(x);})[0]||'投行服务', script:'「往后不管是再融资、并购还是资产证券化，我们投行条线都愿意提前介入、先把方案备着——哪怕暂时不动，顾问关系先建起来，节奏您定。」' }
+  ];
 }
 function pageOp(){
   var ts=myTasks(); var selCo=S.opCo&&co(S.opCo)?S.opCo:(ts[0]?ts[0].co:D.cos[0].id);
   var c=co(selCo);
   var task0=null; D.tasks.forEach(function(x){ if(x.co===c.id) task0=x; });
-  var plans=mbPlans(c);
-  var kv=function(k,v,hot){ return '<div class="kvrow"><span class="k">'+k+'</span><span class="v"'+(hot?' style="color:var(--brand-600);font-weight:600"':'')+'>'+v+'</span></div>'; };
-  var OPEN={'新型电网':'"恭喜贵司'+(c.track.indexOf('海上风电')>=0?'海上风电项目核准落地':'电网订单持续放量')+'，我们梳理了绿色信贷与项目融资组合，想了解资金计划。"','算力网':'"智算中心建设进入高峰，可围绕设备采购和项目周期设计资金安排，先从结算和现金管理合作。"','城市地下管网':'"管廊与管网项目的资金监管和专项债配套可出完整方案，想了解项目进度。"','水网':'"水利项目投资大周期长，项目贷+水利专项贷能匹配建设节奏，想了解资本金安排。"','物流网':'"枢纽与运力建设的中长期安排，可按节点设计，先从结算归集做起。"','新一代通信网':'"科技金融和投行服务可匹配研发与资本运作节奏，想了解今年资金安排。"'}[c.net]||'"想了解贵司近期资金安排与项目节奏。"';
+  var verdict=c.prog==='突破'?'重点介入':c.prog==='攻坚'?'适度介入':'培育跟踪';
+  var vSub=c.pos+'客户 · '+c.prog+'档 · 授信评估';
+  var kpi=function(k,v){ return '<div class="opb-kpi"><div class="k">'+k+'</div><div class="v">'+v+'</div></div>'; };
+  var cl=function(x,cls){ return '<span class="opb-cl '+cls+'">'+esc(x)+'</span>'; };
+  var BIZ={'新型电网':[['核心业务（to G/B）',c.cat==='建设运营商'?'电网/海风场投资建设运营，项目核准与并网节奏决定资本开支':'电网装备与海缆/风电配套供货，客户以国网/南网、发电集团与整机厂为主','#C0202C'],['场景延伸（to C/场景）',c.track.indexOf('海上风电')>=0?'海上风电运维、绿电交易与碳资产场景延伸，运营期现金流稳定':'分布式能源、虚拟电厂与充电场景，负荷资源入口','#2458F5'],['业务壁垒',c.cat==='建设运营商'?'特许经营与项目资源稀缺，省级平台卡位构成先发壁垒':'电网认证周期1-2年构成置换壁垒，批中标份额集中','#B08A00']],
+    '算力网':[['智算建设与运营',c.cat==='建设运营商'?'智算中心/超算平台建设运营，算力调度与政府订单为主':'算力设备/液冷/网络配套，客户为运营商与智算中心','#C0202C'],['算电协同场景','绿电直供、算力交易与边缘计算场景延伸，绑定地方数据要素政策','#2458F5'],['业务壁垒','重资产+政府合作卡位；上架算力与运维能力构成运营壁垒','#B08A00']],
+    '城市地下管网':[['管网建设运营',c.cat==='建设运营商'?'综合管廊/供排水/燃气投资运营，特许经营现金流稳定':'管网施工与设备供货，业主为地方平台与水务公司','#C0202C'],['智慧化延伸','智慧水务/管网监测数字化改造，带动长期运维协议','#2458F5'],['业务壁垒','特许经营授权与区域管网资源构成自然垄断属性','#B08A00']],
+    '水网':[['水利工程与供水',c.cat==='建设运营商'?'原水/调水/供水枢纽建设运营，水费与政府购买服务双现金流':'水务装备与工程配套，跟随水利专项投资周期','#C0202C'],['节水与水环境','节水改造、水环境治理延伸场景，绑定国家水网重大工程','#2458F5'],['业务壁垒','水利特许经营与水源地资源稀缺，区域垄断明显','#B08A00']],
+    '物流网':[['物流枢纽运营',c.cat==='建设运营商'?'机场/铁路/港口/园区枢纽建设运营，吞吐量决定收益':'物流装备与多式联运服务，客户为枢纽与货主','#C0202C'],['供应链延伸','冷链、跨境与供应链增值服务，绑定产业带货量','#2458F5'],['业务壁垒','枢纽资源与航线/班列时刻稀缺，网络效应显著','#B08A00']],
+    '新一代通信网':[['通信设备与器件',c.cat==='建设运营商'?'通信网络建设运营，运营商集采与政企专网为主':'光模块/射频/卫星等器件供货，客户为设备商与运营商','#C0202C'],['AI 与算力带动','AI算力建设带动高速光模块/连接需求，订单能见度高','#2458F5'],['业务壁垒','技术认证与客户验证周期长，车规/高速率环节格局集中','#B08A00']]}[c.net]||[['主营业务',esc(c.track),'#C0202C'],['场景延伸','产业链上下游协同场景','#2458F5'],['业务壁垒','细分领域认证与客户壁垒','#B08A00']];
+  var topics=opTopics(c);
+  var CLS=['a','b','c'];
   return '<div class="picker">'+ts.map(function(t){ var cc=co(t.co); return '<div class="pitem '+(cc.id===selCo?'on':'')+'" onclick="openOp(\''+cc.id+'\')">'+esc(cc.short)+'</div>'; }).join('')+'</div>'+
-  /* 速览头 */
-  '<div class="card" style="background:linear-gradient(115deg,#7E0E19,#C0202C);color:#fff"><div style="font-size:10px;letter-spacing:2px;color:#FFD9DC">客户经理拜访速览</div>'+
-    '<div style="font-size:17px;font-weight:800;margin-top:4px;line-height:1.4">'+esc(c.name)+'</div>'+
-    '<div style="font-size:11px;color:#FFD9DC;margin-top:3px">'+esc(c.net)+' · '+esc(c.track)+' · '+esc(c.cat)+'</div></div>'+
-  /* 企业基本信息 */
-  '<div class="card"><div class="sec-t">企业基本信息</div>'+
-    kv('企业名称',esc(c.name))+kv('客户大类',esc(c.cat),1)+kv('所属环节',esc(c.net)+'·'+esc(c.track))+
-    kv('所在地区',esc(c.city)+'·'+esc(c.zone))+
-    kv('上市情况',c.listed.indexOf('是')===0?'是 · '+esc(c.listed.slice(2)):'未上市',1)+
-    kv('企业性质',esc(c.nat))+kv('四维标签',c.prog+' · '+c.pos+' · '+c.wt,1)+
-    kv('合作状态',(c.internal&&c.internal.credit>0)?'已合作：授信'+c.internal.credit+'亿':(task0?'任务跟进中·未建立授信':'未合作·破冰阶段'),1)+
-    kv('上次接触',task0&&task0.log[0]?task0.log[0].d+' '+task0.log[0].t:'—')+'</div>'+
-  /* 一句话判断 */
-  '<div class="card"><div class="sec-t">一句话判断</div><div class="sub" style="font-weight:600;line-height:1.8">围绕「'+esc(c.sig[0])+'」切入——'+esc(c.cat)+'（'+c.pos+'客户·'+c.prog+'档·'+c.rel+'），AI 建议以<b style="color:var(--brand-600)">'+esc(plans[0].name)+'</b>为主打'+(plans[1]?'、'+esc(plans[1].name)+'配套':'')+'，先以结算/代发等非信贷服务建立往来，方案窗口建议 <b style="color:var(--danger-500)">11月内</b> 锁定。</div></div>'+
-  /* 推荐产品 */
-  '<div class="card"><div class="sec-t">推荐产品<small>点击切换</small></div><div id="mbProds">'+
-    plans.map(function(pl,i){ return '<div class="qitem" data-mbprod="'+i+'" style="cursor:pointer;border:1px solid '+(i===0?'var(--brand-500)':'var(--line)')+';border-radius:10px;padding:9px 10px;margin-bottom:7px'+(i===0?';background:var(--brand-50)':'')+'"><span class="tag '+(i===0?'tag-solid-red':'tag-blue')+'" style="flex-shrink:0;align-self:flex-start">'+esc(pl.badge)+'</span><div style="flex:1"><b style="font-size:13px">'+esc(pl.name)+'</b><div class="muted" style="margin-top:2px">'+esc(pl.fit)+'</div></div></div>'; }).join('')+
-    '</div><div id="mbProdDetail"></div>'+
-    '<div class="muted" style="margin-top:4px">额度利率以本行产品制度及审批为准</div></div>'+
-  /* 切入话术 */
-  '<div class="card"><div class="sec-t">切入策略与话术</div>'+
-    [['建议开场',OPEN],['核心价值主张','"把'+esc(plans[0].name)+'的提款、交付和回款衔接起来；结算归集/代发/现金管理先行落地，不增加额外负担。"'],['异议回应','"已有合作银行"→从新增项目或非信贷服务补充切入；"要抵押"→先核确权与批复再评估增信。'],['推进方式','选定一个订单/项目试点，明确材料与跟进人，会后约定资料清单与反馈时间。']].map(function(x){ return '<div style="margin-bottom:8px"><b style="font-size:12px;color:var(--brand-600)">'+x[0]+'</b><div class="sub">'+x[1]+'</div></div>'; }).join('')+'</div>'+
-  /* 拜访准备 */
-  '<div class="card"><div class="sec-t">拜访准备</div>'+
-    [['建议携带',[esc(plans[0].name)+'要点与测算模板','订单/项目材料清单','结算代发现金管理介绍',c.listed.indexOf('是')===0?'上市综合服务预案':'企业授权说明']],['会前准备',['复核工商/上市/资质信息',esc(c.net)+'产业趋势一页图','确认客户参会人','联动产品经理测算']],['本次目标',[c.prog==='突破'?'CFO认同方案框架，约定行长拜访':c.prog==='攻坚'?'摸清资金安排与决策链':'建立联系摸排融资安排','确认6-12月订单/项目与资金缺口','收集合同回款与项目资料','约定资料责任人与下次沟通']]].map(function(x){ return '<div style="margin-bottom:9px"><b style="font-size:12px;color:var(--brand-600)">'+x[0]+'</b><ol style="margin:4px 0 0 16px" class="sub">'+x[1].map(function(y){ return '<li style="margin:2px 0">'+esc(y)+'</li>'; }).join('')+'</ol></div>'; }).join('')+'</div>'+
-  /* 访谈提纲 */
-  '<div class="card"><div class="sec-t">访谈提纲</div>'+
-    [['订单与项目','订单储备/项目进度？框架与正式合同占比？关键交付验收节点？','订单台账、主要合同'],['客户与结算','账期与结算方式？电汇/票据/平台占比？','客户结构、应收账龄'],['产能与投资','产能利用率？在建产线与设备付款计划？','设备清单、采购合同'],['资金与融资','现有授信与到期安排？缺口来自备货/应收/项目？','融资担保明细、资金计划'],['政策与申报',(c.net==='新型电网'?'绿色信贷/贴息':c.net==='算力网'?'算力基础设施贴息':c.net==='城市地下管网'?'专项债配套':c.net==='水网'?'水利专项':c.net==='物流网'?'多式联运补贴':'专精特新/科技补贴')+'申报计划？需何协助？','申报计划、资质证书'],['会后确认','指定资料联系人，确认材料范围与方案反馈时间。','联系人清单、下次时间']].map(function(x,i){ return '<div class="qitem"><span class="qn">'+(i+1)+'</span><div><b style="font-size:12.5px">'+x[0]+'</b><div class="sub">'+x[1]+'</div><div class="muted" style="margin-top:2px">建议带回：'+x[2]+'</div></div></div>'; }).join('')+'</div>'+
-  /* 折叠：背景与风险 */
-  '<div class="card"><details><summary style="cursor:pointer;font-weight:700;font-size:13px">展开企业背景与风险信息</summary>'+
-    '<div class="sec-t" style="margin-top:10px">关键指标速览</div>'+
-    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'+
-      '<div style="border:1px solid var(--line);border-radius:9px;padding:7px 9px"><div class="muted">综合评分</div><b style="font-size:16px;color:var(--brand-600)">'+c.score+'</b> <span class="muted">'+c.sigLv+'级 · '+c.rel+'</span></div>'+
-      '<div style="border:1px solid var(--line);border-radius:9px;padding:7px 9px"><div class="muted">客户大类</div><b style="font-size:14px">'+esc(c.cat)+'</b><div class="muted">'+esc(c.nat)+'</div></div>'+
-      '<div style="border:1px solid var(--line);border-radius:9px;padding:7px 9px"><div class="muted">上市情况</div><b style="font-size:14px">'+(c.listed.indexOf('是')===0?'是':'否')+'</b><div class="muted">'+(c.listed.indexOf('是')===0?esc(c.listed.slice(2)):'非上市主体')+'</div></div>'+
-      '<div style="border:1px solid var(--line);border-radius:9px;padding:7px 9px"><div class="muted">营销进展</div><b style="font-size:14px">'+c.prog+'</b><div class="muted">'+c.pos+' · '+c.wt+'</div></div>'+
-    '</div>'+
-    '<div class="sec-t" style="margin-top:12px">近期动态 / 经营要点</div>'+c.sig.map(function(sg,i){ return '<div class="qitem"><span class="tag tag-line" style="flex-shrink:0;align-self:flex-start">'+(i===0?'信号':'依据')+'</span><span class="sub">'+esc(sg)+'</span></div>'; }).join('')+
-    '<div class="sec-t" style="margin-top:12px">政策与产业机会</div><div class="sub">'+esc(c.net)+'方向可对接专项政策与贴息工具，现场核实申报窗口与条件；六张网建设持续放量，关注同业授信动向。</div>'+
-    '<div class="sec-t" style="margin-top:12px">风险提示</div>'+
-    [['企业自身','中',(c.pos==='战略'?'体量大决策链长，方案需多部门联动':'关注订单波动与回款账期变化')],['关联企业',c.cat==='上游供应商'?'高':'中',(c.cat==='上游供应商'?'对链主客户依赖度需核实（前五大集中度）':'项目公司治理与资金归集需核实')],['同业动态','中','四大行与股份行均在跟进六张网名单客户，建议两周内递交方案'],['避雷提示','—','不主动谈他行合作细节与审批节奏预判']].map(function(x){ return '<div class="qitem" style="align-items:flex-start"><span class="tag '+(x[1]==='高'?'tag-red':x[1]==='中'?'tag-orange':'tag-gray')+'" style="flex-shrink:0">'+x[0]+' '+x[1]+'</span><span class="sub" style="flex:1">'+esc(x[2])+'</span></div>'; }).join('')+
-  '</details></div>'+
-  '<button class="mbtn pri" style="width:100%;height:38px" onclick="toastMsg(\'访前一页纸已下载（PDF）\')">下载访前一页纸</button>';
+  /* HERO */
+  '<div class="opb-hero"><div><div class="ey">访前准备 · 客户经理速览</div><h2>'+esc(c.name)+'</h2>'+
+    '<div class="sb">'+(c.listed.indexOf('是')===0?esc(c.listed.slice(2))+' ｜ ':'')+esc(c.city)+'·'+esc(c.zone)+(c.opp?'（机会地：'+esc(c.opp)+'）':'')+' ｜ '+esc(c.net)+'·'+esc(c.track)+' ｜ 数据基准日 2026-11-04 ｜ 配套：《综合服务方案》</div></div>'+
+    '<div class="opb-verdict"><div class="lv">'+verdict+'</div><div class="sm">'+vSub+'</div></div></div>'+
+  /* KPI */
+  '<div class="opb-kpis mt2">'+
+    kpi('综合评分',c.score)+kpi('客户大类',c.cat==='建设运营商'?'运营商':'供应商')+kpi('上市情况',c.listed.indexOf('是')===0?'是':'否')+
+    kpi('营销进展',c.prog)+kpi('AI 信号',c.sigLv+' 级')+kpi('建议切入',(c.prods||[]).length+' 项')+'</div>'+
+  /* §1 客户画像 */
+  '<div class="opb-sec"><span class="no">1</span><b>客户画像</b></div>'+
+  '<div class="card"><div class="opb-cloud mb2">'+
+    cl(c.listed.indexOf('是')===0?c.listed.slice(2):'非上市主体',c.listed.indexOf('是')===0?'a':'e')+
+    cl(c.net+' · '+c.track,'b')+cl(c.cat,'a')+cl(c.nat,'c')+cl(c.pos+'客户','a')+
+    cl('营销进展：'+c.prog,'b')+cl('权重：'+c.wt,'c')+cl(c.rel,'a')+cl('四线得分 '+c.score,'b')+cl(c.city+'属地','c')+
+  '</div>'+
+  BIZ.map(function(b2){ return '<div class="opb-biz mb2" style="border-top:3px solid '+b2[2]+'"><div class="t">'+esc(b2[0])+'</div><div class="s">'+esc(b2[1])+'</div></div>'; }).join('')+
+  '<div class="opb-note"><b>画像小结：</b>一家"'+esc(c.net)+'"方向的'+esc(c.nat)+esc(c.cat)+'——经营基本面看'+(c.cat==='建设运营商'?'项目核准与现金流':'链主订单与回款')+'，成长弹性看'+esc(c.track.split('·')[0])+'，信用观察点看'+(c.cat==='上游供应商'?'客户集中度与账期变化':'资本开支与资本金到位节奏')+'。</div></div>'+
+  /* §2 建议对接人 */
+  '<div class="opb-sec"><span class="no">2</span><b>建议对接人</b></div>'+
+  '<div class="mb2">'+
+  '<div class="opb-person"><div class="nm">周敏</div><div class="rl">财务总监</div><div class="pt">资金安排、融资需求、应收与回款、结算方案的实际决策者——<b>方案落地的关键人</b>。</div></div>'+
+  '<div class="opb-person" style="margin-top:8px"><div class="nm">王涛</div><div class="rl">董事会秘书 / 综合管理部负责人</div><div class="pt">对外信息与授信框架的统一接口人——<b>首次拜访第一对象</b>。</div></div>'+
+  '<div class="opb-person" style="margin-top:8px"><div class="nm">陈志强</div><div class="rl">总经理 / 董事长</div><div class="pt">'+esc(c.net)+'布局、资本运作的战略层对话对象——<b>二次拜访升级</b>谈综合合作框架。</div></div></div>'+
+  /* §3 六个核心交流议题 */
+  '<div class="opb-sec"><span class="no">3</span><b>六个核心交流议题（附交流理由）</b></div>'+
+  topics.map(function(tp,i){
+    var noBg=i<2?'#B08A00':i<4?'#2458F5':'#C0202C';
+    return '<div class="opb-topic mb2"><div class="hd"><span class="no2" style="background:'+noBg+'">'+'①②③④⑤⑥'[i]+'</span><span class="q">'+esc(tp.q)+'</span></div>'+
+      '<div class="ask">'+esc(tp.ask)+'</div>'+
+      '<div class="why"><b>为什么谈：</b>'+esc(tp.why)+'→ 对应方案：<b>'+esc(tp.plan)+'</b>。</div>'+
+      '<div class="script"><span class="sl">话术示范 · 可照读</span>'+esc(tp.script)+'</div></div>';
+  }).join('')+
+  /* §4 拜访注意事项 */
+  '<div class="opb-sec"><span class="no">4</span><b>拜访注意事项</b></div>'+
+  '<div class="card mb2"><div class="opb-note" style="margin:0">'+
+    (c.prog==='突破'?'<b>方案窗口在 11 月内</b>，错过需等下一周期；':c.prog==='攻坚'?'年底前是授信落地窗口；':'以建立联系为主，不急于报价；')+
+    '首访锁财务口 → 两周内提交定制方案 → 纳入年度授信盘子。切忌泛泛推销与低价竞争；带<b>'+esc((c.prods||[]).slice(0,2).join('、'))+'</b>要点与测算上门；他行合作、股价话题不主动评论；未公开数据按内幕信息管理；不承诺额度、利率、审批时限。</div></div>'+
+  /* 折叠 5-10 */
+  '<details class="mb2" style="margin-bottom:10px"><summary class="mbtn" style="width:100%;text-align:center;cursor:pointer;list-style:none">展开更多：股权治理 · 集团架构 · 财务速览 · 资本表现 · 行业地位 · 风险排查（5-10）▾</summary><div style="padding-top:8px">'+
+  '<div class="opb-sec"><span class="no">5</span><b>股权与治理要点</b></div>'+
+  '<div class="card mb2"><ul style="padding-left:18px;font-size:12px;color:var(--t2);line-height:2">'+
+    '<li><b style="color:var(--brand-600)">控制链：</b>'+(c.nat.indexOf('国企')>=0||c.nat.indexOf('国资')>=0||c.nat.indexOf('央企')>=0?esc(c.nat)+'背景，实际控制人为相应国资监管主体，治理规范':'民营控股，实际控制人为自然人，关注股权质押与代持情况')+'</li>'+
+    '<li><b style="color:var(--brand-600)">股东结构：</b>'+(c.listed.indexOf('是')===0?'上市主体，前十大股东以机构与产业资本为主':'非上市主体，股东以创始团队与产业投资人为主')+'</li>'+
+    '<li><b style="color:var(--brand-600)">关注点：</b>'+(c.nat.indexOf('民营')>=0?'大股东质押比例与平仓线距离——首授必查':'出资人资本金到位与政府购买服务协议期限')+'</li></ul>'+
+    '<div class="opb-note">授信策略应'+(c.cat==='上游供应商'?'与链主订单绑定':'与项目现金流绑定')+'，而非与单一股东信用绑定。</div></div>'+
+  '<div class="opb-sec"><span class="no">6</span><b>集团架构与用信建议</b></div>'+
+  '<div class="card mb2"><ul style="padding-left:18px;font-size:12px;color:var(--t2);line-height:2"><li>母公司统一授信、子公司按用信场景拆分；</li><li>'+(c.cat==='上游供应商'?'关注其对链主的依赖度：前五大客户集中度需现场核实':'关注项目公司资本金与并表范围')+'；</li><li>对外担保与关联交易须穿透核查。</li></ul></div>'+
+  '<div class="opb-sec"><span class="no">7</span><b>财务速览（示意）</b></div>'+
+  '<div class="card mb2"><div class="kvrow"><span class="k">营收规模</span><span class="v">'+(c.pos==='战略'?'体量大':'成长期')+' · 跟随'+esc(c.net)+'投资周期放量</span></div>'+
+    '<div class="kvrow"><span class="k">盈利能力</span><span class="v">'+(c.prog==='突破'?'强':'改善中')+' · 四线得分 '+c.score+'</span></div>'+
+    '<div class="kvrow"><span class="k">杠杆水平</span><span class="v">'+(c.cat==='建设运营商'?'重资产高杠杆（项目期）':'适中')+'</span></div>'+
+    '<div class="kvrow"><span class="k">现金流</span><span class="v">'+(c.cat==='上游供应商'?'回款账期是核心变量':'政府/业主回款稳定')+'</span></div>'+
+    '<div class="opb-note">财务数值为演示示意——正式环境接入财报后自动生成完整四维分析。</div></div>'+
+  '<div class="opb-sec"><span class="no">8</span><b>资本市场表现</b></div>'+
+  '<div class="card mb2">'+(c.listed.indexOf('是')===0?
+    '<ul style="padding-left:18px;font-size:12px;color:var(--t2);line-height:2"><li>板块/代码：'+esc(c.listed.slice(2))+'；估值以 PB/PS 为参考；</li><li>股价波动传导：市值缩水 → 质押压力 → 授信与股价脱敏、与现金流绑定；</li><li>贷后按月监测质押率与减持公告。</li></ul>':
+    '<ul style="padding-left:18px;font-size:12px;color:var(--t2);line-height:2"><li>非上市主体——关注 '+(c.prog==='突破'?'Pre-IPO/上市辅导进展（募集资金监管预案提前卡位）':'股权融资轮次与估值变化')+'；</li><li>员工持股与股权激励带来配套金融服务机会。</li></ul>')+'</div>'+
+  '<div class="opb-sec"><span class="no">9</span><b>行业景气与公司地位</b></div>'+
+  '<div class="card mb2"><ul style="padding-left:18px;font-size:12px;color:var(--t2);line-height:2"><li><span class="tag tag-green" style="height:19px">政策强β</span>江苏省六张网专项持续投入，'+esc(c.net)+'环节订单能见度高；</li><li><span class="tag tag-blue" style="height:19px">公司卡位</span>'+esc(c.track)+'细分环节'+(c.pos==='战略'?'龙头':c.pos==='腰部'?'成长':'参与者')+'，'+c.rel+'；</li><li><span class="tag tag-orange" style="height:19px">竞争压力</span>四大行与股份行均在跟进六张网名单，建议两周内递交方案。</li></ul></div>'+
+  '<div class="opb-sec"><span class="no">10</span><b>风险排查与综合评分</b></div>'+
+  '<div class="card"><div class="kvrow"><span class="k">失信/处罚</span><span class="v" style="color:#0F6E56">正常 · 公开信息未见异常</span></div>'+
+    '<div class="kvrow"><span class="k">客户集中度</span><span class="v">'+(c.cat==='上游供应商'?'关注 · 前五大集中度需核实':'正常 · 业主以政府/国企为主')+'</span></div>'+
+    '<div class="kvrow"><span class="k">同业竞争</span><span class="v" style="color:#C77700">关注 · 比拼方案与服务时效</span></div>'+
+    '<div class="opb-hbar" style="margin-top:8px"><span class="bl">四线得分</span><div class="bt"><i style="width:'+c.score+'%"></i></div><span class="bn">'+c.score+' / 100（'+c.sigLv+' 级）</span></div></div>'+
+  '</div></details>'+
+  '<button class="mbtn pri" style="width:100%;height:38px" onclick="toastMsg(\'访前准备看板已下载（PDF）\')">下载访前准备</button>';
 }
-function bindMbProds(){
-  var c=co(S.opCo&&co(S.opCo)?S.opCo:(myTasks()[0]?myTasks()[0].co:D.cos[0].id));
-  var plans=mbPlans(c);
-  var wrap=document.querySelector('#mbProds'); if(!wrap) return;
-  var det=document.querySelector('#mbProdDetail');
-  wrap.querySelectorAll('[data-mbprod]').forEach(function(el){
-    el.onclick=function(){
-      wrap.querySelectorAll('[data-mbprod]').forEach(function(x2){ x2.style.borderColor='var(--line)'; x2.style.background='#fff'; });
-      el.style.borderColor='var(--brand-500)'; el.style.background='var(--brand-50)';
-      var pl=plans[+el.dataset.mbprod]||plans[0];
-      det.innerHTML='<div class="aicard" style="margin-top:4px"><div class="ah"><span class="aibadge">AI</span>'+esc(pl.name)+' · 方案要素</div><div class="ab">'+
-        mbSpecs(pl.name).map(function(x2){ return x2[0]+'：<b style="display:inline">'+esc(x2[1])+'</b>'; }).join('<br>')+
-        '<b>现场核实</b>订单生效/确权方式/回款账龄/项目批复（按产品类型）</div></div>';
-    };
-  });
-  wrap.querySelector('[data-mbprod]').onclick();
-}
-var _origSwitchTab=switchTab;
-switchTab=function(t){ S.tab=t; renderTab(); renderBody(); if(t==='op') setTimeout(bindMbProds,50); };
-
 /* ---------- 纪要页 ---------- */
 function goVisit(taskId){ S.selTask=taskId; switchTab('visit'); }
 var REC={on:false,sec:0,timer:null,stream:null};
