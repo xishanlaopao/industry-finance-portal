@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>产业金融协同工具 · 移动工作台</title>
+<style>
+/* ============ 设计令牌（与 PC 门户一致） ============ */
+:root {
+  --brand-500:#C0202C; --brand-600:#A61521; --brand-700:#8E1019; --brand-100:#FBE7E9; --brand-50:#FCF4F5;
+  --blue-500:#2458F5; --blue-100:#E7EEFF;
+  --ok-500:#16A34A; --ok-50:#E8F7EE; --warn-500:#F59E0B; --warn-50:#FEF4E2; --danger-500:#E5484D; --danger-50:#FDECEC;
+  --info-500:#0EA5E9; --info-50:#E6F6FD; --violet-500:#7C3AED; --violet-50:#F1EAFE;
+  --bg:#F5F6F8; --card:#fff; --line:#E7EAF0; --line-strong:#D5DAE4;
+  --t1:#1A2233; --t2:#5A6478; --t3:#8A93A6;
+  --font:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  --r:12px;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html,body { height:100%; }
+body { font-family:var(--font); background:#20242B; display:flex; justify-content:center; align-items:center; }
+::-webkit-scrollbar { width:0; height:0; }
+
+/* ============ 手机壳（PC 预览） ============ */
+.phone { width:100%; max-width:414px; height:min(880px,100vh); background:var(--bg); display:flex; flex-direction:column; overflow:hidden; position:relative; box-shadow:0 20px 60px rgba(0,0,0,.5); }
+@media (max-width:480px) { body { background:var(--bg); } .phone { max-width:none; height:100vh; box-shadow:none; } }
+
+/* ============ 顶栏 ============ */
+.mhead { background:linear-gradient(96deg,#7E0E19,#A61521 45%,#C0202C); color:#fff; padding:14px 16px 12px; flex-shrink:0; }
+.mhead .r1 { display:flex; align-items:center; gap:8px; }
+.mhead .logo { width:26px; height:26px; border-radius:7px; background:#fff; color:var(--brand-600); font-weight:800; font-size:12px; display:flex; align-items:center; justify-content:center; }
+.mhead .t { font-size:15px; font-weight:700; letter-spacing:.5px; flex:1; }
+.mhead .urole { background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.35); border-radius:999px; font-size:11px; padding:3px 10px; display:flex; align-items:center; gap:5px; }
+.mhead .uinfo { display:flex; align-items:center; gap:9px; margin-top:10px; }
+.mhead .avatar { width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,.2); border:1px solid rgba(255,255,255,.4); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; }
+.mhead .un { font-size:13px; font-weight:600; }
+.mhead .ud { font-size:11px; color:#FFD9DC; margin-top:1px; }
+.mhead .kpis { display:flex; gap:6px; margin-top:10px; overflow-x:auto; }
+.mhead .kpi { background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.22); border-radius:9px; padding:5px 10px; flex-shrink:0; }
+.mhead .kpi .k { font-size:10px; color:#FFD9DC; }
+.mhead .kpi .v { font-size:15px; font-weight:700; }
+
+/* ============ 主体 ============ */
+.mbody { flex:1; overflow-y:auto; padding:12px 12px 16px; }
+.mpage { display:none; }
+.mpage.on { display:block; animation:fadeIn .18s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:none; } }
+.card { background:var(--card); border-radius:var(--r); border:1px solid var(--line); padding:13px 14px; margin-bottom:10px; }
+.sec-t { font-size:14px; font-weight:700; display:flex; align-items:center; gap:7px; margin-bottom:8px; }
+.sec-t::before { content:""; width:3.5px; height:14px; border-radius:2px; background:var(--brand-500); }
+.sec-t small { font-size:10.5px; color:var(--t3); font-weight:400; margin-left:auto; }
+.tag { display:inline-flex; align-items:center; height:20px; padding:0 7px; border-radius:5px; font-size:10.5px; font-weight:500; white-space:nowrap; }
+.tag-blue{background:var(--blue-100);color:#1A44D6} .tag-green{background:var(--ok-50);color:var(--ok-500)}
+.tag-orange{background:var(--warn-50);color:#C77700} .tag-red{background:var(--danger-50);color:var(--danger-500)}
+.tag-violet{background:var(--violet-50);color:var(--violet-500)} .tag-cyan{background:var(--info-50);color:#0284C7}
+.tag-gray{background:#F0F2F7;color:var(--t2)} .tag-line{background:#fff;border:1px solid var(--line-strong);color:var(--t2)}
+.tag-solid-red{background:var(--brand-500);color:#fff}
+.muted { color:var(--t3); font-size:11px; }
+.sub { color:var(--t2); font-size:12px; line-height:1.7; }
+b.sm { font-size:13px; }
+
+/* 任务卡 */
+.tcard { display:flex; gap:11px; }
+.tcard .tdoc { width:40px; height:40px; border-radius:10px; background:linear-gradient(135deg,var(--brand-600),var(--brand-500)); color:#fff; font-size:13px; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.tcard .tbody { flex:1; min-width:0; }
+.tcard .tr1 { display:flex; align-items:center; gap:6px; }
+.tcard .tn { font-size:14px; font-weight:700; flex:1; }
+.tcard .tmeta { font-size:10.5px; color:var(--t3); margin-top:3px; }
+.tcard .tlast { font-size:11px; color:var(--t2); background:#F7F9FC; border-radius:8px; padding:6px 8px; margin-top:7px; line-height:1.6; }
+.tcard .tacts { display:flex; gap:8px; margin-top:8px; }
+.mbtn { flex:1; height:30px; border-radius:8px; border:1px solid var(--line-strong); background:#fff; color:var(--t2); font-size:12px; font-family:var(--font); display:flex; align-items:center; justify-content:center; gap:4px; }
+.mbtn.pri { background:var(--brand-500); border-color:var(--brand-500); color:#fff; font-weight:600; }
+.mbtn.ghost-plain { flex:0 0 auto; padding:0 12px; }
+
+/* 一页纸 */
+.op-head { display:flex; gap:11px; align-items:center; }
+.op-logo { width:44px; height:44px; border-radius:11px; background:linear-gradient(135deg,var(--brand-600),var(--brand-500)); color:#fff; font-weight:800; font-size:14px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.op-score { margin-left:auto; text-align:center; background:#FFF6F7; border:1px solid #F3D3D6; border-radius:10px; padding:4px 10px; flex-shrink:0; }
+.op-score b { font-size:20px; color:var(--brand-600); display:block; line-height:1.15; }
+.op-tags { display:flex; flex-wrap:wrap; gap:5px; margin-top:8px; }
+.op-sec { margin-top:12px; }
+.op-sec-t { font-size:11px; font-weight:700; color:var(--brand-600); letter-spacing:.5px; margin-bottom:6px; display:flex; align-items:center; gap:6px; }
+.op-sec-t::before { content:""; width:3px; height:10px; border-radius:2px; background:var(--brand-500); }
+.kvrow { display:flex; gap:8px; padding:5px 0; border-bottom:1px dashed var(--line); font-size:12px; }
+.kvrow:last-child { border-bottom:none; }
+.kvrow .k { width:78px; color:var(--t3); flex-shrink:0; }
+.kvrow .v { flex:1; color:var(--t1); line-height:1.55; }
+.qitem { display:flex; gap:8px; margin-bottom:7px; }
+.qn { width:17px; height:17px; border-radius:50%; background:var(--brand-500); color:#fff; font-size:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:2px; }
+
+/* 录音 */
+.recard { text-align:center; padding:18px 14px 14px; background:linear-gradient(160deg,#FBF4F5,#F7FAFF); border:1px solid #F0D9DC; border-radius:var(--r); margin-bottom:10px; }
+.mic { width:76px; height:76px; border-radius:50%; border:none; background:linear-gradient(135deg,var(--brand-600),var(--brand-500)); color:#fff; font-size:26px; cursor:pointer; box-shadow:0 6px 20px rgba(192,32,44,.35); transition:.15s; }
+.mic:active { transform:scale(.96); }
+.mic.rec { background:var(--danger-500); animation:pulse 1s infinite; }
+.mic[disabled] { opacity:.6; }
+@keyframes pulse { 0% { box-shadow:0 0 0 0 rgba(229,72,77,.45); } 100% { box-shadow:0 0 0 20px rgba(229,72,77,0); } }
+.rt { margin-top:10px; font-size:22px; font-weight:700; font-variant-numeric:tabular-nums; }
+.rtip { font-size:11px; color:var(--t2); margin-top:4px; line-height:1.6; }
+.rwave { display:flex; gap:3px; justify-content:center; height:22px; align-items:center; margin-top:8px; }
+.rwave i { width:3px; border-radius:2px; background:var(--brand-500); height:6px; }
+.rwave.on i { animation:wv 1s infinite ease-in-out; }
+.rwave.on i:nth-child(2n) { animation-delay:.15s; } .rwave.on i:nth-child(3n) { animation-delay:.3s; } .rwave.on i:nth-child(4n) { animation-delay:.45s; }
+@keyframes wv { 0%,100% { height:5px; } 50% { height:20px; } }
+.fgrid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin:10px 0; }
+.fitem label { display:block; font-size:10.5px; color:var(--t3); margin-bottom:3px; }
+.fitem input,.fitem select, textarea.tarea { width:100%; border:1px solid var(--line-strong); border-radius:8px; padding:7px 9px; font-size:12px; font-family:var(--font); outline:none; background:#fff; color:var(--t1); }
+.fitem input:focus,.fitem select:focus, textarea.tarea:focus { border-color:var(--brand-500); }
+textarea.tarea { width:100%; min-height:88px; resize:vertical; line-height:1.7; }
+.aicard { background:linear-gradient(135deg,#F5F0FF,#EEF6FF); border:1px solid #E0D9FB; border-radius:var(--r); padding:12px 13px; margin-top:10px; }
+.aicard .ah { display:flex; align-items:center; gap:6px; font-weight:700; font-size:12px; color:#4C36B0; margin-bottom:6px; }
+.aibadge { display:inline-flex; align-items:center; font-size:9.5px; font-weight:800; color:#fff; background:linear-gradient(135deg,#6D3BF5,#00B4FF); padding:2px 7px; border-radius:9px; letter-spacing:.5px; }
+.aicard .ab { font-size:11.5px; color:#2B2350; line-height:1.8; }
+.aicard .ab b { display:block; margin-top:6px; color:#1A1440; }
+.logitem { padding:9px 0; border-bottom:1px dashed var(--line); }
+.logitem:last-child { border-bottom:none; }
+.logitem .l1 { display:flex; align-items:center; gap:6px; }
+.logitem .lt { font-size:12px; font-weight:600; }
+.logitem .ld { font-size:10.5px; color:var(--t3); }
+.logitem .lx { font-size:11.5px; color:var(--t2); line-height:1.65; margin-top:4px; }
+
+/* AI 问答 */
+.chat { display:flex; flex-direction:column; gap:8px; padding:4px 2px 8px; }
+.bub-q { align-self:flex-end; max-width:82%; background:var(--brand-500); color:#fff; border-radius:13px 13px 3px 13px; padding:9px 12px; font-size:12.5px; line-height:1.6; }
+.bub-a { align-self:flex-start; max-width:90%; background:#fff; border:1px solid #E3DEFA; border-radius:13px 13px 13px 3px; padding:9px 12px; font-size:12px; line-height:1.7; color:#2B2350; box-shadow:0 1px 3px rgba(16,24,40,.05); }
+.bub-a .src { display:block; margin-top:6px; font-size:10px; color:var(--t3); }
+.sugs { display:flex; flex-wrap:wrap; gap:6px; margin:8px 0; }
+.sug { font-size:11px; padding:5px 10px; border-radius:999px; background:#F2F4F8; color:var(--t2); border:1px solid var(--line); }
+.askrow { display:flex; gap:8px; }
+.askrow input { flex:1; height:36px; border:1px solid var(--line-strong); border-radius:10px; padding:0 12px; font-size:12.5px; outline:none; font-family:var(--font); }
+.askrow button { width:64px; border:none; border-radius:10px; background:var(--brand-500); color:#fff; font-size:13px; font-weight:600; font-family:var(--font); }
+
+/* 我的 */
+.ucard { display:flex; gap:12px; align-items:center; }
+.uav2 { width:52px; height:52px; border-radius:14px; background:linear-gradient(135deg,#7E0E19,#C0202C); color:#fff; font-size:20px; font-weight:800; display:flex; align-items:center; justify-content:center; }
+.rolelist { display:flex; flex-direction:column; gap:8px; }
+.roleitem { display:flex; align-items:center; gap:10px; border:1px solid var(--line); border-radius:12px; padding:10px 12px; }
+.roleitem.on { border-color:var(--brand-500); background:var(--brand-50); }
+.roleitem .rn { font-size:13px; font-weight:700; }
+.roleitem .rd { font-size:10.5px; color:var(--t3); margin-top:1px; }
+
+/* 底部导航 */
+.mtab { flex-shrink:0; display:flex; background:#fff; border-top:1px solid var(--line); padding:6px 4px calc(8px + env(safe-area-inset-bottom)); }
+.mtab .ti { flex:1; display:flex; flex-direction:column; align-items:center; gap:2px; font-size:10px; color:var(--t3); cursor:pointer; padding:3px 0; border-radius:8px; }
+.mtab .ti .ic { font-size:19px; line-height:1; }
+.mtab .ti.on { color:var(--brand-600); font-weight:700; }
+.mtab .ti.on .ic { transform:translateY(-1px); }
+
+/* Toast */
+#toast { position:absolute; left:50%; transform:translateX(-50%); bottom:86px; background:rgba(26,34,51,.92); color:#fff; padding:9px 16px; border-radius:999px; font-size:12px; display:none; z-index:99; max-width:82%; text-align:center; line-height:1.5; }
+
+/* 选择器 */
+.picker { display:flex; gap:6px; overflow-x:auto; padding-bottom:4px; margin-bottom:10px; }
+.pitem { flex-shrink:0; font-size:11.5px; padding:6px 12px; border-radius:999px; background:#fff; border:1px solid var(--line-strong); color:var(--t2); }
+.pitem.on { background:var(--brand-500); border-color:var(--brand-500); color:#fff; font-weight:600; }
+.empty { text-align:center; padding:34px 16px; color:var(--t3); font-size:12px; }
+.empty .e { font-size:30px; margin-bottom:6px; }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="mhead" id="mHead"></div>
+  <div class="mbody" id="mBody"></div>
+  <div class="mtab" id="mTab"></div>
+  <div id="toast"></div>
+  <div id="roleMask" style="display:none;position:absolute;inset:0;background:rgba(10,20,40,.45);z-index:90" onclick="toggleRoleSheet()"></div>
+  <div id="roleSheet" style="display:none;position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:16px 16px 0 0;z-index:95;padding:6px 12px calc(14px + env(safe-area-inset-bottom));box-shadow:0 -8px 30px rgba(10,20,40,.2)"></div>
+</div>
+
+<script>
+/* ============================================================
+   移动工作台 · 数据（与 PC 机会漏斗一致口径的演示子集）
+   ============================================================ */
+var D = {
+  nets: ['新型电网', '算力网', '城市地下管网', '物流网', '新一代通信网', '海上风电'],
+  cos: [
+    { id:'F001', short:'中天科技', name:'江苏中天科技股份有限公司', cat:'上游供应商', net:'新型电网', track:'海底电缆·高压海缆/海缆附件', city:'南通', zone:'如东县', score:100, prog:'突破', pos:'战略', wt:'主攻', listed:'是·上交所主板(600522)', nat:'民营企业', rel:'高度相关',
+      recent:'海缆/风电塔筒龙头，在手订单充足，如东基地扩产在即',
+      sig:['经营四线得分 100（A 级信号 · 高度相关）','客户大类：上游供应商 ｜ 海底电缆 ｜ 民营企业'],
+      prods:['项目贷款','并购贷款','绿色信贷','债券承销','供应链金融'],
+      internal:{credit:0,used:0,deposit:0,settle:0,products:[]} },
+    { id:'F011', short:'江苏省数据', name:'江苏省数据集团有限公司', cat:'建设运营商', net:'算力网', track:'智算中心及算力调度', city:'南京', zone:'建邺区', score:96, prog:'突破', pos:'战略', wt:'主攻', listed:'否', nat:'省属国企', rel:'高度相关',
+      recent:'省属数据集团，智算中心二期资本开支约 8 亿',
+      sig:['经营四线得分 96（A 级信号 · 高度相关）','客户大类：建设运营商 ｜ 智算中心 ｜ 省属国企'],
+      prods:['项目贷','科技贷','政府存款','结算'],
+      internal:{credit:0,used:0,deposit:0,settle:0,products:[]} },
+    { id:'F069', short:'南京城建', name:'南京市城市建设投资控股(集团)有限责任公司', cat:'建设运营商', net:'城市地下管网', track:'综合管廊及生命线', city:'南京', zone:'玄武区', score:88, prog:'攻坚', pos:'战略', wt:'择优', listed:'否', nat:'地方国资', rel:'高度相关',
+      recent:'管廊二期项目公司月底注册，资金监管招标在即',
+      sig:['经营四线得分 88（A 级信号 · 高度相关）','客户大类：建设运营商 ｜ 综合管廊 ｜ 地方国资'],
+      prods:['项目贷','专项债配套','结算'],
+      internal:{credit:0,used:0,deposit:0,settle:0,products:[]} },
+    { id:'F003', short:'国信集团', name:'江苏省国信集团', cat:'建设运营商', net:'新型电网', track:'海上风电', city:'南京', zone:'玄武区', score:98, prog:'突破', pos:'战略', wt:'主攻', listed:'否', nat:'省属国企', rel:'高度相关', opp:'盐城市-大丰区、东台市',
+      recent:'省属能源平台，大丰 800MW 海上风电核准公示',
+      sig:['经营四线得分 98（A 级信号 · 高度相关）','客户大类：建设运营商 ｜ 海上风电 ｜ 省属国企'],
+      prods:['项目贷','绿色贷款','并购贷','债券承销'],
+      internal:{credit:0,used:0,deposit:0,settle:0,products:[]} },
+    { id:'F012', short:'东部机场', name:'东部机场集团有限公司', cat:'建设运营商', net:'物流网', track:'航空物流', city:'南京', zone:'江宁区', score:96, prog:'突破', pos:'战略', wt:'次攻', listed:'否', nat:'省属国企', rel:'高度相关',
+      recent:'省属机场集团，改扩建+航空物流枢纽建设',
+      sig:['经营四线得分 96（A 级信号 · 高度相关）','客户大类：建设运营商 ｜ 航空物流 ｜ 省属国企'],
+      prods:['项目贷','银团','债券承销','结算'],
+      internal:{credit:0,used:0,deposit:0,settle:0,products:[]} },
+    { id:'F004', short:'国电南瑞', name:'国电南瑞科技股份有限公司', cat:'上游供应商', net:'算力网', track:'算电协同', city:'南京', zone:'江宁区', score:98, prog:'突破', pos:'腰部', wt:'主攻', listed:'是·上交所主板(600406)', nat:'央企子公司', rel:'高度相关',
+      recent:'电网自动化龙头，算电协同核心供应商',
+      sig:['经营四线得分 98（A 级信号 · 高度相关）','客户大类：上游供应商 ｜ 算电协同 ｜ 央企子公司'],
+      prods:['科技贷','投行服务','结算'],
+      internal:{credit:0,used:0,deposit:0,settle:0,products:[]} },
+  ],
+  rms: [
+    { id:'rm-drz', name:'邓瑞忠', unit:'无锡分行营业部' },
+    { id:'rm-wq', name:'王倩', unit:'无锡梁溪支行' },
+    { id:'rm-zh', name:'周航', unit:'无锡新吴支行' },
+    { id:'rm-lx', name:'李晓', unit:'无锡江阴支行' },
+  ],
+  tasks: [
+    { id:'FT1', co:'F001', rm:'rm-drz', type:'营销跟进', due:'11-08', status:'跟进中', d:'10-26',
+      note:'海缆订单与扩产窗口，主推项目贷+供应链票据；同步摸排海风场建设资金安排',
+      prods:['项目贷款','供应链票据','出口信贷'],
+      log:[
+        { d:'10-28', t:'访客纪要', by:'邓瑞忠', x:'拜访财务总监：在手海缆订单充足，回款账期 6 个月，倾向供应链票据支付设备款；如东基地扩产预算 12 亿，明年 Q1 启动。AI 建议：先落地票据池+结算归集，扩产对接项目贷与出口信贷。' },
+        { d:'10-27', t:'协同留言', by:'分行产品经理 · 陈立', x:'该户已列入本月重点，供应链票据报价权限我这边同步给到，额度测算走绿色通道。' },
+        { d:'10-26', t:'任务下发', by:'分行产品经理 · 陈立', x:'下发客户维护清单：战略·主攻客户，聚焦项目贷切入。' } ] },
+    { id:'FT2', co:'F011', rm:'rm-drz', type:'营销跟进', due:'11-12', status:'跟进中', d:'10-30',
+      note:'智算中心项目融资对接，强调非信贷服务（结算/代发/闲置资金理财）',
+      prods:['项目贷款','代发工资','对公理财'],
+      log:[
+        { d:'11-01', t:'访客纪要', by:'邓瑞忠', x:'与资金部对接：智算中心二期资本开支约 8 亿，拟"项目贷+设备租赁"组合；闲置资金 1.2 亿有现金管理需求。AI 建议：现金管理方案先行，项目融资与政府专项债联动设计。' },
+        { d:'10-30', t:'任务下发', by:'分行产品经理 · 陈立', x:'下发客户维护清单：战略·主攻客户，项目融资+非信贷综合服务。' } ] },
+    { id:'FT3', co:'F069', rm:'rm-wq', type:'调研摸排', due:'11-15', status:'跟进中', d:'10-27',
+      note:'综合管廊及生命线工程资金监管专户摸排，争取专户落地带动存款',
+      prods:['资金监管','存款归集'],
+      log:[ { d:'10-29', t:'调研纪要', by:'王倩', x:'管廊二期项目公司 11 月注册落地，资金监管招标尚未启动；建议提前介入出监管方案。' },
+            { d:'10-27', t:'任务下发', by:'分行产品经理 · 陈立', x:'下发客户维护清单：管廊资金监管专户先行。' } ] },
+    { id:'FT4', co:'F003', rm:'rm-zh', type:'营销跟进', due:'11-05', status:'已反馈', d:'10-24',
+      note:'大丰海上风电项目银团参与摸底，关注同业份额分配',
+      prods:['银团贷款','绿色贷款'],
+      log:[ { d:'11-02', t:'反馈', by:'周航', x:'已完成摸底：牵头行为国开行，我行可争取参团份额 3-5 亿；股东增资到位后启动。' },
+            { d:'10-24', t:'任务下发', by:'分行产品经理 · 陈立', x:'下发客户维护清单：海风项目银团参团机会。' } ] },
+    { id:'FT5', co:'F012', rm:'rm-lx', type:'营销跟进', due:'11-10', status:'跟进中', d:'10-25',
+      note:'机场改扩建项目贷沟通 + 航空物流结算归集与代发联动',
+      prods:['项目贷款','结算归集','代发工资'],
+      log:[ { d:'10-31', t:'访客纪要', by:'李晓', x:'改扩建项目已有他行报价，客户关注放款节奏与代发联动；建议以"审批时效+结算归集+代发"组合应对。' },
+            { d:'10-25', t:'任务下发', by:'分行产品经理 · 陈立', x:'下发客户维护清单：省属国企综合经营。' } ] },
+    { id:'FT6', co:'F004', rm:'rm-drz', type:'产品推介', due:'11-06', status:'待接收', d:'11-03',
+      note:'算电协同科技贷推介 + 投行培育陪伴（非信贷：结算与资金归集）',
+      prods:['科技贷','投行服务'],
+      log:[ { d:'11-03', t:'任务下发', by:'分行产品经理 · 陈立', x:'下发客户维护清单：央企子公司组合服务。' } ] },
+  ],
+  users: [
+    { id:'rm', av:'邓', name:'邓瑞忠', role:'客户经理', dept:'无锡分行营业部', tip:'我承接的下发任务' },
+    { id:'head', av:'陆', name:'陆青', role:'支行长', dept:'无锡分行营业部', tip:'本支行任务与人员' },
+    { id:'pm', av:'陈', name:'陈立', role:'分行产品经理', dept:'公司银行部', tip:'机会漏斗 · 订阅 · 下发' },
+    { id:'gm', av:'王', name:'王健', role:'部门负责人', dept:'公司银行部', tip:'全辖营销过程总览' },
+  ],
+  qa: [
+    { q:'六张网客户优先推什么产品？', a:'按方向匹配：新型电网→项目贷+保函+结算归集；算力网→项目贷+设备更新贴息+现金管理；管网→资金监管+专项债配套；物流→固贷+供应链融资+代发；通信→科创e贷+研发贷+票据池；海上风电→银团+保函+跨境结算。非信贷服务（结算/代发/理财）建议先行落地。', src:'产品政策库 · 六张网营销指引' },
+    { q:'访客纪要里要记录哪些要点？', a:'关键人与决策链、资金安排时间表、非信贷服务切入机会（结算/代发/票据）、同业竞争动态、下一步动作与承诺。语音转写后 AI 会自动整理为需求识别与综合方案建议。', src:'过程管理制度 · 访客纪要规范' },
+    { q:'什么是四维标签？', a:'方向（六张网+细分赛道）、进展（突破/攻坚/培养/储备）、地位（战略/腰部/基础）、权重（主攻/次攻/择优/承接）。由 AI 根据公开信号自动打标，产品经理可在机会漏斗中调整并订阅。', src:'机会漏斗 · 标签体系说明' },
+    { q:'非信贷服务有哪些？', a:'结算归集、代发工资、票据池、现金管理/对公理财、资金监管、跨境结算与避险、保函（非融资类）。前中台协同方案中建议与信贷产品组合推进。', src:'产品政策库 · 综合服务目录' },
+  ],
+  script: {
+    '新型电网':'今天拜访了财务总监。海缆和风电塔筒订单排到明年，回款账期六个月，希望用供应链票据支付设备款。如东基地扩产预算三个亿，明年一季度启动，想了解项目贷和出口信贷。结算目前主要在四大行，愿意把部分结算迁过来。',
+    '算力网':'和资金部聊了四十分钟。智算中心二期资本开支八个亿左右，打算项目贷加设备租赁组合。手上还有一点二亿闲置资金，有现金管理需求。代发目前不到三百人，扩张后会到八百人。',
+    '城市地下管网':'管廊二期项目公司月底注册，资金监管招标还没启动。业主方关心监管银行的放款时效和系统对接，专项债配套还有两亿缺口，想比较成本。施工保函明年有密集需求。',
+    '水网':'走访了原水公司和供水枢纽项目。调水工程二期投资六亿，资本金到位三成，剩下想用项目贷加水利专项贷。水费收缴账户在他行，业主愿意谈结算归集和资金监管专户。',
+    '物流网':'机场改扩建和铁路专用线项目都有他行报价，客户更看重放款节奏。货运板块的车队更新一点五亿想讨论置换。对票据池加代发联动很感兴趣，约了下周运营团队对接。',
+    '新一代通信网':'光模块和光纤光缆订单能见度到明年年底。科创板辅导中，券商建议提前做募集资金监管预案。研发投入今年超一个亿，希望有信用类科创贷。应收在头部客户，账期九十天，可以做保理。'
+  },
+  prodByNet: {
+    '新型电网':['项目贷款','绿色贷款','供应链金融'], '新一代通信网':['科创贷款','并购贷款','票据池'],
+    '算力网':['项目贷款','科技贷','设备更新贷'], '城市地下管网':['项目贷','资金监管','债券承销'],
+    '水网':['项目贷款','水利专项贷','资金监管'], '物流网':['项目贷','供应链融资','结算归集']
+  }
+};
+
+/* ============================================================
+   应用状态与工具
+   ============================================================ */
+var S = { role:'rm', tab:'task', selTask:'FT1', opCo:null, chat:[{a:'您好，我是工作台 AI 助手，可解答产品、政策与营销策略问题。'}] };
+function $(s){ return document.querySelector(s); }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+function co(id){ for (var i=0;i<D.cos.length;i++) if (D.cos[i].id===id) return D.cos[i]; return null; }
+function task(id){ for (var i=0;i<D.tasks.length;i++) if (D.tasks[i].id===id) return D.tasks[i]; return null; }
+function rm(id){ for (var i=0;i<D.rms.length;i++) if (D.rms[i].id===id) return D.rms[i]; return {name:'—',unit:''}; }
+function user(){ for (var i=0;i<D.users.length;i++) if (D.users[i].id===S.role) return D.users[i]; return D.users[0]; }
+function myTasks(){
+  if (S.role==='rm') return D.tasks.filter(function(t){ return t.rm==='rm-drz'; });
+  if (S.role==='head') return D.tasks.filter(function(t){ return rm(t.rm).unit==='无锡分行营业部'; });
+  return D.tasks;
+}
+function toastMsg(m){ var t=$('#toast'); t.textContent=m; t.style.display='block'; clearTimeout(t._h); t._h=setTimeout(function(){ t.style.display='none'; },2200); }
+var stTag=function(s){ return ({待接收:'tag-gray',跟进中:'tag-blue',已反馈:'tag-green',已关闭:'tag-line'})[s]||'tag-gray'; };
+var progCls={突破:'tag-solid-red',攻坚:'tag-orange',培育:'tag-blue',储备:'tag-gray'};
+function fmt2(n){ return (n<10?'0':'')+n; }
+
+/* ============================================================
+   渲染
+   ============================================================ */
+function renderHead(){
+  var u=user(), ts=myTasks();
+  var ks=[];
+  if (S.role==='rm') ks=[['承接任务',ts.length],['待接收',ts.filter(function(t){return t.status==='待接收';}).length],['跟进中',ts.filter(function(t){return t.status==='跟进中';}).length],['已反馈',ts.filter(function(t){return t.status==='已反馈';}).length]];
+  else if (S.role==='head') ks=[['支行任务',ts.length],['跟进中',ts.filter(function(t){return t.status==='跟进中';}).length],['反馈率',ts.length?Math.round(ts.filter(function(t){return t.status==='已反馈';}).length/ts.length*100)+'%':'—']];
+  else if (S.role==='pm') ks=[['已下发',ts.length],['待接收',ts.filter(function(t){return t.status==='待接收';}).length],['订阅企业',10],['覆盖客户经理',new Set(ts.map(function(t){return t.rm;})).size]];
+  else ks=[['全辖任务',ts.length],['覆盖企业',new Set(ts.map(function(t){return t.co;})).size],['反馈率',ts.length?Math.round(ts.filter(function(t){return t.status==='已反馈';}).length/ts.length*100)+'%':'—']];
+  $('#mHead').innerHTML =
+    '<div class="r1"><div class="logo">京</div><div class="t">产业金融协同工具</div>'+
+    '<div class="urole" onclick="toggleRoleSheet()">'+esc(u.role)+' ▾</div></div>'+
+    '<div class="uinfo"><div class="avatar">'+esc(u.av)+'</div><div><div class="un">'+esc(u.name)+'</div></div></div>'+
+    '<div class="kpis">'+ks.map(function(k){ return '<div class="kpi"><div class="k">'+esc(k[0])+'</div><div class="v">'+k[1]+'</div></div>'; }).join('')+'</div>';
+}
+function renderTab(){
+  var tabs=[['task','📋','任务'],['op','📄','一页纸'],['visit','🎙','纪要'],['ai','✦','AI'],['my','👤','我的']];
+  $('#mTab').innerHTML=tabs.map(function(t){ return '<div class="ti '+(S.tab===t[0]?'on':'')+'" data-t="'+t[0]+'"><span class="ic">'+t[1]+'</span>'+t[2]+'</div>'; }).join('');
+  Array.prototype.forEach.call($('#mTab').children,function(el){ el.onclick=function(){ switchTab(el.dataset.t); }; });
+}
+function switchTab(t){ S.tab=t; renderTab(); renderBody(); }
+
+/* ---------- 任务页 ---------- */
+function pageTask(){
+  var ts0=myTasks(); var kw=(S.kw||'').trim();
+  var ts=kw?ts0.filter(function(t){ return (co(t.co).name+co(t.co).short).indexOf(kw)>=0; }):ts0;
+  var h='<div class="card" style="padding:10px 14px"><div class="flex-between" style="gap:8px"><b style="font-size:14px">'+(S.role==='rm'?'我承接的任务':S.role==='head'?'本支行任务':S.role==='pm'?'我下发的任务':'全辖任务')+'</b><span class="muted">'+(kw?'命中 '+ts.length+' / '+ts0.length:'共 '+ts.length+' 项')+'</span></div>'+
+    '<input id="tKw" placeholder="按企业名称筛选…" value="'+esc(S.kw||'')+'" style="width:100%;margin-top:8px;border:1px solid var(--line-strong);border-radius:9px;padding:7px 10px;font-size:12.5px;outline:none;font-family:inherit"></div>';
+  if (!ts.length) h+='<div class="card"><div class="empty"><div class="e">📭</div>暂无任务</div></div>';
+  ts.forEach(function(t){
+    var c=co(t.co);
+    h+='<div class="card"><div class="tcard"><div class="tdoc">'+esc(c.short.slice(0,2))+'</div><div class="tbody">'+
+      '<div class="tr1"><div class="tn">'+esc(c.short)+'</div><span class="tag '+stTag(t.status)+'">'+t.status+'</span></div>'+
+      '<div class="tmeta">'+esc(t.type)+' · 截止 '+t.due+' · '+esc(rm(t.rm).name)+' · '+esc(c.net)+'</div>'+
+      '<div class="tmeta">重点：'+esc(t.prods.join(' / '))+'</div>'+
+      (t.log[0]?'<div class="tlast"><b style="color:var(--t1)">'+esc(t.log[0].d)+' '+esc(t.log[0].t)+'</b> — '+esc(t.log[0].x.slice(0,52))+'…</div>':'<div class="tlast" style="color:var(--warn-500)">尚无跟进记录，请尽快接收并拜访</div>')+
+      '<div class="tacts">'+
+        '<button class="mbtn" onclick="openOp(\''+c.id+'\')">📄 访前一页纸</button>'+
+        (S.role==='rm'?'<button class="mbtn pri" onclick="goVisit(\''+t.id+'\')">🎙 去跟进</button>':'<button class="mbtn" onclick="goVisit(\''+t.id+'\')">查看纪要</button>')+
+      '</div></div></div></div>';
+  });
+  return h;
+}
+
+/* ---------- 一页纸 ---------- */
+function openOp(coId){ S.opCo=coId; switchTab('op'); }
+/* 访前一页纸（内容结构与 PC 端 AI智能分析·访前一页纸 一致，移动样式） */
+function mbProdType(n){
+  if (/订单|应收|供应链|票据|贸易|保理/.test(n)) return 'trade';
+  if (/项目|固定资产|设备|技改|并购|银团|绿色|水利|债券|出口|租赁/.test(n)) return 'proj';
+  if (/科技|科创|投行|培育|股权/.test(n)) return 'credit';
+  return 'cash';
+}
+function mbSpecs(n){
+  var T=mbProdType(n);
+  if (T==='trade') return [['额度','300万–5000万，按订单/应收核定'],['利率','年化3.2%–5.0%'],['期限','3–12个月'],['担保','信用/保证/应收质押'],['还款','按回款分期或到期还本']];
+  if (T==='proj') return [['额度','1000万–5亿，按项目投资核定'],['利率','3.0%–4.5%，可叠加贴息'],['期限','3–10年，宽限1–2年'],['担保','项目资产抵押/银团份额'],['还款','分期还本，匹配投产']];
+  if (T==='credit') return [['额度','500万–5000万'],['利率','3.5%–5.5%，政策补贴降成本'],['期限','1–3年循环'],['担保','信用为主，可叠知识产权质押'],['还款','按月付息到期还本']];
+  return [['内容','结算归集/代发/资金监管/现金管理'],['费率','按综合贡献定价'],['时效','T+3 开通'],['要求','基本户或监管专户'],['效益','派生存款与个人客群']];
+}
+function mbPlans(c){
+  var pr=(c.prods&&c.prods.length?c.prods.slice(0,3):D.prodByNet[c.net]||['流动资金贷款']);
+  function fit(n){
+    if (/项目|固定资产|技改/.test(n)) return '适配项目资本开支与建设周期资金安排。';
+    if (/设备|租赁/.test(n)) return '适配设备采购分期投入场景。';
+    if (/供应链|订单|应收|票据|保理/.test(n)) return '适配订单与应收周转，盘活链上资金。';
+    if (/科技|科创|投行|培育/.test(n)) return '适配研发投入与科技资质融资。';
+    if (/并购/.test(n)) return '适配产业链整合并购支付。';
+    if (/银团/.test(n)) return '适配大额项目多行分担。';
+    if (/绿色/.test(n)) return '适配绿色项目，可接贴息工具。';
+    if (/出口|跨境/.test(n)) return '适配出口与跨境结算避险。';
+    if (/债券/.test(n)) return '适配直接融资，优化负债结构。';
+    return '适配日常经营与综合金融服务。';
+  }
+  return pr.map(function(n,i){ return { name:n, badge:i===0?'优先沟通':(mbProdType(n)==='cash'?'非信贷先行':'配套方案'),
+    fit:fit(n), tags:[c.net,c.prog,i===0?'主推':'配套'] }; });
+}
+function pageOp(){
+  var ts=myTasks(); var selCo=S.opCo&&co(S.opCo)?S.opCo:(ts[0]?ts[0].co:D.cos[0].id);
+  var c=co(selCo);
+  var task0=null; D.tasks.forEach(function(x){ if(x.co===c.id) task0=x; });
+  var plans=mbPlans(c);
+  var kv=function(k,v,hot){ return '<div class="kvrow"><span class="k">'+k+'</span><span class="v"'+(hot?' style="color:var(--brand-600);font-weight:600"':'')+'>'+v+'</span></div>'; };
+  var OPEN={'新型电网':'"恭喜贵司'+(c.track.indexOf('海上风电')>=0?'海上风电项目核准落地':'电网订单持续放量')+'，我们梳理了绿色信贷与项目融资组合，想了解资金计划。"','算力网':'"智算中心建设进入高峰，可围绕设备采购和项目周期设计资金安排，先从结算和现金管理合作。"','城市地下管网':'"管廊与管网项目的资金监管和专项债配套可出完整方案，想了解项目进度。"','水网':'"水利项目投资大周期长，项目贷+水利专项贷能匹配建设节奏，想了解资本金安排。"','物流网':'"枢纽与运力建设的中长期安排，可按节点设计，先从结算归集做起。"','新一代通信网':'"科技金融和投行服务可匹配研发与资本运作节奏，想了解今年资金安排。"'}[c.net]||'"想了解贵司近期资金安排与项目节奏。"';
+  return '<div class="picker">'+ts.map(function(t){ var cc=co(t.co); return '<div class="pitem '+(cc.id===selCo?'on':'')+'" onclick="openOp(\''+cc.id+'\')">'+esc(cc.short)+'</div>'; }).join('')+'</div>'+
+  /* 速览头 */
+  '<div class="card" style="background:linear-gradient(115deg,#7E0E19,#C0202C);color:#fff"><div style="font-size:10px;letter-spacing:2px;color:#FFD9DC">客户经理拜访速览</div>'+
+    '<div style="font-size:17px;font-weight:800;margin-top:4px;line-height:1.4">'+esc(c.name)+'</div>'+
+    '<div style="font-size:11px;color:#FFD9DC;margin-top:3px">'+esc(c.net)+' · '+esc(c.track)+' · '+esc(c.cat)+'</div></div>'+
+  /* 企业基本信息 */
+  '<div class="card"><div class="sec-t">企业基本信息</div>'+
+    kv('企业名称',esc(c.name))+kv('客户大类',esc(c.cat),1)+kv('所属环节',esc(c.net)+'·'+esc(c.track))+
+    kv('所在地区',esc(c.city)+'·'+esc(c.zone))+
+    kv('上市情况',c.listed.indexOf('是')===0?'是 · '+esc(c.listed.slice(2)):'未上市',1)+
+    kv('企业性质',esc(c.nat))+kv('四维标签',c.prog+' · '+c.pos+' · '+c.wt,1)+
+    kv('合作状态',(c.internal&&c.internal.credit>0)?'已合作：授信'+c.internal.credit+'亿':(task0?'任务跟进中·未建立授信':'未合作·破冰阶段'),1)+
+    kv('上次接触',task0&&task0.log[0]?task0.log[0].d+' '+task0.log[0].t:'—')+'</div>'+
+  /* 一句话判断 */
+  '<div class="card"><div class="sec-t">一句话判断</div><div class="sub" style="font-weight:600;line-height:1.8">围绕「'+esc(c.sig[0])+'」切入——'+esc(c.cat)+'（'+c.pos+'客户·'+c.prog+'档·'+c.rel+'），AI 建议以<b style="color:var(--brand-600)">'+esc(plans[0].name)+'</b>为主打'+(plans[1]?'、'+esc(plans[1].name)+'配套':'')+'，先以结算/代发等非信贷服务建立往来，方案窗口建议 <b style="color:var(--danger-500)">11月内</b> 锁定。</div></div>'+
+  /* 推荐产品 */
+  '<div class="card"><div class="sec-t">推荐产品<small>点击切换</small></div><div id="mbProds">'+
+    plans.map(function(pl,i){ return '<div class="qitem" data-mbprod="'+i+'" style="cursor:pointer;border:1px solid '+(i===0?'var(--brand-500)':'var(--line)')+';border-radius:10px;padding:9px 10px;margin-bottom:7px'+(i===0?';background:var(--brand-50)':'')+'"><span class="tag '+(i===0?'tag-solid-red':'tag-blue')+'" style="flex-shrink:0;align-self:flex-start">'+esc(pl.badge)+'</span><div style="flex:1"><b style="font-size:13px">'+esc(pl.name)+'</b><div class="muted" style="margin-top:2px">'+esc(pl.fit)+'</div></div></div>'; }).join('')+
+    '</div><div id="mbProdDetail"></div>'+
+    '<div class="muted" style="margin-top:4px">额度利率以本行产品制度及审批为准</div></div>'+
+  /* 切入话术 */
+  '<div class="card"><div class="sec-t">切入策略与话术</div>'+
+    [['建议开场',OPEN],['核心价值主张','"把'+esc(plans[0].name)+'的提款、交付和回款衔接起来；结算归集/代发/现金管理先行落地，不增加额外负担。"'],['异议回应','"已有合作银行"→从新增项目或非信贷服务补充切入；"要抵押"→先核确权与批复再评估增信。'],['推进方式','选定一个订单/项目试点，明确材料与跟进人，会后约定资料清单与反馈时间。']].map(function(x){ return '<div style="margin-bottom:8px"><b style="font-size:12px;color:var(--brand-600)">'+x[0]+'</b><div class="sub">'+x[1]+'</div></div>'; }).join('')+'</div>'+
+  /* 拜访准备 */
+  '<div class="card"><div class="sec-t">拜访准备</div>'+
+    [['建议携带',[esc(plans[0].name)+'要点与测算模板','订单/项目材料清单','结算代发现金管理介绍',c.listed.indexOf('是')===0?'上市综合服务预案':'企业授权说明']],['会前准备',['复核工商/上市/资质信息',esc(c.net)+'产业趋势一页图','确认客户参会人','联动产品经理测算']],['本次目标',[c.prog==='突破'?'CFO认同方案框架，约定行长拜访':c.prog==='攻坚'?'摸清资金安排与决策链':'建立联系摸排融资安排','确认6-12月订单/项目与资金缺口','收集合同回款与项目资料','约定资料责任人与下次沟通']]].map(function(x){ return '<div style="margin-bottom:9px"><b style="font-size:12px;color:var(--brand-600)">'+x[0]+'</b><ol style="margin:4px 0 0 16px" class="sub">'+x[1].map(function(y){ return '<li style="margin:2px 0">'+esc(y)+'</li>'; }).join('')+'</ol></div>'; }).join('')+'</div>'+
+  /* 访谈提纲 */
+  '<div class="card"><div class="sec-t">访谈提纲</div>'+
+    [['订单与项目','订单储备/项目进度？框架与正式合同占比？关键交付验收节点？','订单台账、主要合同'],['客户与结算','账期与结算方式？电汇/票据/平台占比？','客户结构、应收账龄'],['产能与投资','产能利用率？在建产线与设备付款计划？','设备清单、采购合同'],['资金与融资','现有授信与到期安排？缺口来自备货/应收/项目？','融资担保明细、资金计划'],['政策与申报',(c.net==='新型电网'?'绿色信贷/贴息':c.net==='算力网'?'算力基础设施贴息':c.net==='城市地下管网'?'专项债配套':c.net==='水网'?'水利专项':c.net==='物流网'?'多式联运补贴':'专精特新/科技补贴')+'申报计划？需何协助？','申报计划、资质证书'],['会后确认','指定资料联系人，确认材料范围与方案反馈时间。','联系人清单、下次时间']].map(function(x,i){ return '<div class="qitem"><span class="qn">'+(i+1)+'</span><div><b style="font-size:12.5px">'+x[0]+'</b><div class="sub">'+x[1]+'</div><div class="muted" style="margin-top:2px">建议带回：'+x[2]+'</div></div></div>'; }).join('')+'</div>'+
+  /* 折叠：背景与风险 */
+  '<div class="card"><details><summary style="cursor:pointer;font-weight:700;font-size:13px">展开企业背景与风险信息</summary>'+
+    '<div class="sec-t" style="margin-top:10px">关键指标速览</div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'+
+      '<div style="border:1px solid var(--line);border-radius:9px;padding:7px 9px"><div class="muted">综合评分</div><b style="font-size:16px;color:var(--brand-600)">'+c.score+'</b> <span class="muted">'+c.sigLv+'级 · '+c.rel+'</span></div>'+
+      '<div style="border:1px solid var(--line);border-radius:9px;padding:7px 9px"><div class="muted">客户大类</div><b style="font-size:14px">'+esc(c.cat)+'</b><div class="muted">'+esc(c.nat)+'</div></div>'+
+      '<div style="border:1px solid var(--line);border-radius:9px;padding:7px 9px"><div class="muted">上市情况</div><b style="font-size:14px">'+(c.listed.indexOf('是')===0?'是':'否')+'</b><div class="muted">'+(c.listed.indexOf('是')===0?esc(c.listed.slice(2)):'非上市主体')+'</div></div>'+
+      '<div style="border:1px solid var(--line);border-radius:9px;padding:7px 9px"><div class="muted">营销进展</div><b style="font-size:14px">'+c.prog+'</b><div class="muted">'+c.pos+' · '+c.wt+'</div></div>'+
+    '</div>'+
+    '<div class="sec-t" style="margin-top:12px">近期动态 / 经营要点</div>'+c.sig.map(function(sg,i){ return '<div class="qitem"><span class="tag tag-line" style="flex-shrink:0;align-self:flex-start">'+(i===0?'信号':'依据')+'</span><span class="sub">'+esc(sg)+'</span></div>'; }).join('')+
+    '<div class="sec-t" style="margin-top:12px">政策与产业机会</div><div class="sub">'+esc(c.net)+'方向可对接专项政策与贴息工具，现场核实申报窗口与条件；六张网建设持续放量，关注同业授信动向。</div>'+
+    '<div class="sec-t" style="margin-top:12px">风险提示</div>'+
+    [['企业自身','中',(c.pos==='战略'?'体量大决策链长，方案需多部门联动':'关注订单波动与回款账期变化')],['关联企业',c.cat==='上游供应商'?'高':'中',(c.cat==='上游供应商'?'对链主客户依赖度需核实（前五大集中度）':'项目公司治理与资金归集需核实')],['同业动态','中','四大行与股份行均在跟进六张网名单客户，建议两周内递交方案'],['避雷提示','—','不主动谈他行合作细节与审批节奏预判']].map(function(x){ return '<div class="qitem" style="align-items:flex-start"><span class="tag '+(x[1]==='高'?'tag-red':x[1]==='中'?'tag-orange':'tag-gray')+'" style="flex-shrink:0">'+x[0]+' '+x[1]+'</span><span class="sub" style="flex:1">'+esc(x[2])+'</span></div>'; }).join('')+
+  '</details></div>'+
+  '<button class="mbtn pri" style="width:100%;height:38px" onclick="toastMsg(\'访前一页纸已下载（PDF）\')">下载访前一页纸</button>';
+}
+function bindMbProds(){
+  var c=co(S.opCo&&co(S.opCo)?S.opCo:(myTasks()[0]?myTasks()[0].co:D.cos[0].id));
+  var plans=mbPlans(c);
+  var wrap=document.querySelector('#mbProds'); if(!wrap) return;
+  var det=document.querySelector('#mbProdDetail');
+  wrap.querySelectorAll('[data-mbprod]').forEach(function(el){
+    el.onclick=function(){
+      wrap.querySelectorAll('[data-mbprod]').forEach(function(x2){ x2.style.borderColor='var(--line)'; x2.style.background='#fff'; });
+      el.style.borderColor='var(--brand-500)'; el.style.background='var(--brand-50)';
+      var pl=plans[+el.dataset.mbprod]||plans[0];
+      det.innerHTML='<div class="aicard" style="margin-top:4px"><div class="ah"><span class="aibadge">AI</span>'+esc(pl.name)+' · 方案要素</div><div class="ab">'+
+        mbSpecs(pl.name).map(function(x2){ return x2[0]+'：<b style="display:inline">'+esc(x2[1])+'</b>'; }).join('<br>')+
+        '<b>现场核实</b>订单生效/确权方式/回款账龄/项目批复（按产品类型）</div></div>';
+    };
+  });
+  wrap.querySelector('[data-mbprod]').onclick();
+}
+var _origSwitchTab=switchTab;
+switchTab=function(t){ S.tab=t; renderTab(); renderBody(); if(t==='op') setTimeout(bindMbProds,50); };
+
+/* ---------- 纪要页 ---------- */
+function goVisit(taskId){ S.selTask=taskId; switchTab('visit'); }
+var REC={on:false,sec:0,timer:null,stream:null};
+function pageVisit(){
+  var ts=myTasks(); var t=task(S.selTask)||ts[0];
+  if (!t) return '<div class="card"><div class="empty"><div class="e">🎙</div>暂无承接任务</div></div>';
+  var c=co(t.co);
+  var h='<div class="picker">'+ts.map(function(x){ return '<div class="pitem '+(x.id===t.id?'on':'')+'" onclick="goVisit(\''+x.id+'\')">'+esc(co(x.co).short)+'（'+x.status+'）</div>'; }).join('')+'</div>';
+  if (S.role!=='rm') {
+    h+='<div class="card"><div class="sub">当前角色（'+esc(user().role)+'）为只读视角，纪要由客户经理语音录入后自动归档：</div></div>';
+    h+='<div class="card">'+t.log.map(function(l){ return '<div class="logitem"><div class="l1"><span class="tag tag-line">'+esc(l.d)+'</span><span class="lt">'+esc(l.t)+'</span><span class="ld" style="margin-left:auto">'+esc(l.by)+'</span></div><div class="lx">'+esc(l.x)+'</div></div>'; }).join('')+'</div>';
+    return h;
+  }
+  h+='<div class="reccard">'+
+    '<button class="mic" id="micBtn" onclick="toggleMic()">●</button>'+
+    '<div class="rwave" id="rWave">'+'<i></i>'.repeat(14)+'</div>'+
+    '<div class="rt" id="rTime">00:00</div>'+
+    '<div class="rtip" id="rTip">点击录音：口述拜访过程，停止后自动转文字并整理归档<br>（录音仅在浏览器内演示，不上传）</div>'+
+  '</div>'+
+  '<div class="card">'+
+    '<div class="fgrid">'+
+      '<div class="fitem"><label>拜访日期</label><input type="date" id="vDate" value="2026-11-04"></div>'+
+      '<div class="fitem"><label>拜访方式</label><select id="vWay"><option>上门走访</option><option>视频会议</option><option>电话沟通</option></select></div>'+
+      '<div class="fitem"><label>关键人</label><input id="vPeer" placeholder="张总·财务总监"></div>'+
+    '</div>'+
+    '<div class="fitem" style="margin:2px 0 6px"><label>交流要点（转写原文，可修改）</label>'+
+    '<textarea class="tarea" id="vNote" placeholder="点击上方录音按钮，转写文字将自动填入；也可直接输入"></textarea></div>'+
+    '<div id="aiOut"></div>'+
+    '<div style="display:flex;gap:8px;margin-top:10px">'+
+      '<button class="mbtn" onclick="aiDo()">✦ AI 整理</button>'+
+      '<button class="mbtn pri" onclick="saveVisit()">保存归档</button>'+
+    '</div>'+
+  '</div>'+
+  '<div class="card"><div class="sec-t">历史纪要与协同留痕<small>'+esc(c.short)+' · '+t.log.length+' 条</small></div>'+
+    t.log.map(function(l){ return '<div class="logitem"><div class="l1"><span class="tag tag-line">'+esc(l.d)+'</span><span class="lt">'+esc(l.t)+'</span><span class="ld" style="margin-left:auto">'+esc(l.by)+'</span></div><div class="lx">'+esc(l.x)+'</div></div>'; }).join('')+
+  '</div>';
+  return h;
+}
+function toggleMic(){
+  var btn=$('#micBtn'), tip=$('#rTip'), tm=$('#rTime'), wave=$('#rWave');
+  if (!REC.on){
+    REC.on=true; REC.sec=0; btn.classList.add('rec'); wave.classList.add('on');
+    tip.innerHTML='正在录音… 再次点击结束并<b style="color:var(--brand-600)"> AI 转写</b>';
+    try { navigator.mediaDevices.getUserMedia({audio:true}).then(function(st){ REC.stream=st; }).catch(function(){}); } catch(e){}
+    REC.timer=setInterval(function(){ REC.sec++; tm.textContent=fmt2(Math.floor(REC.sec/60))+':'+fmt2(REC.sec%60); },1000);
+  } else {
+    clearInterval(REC.timer);
+    if (REC.stream){ REC.stream.getTracks().forEach(function(x){x.stop();}); REC.stream=null; }
+    REC.on=false; btn.classList.remove('rec'); btn.disabled=true; wave.classList.remove('on');
+    tip.textContent='AI 转写中…';
+    var t=task(S.selTask), c=co(t.co);
+    setTimeout(function(){
+      $('#vNote').value=D.script[c.net]||D.script['新型电网'];
+      tip.innerHTML='转写完成（'+tm.textContent+'）· 已填入交流要点，AI 已同步整理';
+      btn.disabled=false;
+      aiDo(true);
+    },1500);
+  }
+}
+function aiDo(auto){
+  var t=task(S.selTask), c=co(t.co);
+  var txt=$('#vNote').value.trim();
+  if (!txt) { toastMsg('请先录音转写或输入交流要点'); return; }
+  var prods=(c.prods&&c.prods.length?c.prods.slice(0,4):D.prodByNet[c.net])||['流动资金贷款'];
+  var html='<div class="aicard"><div class="ah"><span class="aibadge">AI</span>纪要整理'+(auto?'（转写后自动生成）':'')+' · 请确认</div><div class="ab">'+
+    '<b>识别需求</b>· 融资需求：'+prods[0]+'（意向明确，需测算额度）<br>· 非信贷需求：结算归集、代发工资（客户主动提及，优先落地）<br>· 潜在需求：'+prods.slice(1).join('、')+'（下次跟进）'+
+    '<b>建议综合方案（前中台 + AI 协同 · 强调非信贷）</b>① 先落地非信贷服务（结算/代发/票据池）建立日常往来<br>② 按资本开支节奏出具'+prods[0]+'方案，对接政策贴息<br>③ 协同产品经理出综合服务方案（前中台联动）'+
+    '<b>风险提示</b>'+(c.pos==='战略'?'战略客户同业竞争激烈，注意报价与服务时效。':'关注回款账期与资本开支节奏，避免期限错配。')+
+    '</div></div>';
+  $('#aiOut').innerHTML=html;
+  $('#aiOut').dataset.done='1';
+  if (auto) toastMsg('AI 已完成转写整理');
+}
+function saveVisit(){
+  var t=task(S.selTask), c=co(t.co);
+  var note=$('#vNote').value.trim();
+  if (!note) { toastMsg('请先录入交流要点'); return; }
+  var aiOK=$('#aiOut').dataset.done==='1';
+  var peer=$('#vPeer').value.trim()||'关键人';
+  t.log.unshift({ d:'11-04', t:'访客纪要', by:user().name, x:'【'+$('#vWay').value+' · '+peer+'】'+note.slice(0,56)+'…（AI 已整理'+(aiOK?'：需求识别+综合方案（含非信贷服务）':'')+'）' });
+  if (t.status==='待接收') t.status='跟进中';
+  toastMsg('纪要已归档 · 任务更新为「跟进中」，已同步任务跟踪与产品经理');
+  renderHead(); renderBody();
+}
+
+/* ---------- AI 页 ---------- */
+function pageAi(){
+  var h='<div class="card"><div class="chat" id="chatBox">'+
+    S.chat.map(function(m){ return m.q?('<div class="bub-q">'+esc(m.q)+'</div><div class="bub-a">'+m.a+(m.src?'<span class="src">来源：'+esc(m.src)+'</span>':'')+'</div>'):'<div class="bub-a">'+m.a+'</div>'; }).join('')+
+  '</div>'+
+  '<div class="sugs">'+D.qa.map(function(x,i){ return '<span class="sug" onclick="askAI('+i+')">'+esc(x.q)+'</span>'; }).join('')+'</div>'+
+  '<div class="askrow"><input id="aiQ" placeholder="输入问题…" onkeydown="if(event.key===\'Enter\')askFree()"><button onclick="askFree()">提问</button></div></div>';
+  return h;
+}
+function askAI(i){
+  var x=D.qa[i]; S.chat.push({q:x.q,a:x.a,src:x.src}); renderBody();
+  setTimeout(function(){ var b=$('#chatBox'); if (b) b.parentElement.scrollTop=1e5; var cb=$('#chatBox'); if(cb) cb.scrollIntoView({block:'end'}); },30);
+}
+function askFree(){
+  var q=$('#aiQ').value.trim(); if(!q) return;
+  var hit=null; D.qa.forEach(function(x){ if (!hit && (x.q.indexOf(q.slice(0,4))>=0||q.indexOf(x.q.slice(0,4))>=0)) hit=x; });
+  S.chat.push({q:q,a:hit?hit.a:'已收到您的问题。演示环境为预置问答，建议点击下方推荐问题体验完整回答。',src:hit?hit.src:''});
+  renderBody();
+}
+
+/* ---------- 我的页 ---------- */
+function pageMy(){
+  var u=user();
+  return '<div class="card"><div class="ucard"><div class="uav2">'+esc(u.av)+'</div><div><b class="sm" style="font-size:16px">'+esc(u.name)+'</b>'+
+    '<div class="muted" style="margin-top:2px">'+esc(u.role)+' · '+esc(u.dept)+'</div></div></div></div>'+
+  '<div class="card"><div class="sec-t">关于</div><div class="kvrow"><span class="k">平台</span><span class="v">产业金融协同工具 · 移动工作台</span></div>'+
+  '<div class="kvrow"><span class="k">数据时点</span><span class="v">2026-11-04</span></div>'+
+  '<div class="kvrow"><span class="k">功能</span><span class="v">任务列表 · 访前一页纸 · 访客纪要（语音转写+AI整理）· AI问答</span></div>'+
+  '<div class="kvrow"><span class="k">说明</span><span class="v">录音转写为演示模拟（约1.5秒生成），正式环境接入语音识别服务</span></div></div>';
+}
+function toggleRoleSheet(){
+  var mask=document.querySelector('#roleMask'), sheet=document.querySelector('#roleSheet');
+  var show=sheet.style.display==='none';
+  sheet.style.display=show?'block':'none'; mask.style.display=show?'block':'none';
+  if(!show) return;
+  sheet.innerHTML='<div style="text-align:center;font-size:11px;color:var(--t3);padding:8px 0 4px">切换角色（演示）· 工作台内容随角色变化</div>'+
+    D.users.map(function(x){
+      return '<div class="roleitem '+(x.id===S.role?'on':'')+'" onclick="pickRole(\''+x.id+'\')"><div class="uav2" style="width:36px;height:36px;font-size:14px;border-radius:10px">'+esc(x.av)+'</div><div><div class="rn">'+esc(x.name)+'</div><div class="rd">'+esc(x.role)+' · '+esc(x.dept)+'</div></div>'+(x.id===S.role?'<span class="tag tag-green" style="margin-left:auto">当前</span>':'')+'</div>';
+    }).join('')+
+    '<div class="mbtn" style="width:100%;margin-top:6px" onclick="toggleRoleSheet()">取消</div>';
+}
+function pickRole(r){ toggleRoleSheet(); setRole(r); }
+function setRole(r){ S.role=r; var ts=myTasks(); S.selTask=ts[0]?ts[0].id:null; S.opCo=null; renderHead(); renderTab(); renderBody(); toastMsg('已切换：'+user().name+'（'+user().role+'）'); }
+
+/* ---------- 总渲染 ---------- */
+function renderBody(){
+  var h='';
+  if (S.tab==='task') h=pageTask();
+  else if (S.tab==='op') h=pageOp();
+  else if (S.tab==='visit') h=pageVisit();
+  else if (S.tab==='ai') h=pageAi();
+  else h=pageMy();
+  $('#mBody').innerHTML=h;
+  $('#mBody').scrollTop=0;
+  var ki=document.querySelector('#tKw');
+  if(ki) ki.oninput=function(){ S.kw=ki.value; renderBody(); var k2=document.querySelector('#tKw'); if(k2){ k2.focus(); k2.setSelectionRange(k2.value.length,k2.value.length);} };
+}
+renderHead(); renderTab(); renderBody();
+</script>
+</body>
+</html>

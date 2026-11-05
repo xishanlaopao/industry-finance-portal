@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>产业金融协同工具 · 北京银行无锡分行 · V3</title>
+  <link rel="stylesheet" href="css/theme.tokens.css?v=192">
+  <link rel="stylesheet" href="css/components.css?v=192">
+</head>
+<body>
+  <div class="portal">
+    <!-- 顶部细条 -->
+    <div class="ptop"><div class="ptop-in">
+      <span>2026年9月28日 星期一 · 欢迎使用产业金融协同工具 · 数据时点 2026-09-28</span>
+      <div class="pt-links">
+        <div class="dd">
+          <span class="pt-link" id="indSwitch"><b id="indName" style="color:var(--brand-500)">集成电路与电子材料</b> ▾</span>
+          <div class="dd-menu" id="indMenu" style="min-width:238px"></div>
+        </div>
+        <div class="dd">
+          <div class="user-chip" id="userDd">
+            <div class="avatar" id="uAv">王</div>
+            <div><div class="u-name" id="uName">邓瑞忠</div><div class="u-role" id="uRole">客户经理 · 公司银行部</div></div>
+            <span style="color:var(--t3);font-size:10px">▾</span>
+          </div>
+<div class="dd-menu" id="userMenu"></div>
+        </div>
+      </div>
+    </div></div>
+    <!-- 主头部：logo + 横向导航 + 搜索 + AI问述 -->
+    <header class="phead"><div class="phead-in">
+      <div class="plogo">
+        <div class="logo-mark"><img src="assets/logo.png" alt="北京银行"></div>
+        <div class="logo-name">产业金融协同工具</div>
+      </div>
+      <nav class="pnav" id="pnav"></nav>
+      <div class="phead-acts">
+        <div class="psearch">
+          <span class="ps-ico">🔍</span>
+          <input id="pSearch" placeholder="搜索企业 / 政策 / 资讯…" autocomplete="off">
+          <div class="gs-drop" id="psDrop"></div>
+        </div>
+      </div>
+    </div></header>
+    <!-- 主体 -->
+    <main class="pmain">
+      <div class="crumb-bar" id="crumbBar"></div>
+      <div id="viewRoot"></div>
+    </main>
+    <!-- 页脚 -->
+    <footer class="pfoot">
+      北京银行无锡分行 · 产业金融协同工具 · 数据时点 2026-09-28
+    </footer>
+  </div>
+
+  <!-- AI问述浮动面板与按钮 -->
+  <button class="ai-fab" id="aiFab">✦ AI问述</button>
+  <div class="ai-panel-box" id="aiPanel">
+    <div class="aip-head">
+      <div><div class="t">✦ AI 智能问述</div><div class="s">产业知识库 · 政策库 · 实时资讯</div></div>
+      <button class="modal-x" id="aipClose" style="color:#fff">✕</button>
+    </div>
+    <div class="aip-body" id="aipBody"></div>
+    <div class="aip-foot"><input id="aipInput" placeholder="提问，或描述企业情况与需求获取营销建议…"><button id="aipSend">提问</button></div>
+  </div>
+
+  <!-- 弹窗 / 抽屉 / 角标 -->
+  <div class="mask" id="mask"><div class="modal" id="modalBox">
+    <div class="modal-head"><div class="modal-title" id="modalTitle"></div><button class="modal-x" id="modalX">✕</button></div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-foot" id="modalFoot"></div>
+  </div></div>
+  <div class="drawer-mask" id="drawerMask"></div>
+  <aside class="drawer" id="drawer">
+    <div class="drawer-head"><div id="drawerTitle"></div><button class="modal-x" id="drawerX">✕</button></div>
+    <div class="drawer-body" id="drawerBody"></div>
+  </aside>
+
+  <!-- 脚本（顺序勿变；迭代升版时递增 ?v=） -->
+  <script src="config/nav.js?v=192"></script>
+  <script src="data/jxmap.js?v=192"></script>
+  <script src="data/mock.js?v=192"></script>
+  <script src="js/charts.js?v=192"></script>
+  <script src="js/app.js?v=192"></script>
+  <script src="js/views-funnel.js?v=192"></script>
+  <script src="js/views-core.js?v=192"></script>
+  <script src="js/views-biz.js?v=192"></script>
+  <script src="js/views-visit.js?v=192"></script>
+  <script src="js/views-cockpit.js?v=192"></script>
+  <script src="js/views-workbench.js?v=192"></script>
+  <script>APP.boot();</script>
+</body>
+</html>
