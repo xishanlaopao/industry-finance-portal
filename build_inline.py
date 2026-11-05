@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""内联构建：index.dev.html → index.html + 产业金融协同工具-单文件演示版.html
+"""内联构建：index.dev.html → index.html + 北斗·产融智航系统-单文件演示版.html
    CSS 与 6 个 js 内联；config/nav.js、data/jxmap.js、data/mock.js 保持外链；logo 转 base64"""
 import base64, re, pathlib
 
@@ -21,6 +21,6 @@ html = re.sub(r'<script src="(js/[^"?]+)\?v=\d+"></script>', inline_js, html)
 b64 = base64.b64encode((root / 'assets/logo.png').read_bytes()).decode()
 html = html.replace('src="assets/logo.png"', 'src="data:image/png;base64,' + b64 + '"')
 
-for out in ('index.html', '产业金融协同工具-单文件演示版.html'):
+for out in ('index.html', '北斗·产融智航系统-单文件演示版.html'):
     (root / out).write_text(html, encoding='utf-8')
     print('built:', out)

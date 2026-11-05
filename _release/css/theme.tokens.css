@@ -1,0 +1,48 @@
+/* ============================================================
+   产业金融智能平台 · 设计 Token V2（门户版）
+   基调：北京银行品牌红（门户头部）+ 数据蓝（图表/链接）+ 白底内容
+   换肤只改本文件
+   ============================================================ */
+:root {
+  /* 品牌红（门户主色：头部/主按钮/栏目标题） */
+  --brand-500: #C0202C;
+  --brand-600: #A61521;
+  --brand-700: #8E1019;
+  --brand-100: #FBE7E9;
+  --brand-50:  #FCF4F5;
+  /* 头部渐变 */
+  --hdr-grad: linear-gradient(96deg, #7E0E19 0%, #A61521 45%, #C0202C 100%);
+  /* 数据蓝（链接/图表主系列） */
+  --blue-500: #2458F5;  --blue-600: #1A44D6;  --blue-100: #E7EEFF;  --blue-50: #F2F6FF;
+  /* 功能语义色 */
+  --ok-500: #16A34A;  --ok-50:  #E8F7EE;
+  --warn-500:#F59E0B; --warn-50:#FEF4E2;
+  --danger-500:#E5484D; --danger-50:#FDECEC;
+  --info-500:#0EA5E9;  --info-50:#E6F6FD;
+  --violet-500:#7C3AED; --violet-50:#F1EAFE;
+  /* 中性色 */
+  --bg: #F5F6F8;
+  --card: #FFFFFF;
+  --line: #E7EAF0;
+  --line-strong: #D5DAE4;
+  --t1: #1A2233; --t2: #5A6478; --t3: #8A93A6;
+  /* 门户头部（深红）上的文字 */
+  --hdr-text: #FFE3E6;
+  /* 字体 */
+  --font: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+  --fs-xs: 12px; --fs-sm: 13px; --fs-md: 14px; --fs-lg: 16px; --fs-xl: 20px; --fs-2xl: 26px;
+  /* 圆角/阴影/间距 */
+  --r-sm: 6px; --r-md: 10px; --r-lg: 14px;
+  --sh-sm: 0 1px 2px rgba(16,24,40,.05);
+  --sh-md: 0 4px 14px rgba(16,24,40,.08);
+  --sh-lg: 0 10px 32px rgba(16,24,40,.16);
+  --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px; --sp-5: 24px; --sp-6: 32px;
+  /* 布局 */
+  --pmain-w: 1680px;
+  --phead-h: 64px;
+  --ptop-h: 34px;
+  /* 图表 */
+  --chart-grid: #EDF1F7;
+  --chart-label: #8A93A6;
+  --chart-sec: #93A4C8;
+}

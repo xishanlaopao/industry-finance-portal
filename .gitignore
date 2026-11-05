@@ -1,3 +1,9 @@
 .DS_Store
 _deploy.py
 __pycache__/
+
+# Tencent Cloud EdgeOne
+.env
+.edgeone/*
+.tef_dist/*
+  

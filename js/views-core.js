@@ -39,7 +39,7 @@
           <div class="hero2-deco"></div>
           <div class="hero2-main">
             <div class="hero2-brand">
-              <div class="hero2-title">产业金融协同工具</div>
+              <div class="hero2-title">北斗·产融智航系统</div>
               <div class="hero2-en">BOB WUXI · INDUSTRIAL FINANCE INTELLIGENCE</div>
               <div class="hero2-sub">洞察产业 · 链动金融</div>
             </div>

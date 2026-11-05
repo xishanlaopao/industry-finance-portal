@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>产业金融协同工具 · 移动工作台</title>
+<title>北斗·产融智航系统 · 移动工作台</title>
 <style>
 /* ============ 设计令牌（与 PC 门户一致） ============ */
 :root {
@@ -384,7 +384,7 @@ function renderHead(){
   else if (S.role==='pm') ks=[['已下发',ts.length],['待接收',ts.filter(function(t){return t.status==='待接收';}).length],['待陪访',ts.filter(function(t){return t.status==='跟进中'&&+t.due.replace('-','')<=1112;}).length],rv?['待复核',rv]:['订阅企业',10]];
   else ks=[['全辖任务',ts.length],['覆盖企业',new Set(ts.map(function(t){return t.co;})).size],['反馈率',ts.length?Math.round(ts.filter(function(t){return t.status==='已反馈';}).length/ts.length*100)+'%':'—'],od?['超期',od]:['经理',new Set(ts.map(function(t){return t.rm;})).size]];
   $('#mHead').innerHTML =
-    '<div class="r1"><div class="logo">京</div><div class="t">产业金融协同工具</div>'+
+    '<div class="r1"><div class="logo">京</div><div class="t">北斗·产融智航系统</div>'+
     '<div class="urole" onclick="toggleRoleSheet()">'+esc(u.role)+' ▾</div></div>'+
     '<div class="urole2">'+
       '<div class="uav3">'+esc(u.av)+'</div>'+
@@ -665,7 +665,7 @@ function askFree(){
 /* ---------- 我的页 ---------- */
 function pageMy(){
   var u=user();
-  return '<div class="card"><div class="sec-t">关于</div><div class="kvrow"><span class="k">平台</span><span class="v">产业金融协同工具 · 移动工作台</span></div>'+
+  return '<div class="card"><div class="sec-t">关于</div><div class="kvrow"><span class="k">平台</span><span class="v">北斗·产融智航系统 · 移动工作台</span></div>'+
   '<div class="kvrow"><span class="k">数据时点</span><span class="v">2026-11-04</span></div>'+
   '<div class="kvrow"><span class="k">功能</span><span class="v">任务列表 · 访前一页纸 · 访客纪要（语音转写+AI整理）· AI问答</span></div>'+
   '<div class="kvrow"><span class="k">说明</span><span class="v">录音转写为演示模拟（约1.5秒生成），正式环境接入语音识别服务</span></div></div>';
