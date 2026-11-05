@@ -71,12 +71,12 @@
           </div>
         </div>
 
-        <!-- ===== 第一行：资讯快讯 · 订阅推送并排 ===== -->
+        <!-- ===== 第一行：任务待办 · 订阅推送并排 ===== -->
         <div class="home-row">
-          <div class="card">
-            <div class="sec-head" style="padding:14px 16px 4px"><div class="sec-title"><span class="tbar"></span>资讯快讯</div>
-              <span class="sec-more" onclick="APP.go('news')">更多 ›</span></div>
-            <div id="fkArea">${this.fkArea(m)}</div>
+          <div class="card" style="display:flex;flex-direction:column">
+            <div class="sec-head" style="padding:14px 16px 4px"><div class="sec-title"><span class="tbar"></span>任务待办</div>
+              <span class="sec-more" onclick="APP.go('workbench')">进入工作台 ›</span></div>
+            <div id="todoArea" style="flex:1;display:flex;flex-direction:column;min-height:0">${this.todoArea(m)}</div>
           </div>
           <div class="card rail-sub">
             <div class="rs-head"><b>异常数据监控<span class="text-xs text-muted" style="font-weight:400;margin-left:8px">T+1跑批 · 10-19 06:00</span></b><span class="rs-manage" id="rkMore">更多 ›</span></div>
@@ -103,7 +103,7 @@
             <div id="lpList" style="flex:1;min-height:0;display:flex;flex-direction:column"></div>
           </div>
         </div>`;
-      this.bindFk(el, m);
+      this.bindTodo(el);
       this.renderLp(el, m);
       this.renderRisk(el, m);
       this.renderSub(el, m);
@@ -318,6 +318,60 @@
         <div style="flex:1;min-width:0"><div class="m-title" style="display:flex;align-items:center;gap:6px"><span style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(x.t)}</span><span class="tag ${tab === '行业' ? 'tag-line' : 'tag-blue'}" style="height:17px;font-size:10px;padding:0 5px;flex-shrink:0">${x.ind}</span></div>
         <div class="m-time">${x.d}</div></div></div>`).join('') || '<div class="text-sm text-muted" style="padding:12px 2px">暂无${tab}订阅推送</div>'.replace('${tab}', tab);
       el.querySelectorAll('[data-st]').forEach(b => b.onclick = () => { APP.S.subTab = b.dataset.st; this.renderSub(el, m); el.querySelectorAll('[data-st]').forEach(x => x.classList.toggle('on', x.dataset.st === APP.S.subTab)); });
+    },
+    /* ---------- 任务待办（承接任务 + 最新跟进，联动工作台） ---------- */
+    todoArea(m) {
+      const rk = APP.role().key;
+      const F = APP.S.fn || { tasks: m.funnel.tasksSeed, subs: m.funnel.subsSeed };
+      let tasks = F.tasks;
+      if (rk === 'rm') tasks = tasks.filter(t => t.rm === 'rm-drz');
+      else if (rk === 'head') tasks = tasks.filter(t => (m.funnel.rms.find(r => r.id === t.rm) || {}).unit === '无锡分行营业部');
+      const cName = id => { const c = m.funnel.cos.find(x => x.id === id); return c ? c.short : ''; };
+      const rName = id => { const r = m.funnel.rms.find(x => x.id === id); return r ? r.name : ''; };
+      const stTag = s2 => ({ 待接收: 'tag-gray', 跟进中: 'tag-blue', 已反馈: 'tag-green', 已关闭: 'tag-line' }[s2] || 'tag-gray');
+      const overdue = t => +t.due.replace('-', '') < 1105 && t.status !== '已反馈' && t.status !== '已关闭';
+      const rows = tasks.map(t => {
+        const last = t.log[0];
+        return `<div class="todo-row" data-td-go="${t.id}">
+          <div class="tr1">
+            <b>${esc(cName(t.co))}</b>
+            <span class="tag tag-line" style="height:20px;font-size:11px">${esc(t.type)}</span>
+            <span class="tag ${stTag(t.status)}" style="height:20px;font-size:11px">${t.status}</span>
+            ${overdue(t) ? '<span class="tag tag-red" style="height:20px;font-size:11px">超期</span>' : ''}
+            <span style="flex:1"></span>
+            <span style="flex-shrink:0"><button class="btn btn-text btn-sm" data-td-note="${t.id}">纪要</button></span>
+          </div>
+          <div class="tr2">截止 <b>${t.due}</b> · ${esc(rName(t.rm))} · 重点：${esc(t.prods.slice(0, 2).join(' / '))}</div>
+          ${last
+            ? `<div class="tr3"><span class="tag tag-blue" style="height:18px;font-size:10px;flex-shrink:0">${esc(last.t)}</span><span>${last.d} · ${esc(last.by)} — ${esc(last.x.length > 52 ? last.x.slice(0, 52) + '…' : last.x)}</span></div>`
+            : `<div class="tr3" style="color:var(--warn-500)">尚无跟进记录，请尽快接收并拜访</div>`}
+        </div>`;
+      }).join('');
+      return `
+        <div class="flex-between" style="padding:10px 16px 6px">
+          <b style="font-size:16px">${rk === 'rm' ? '我承接的任务' : rk === 'head' ? '本支行任务' : rk === 'pm' ? '我下发的任务' : '全辖任务'}<span style="font-size:12px;color:var(--t3);font-weight:400;margin-left:8px">${tasks.length} 项${tasks.filter(overdue).length ? ' · <span style="color:var(--danger-500)">超期 ' + tasks.filter(overdue).length + '</span>' : ''}</span></b>
+          <span style="flex:1"></span>
+        </div>
+        <div class="todo-list">${rows || '<div style="padding:20px 16px;font-size:13px;color:var(--t3)">暂无承接任务</div>'}</div>
+        <style>
+          .todo-list { display:flex; flex-direction:column; gap:9px; padding:2px 16px 14px; flex:1; min-height:0; }
+          .todo-row { flex:1; min-height:0; display:flex; flex-direction:column; justify-content:space-evenly; gap:9px; padding:12px 16px; border:1px solid var(--line); border-radius:10px; background:#FAFBFC; cursor:pointer; transition:.15s; }
+          .todo-row:hover { border-color:var(--brand-500); background:var(--brand-50); }
+          .todo-row .tr1 { display:flex; align-items:center; gap:8px; line-height:1.6; }
+          .todo-row .tr1 b { font-size:16px; }
+          .todo-row .tr2 { font-size:13.5px; color:var(--t2); line-height:1.7; }
+          .todo-row .tr2 b { color:var(--t1); }
+          .todo-row .tr3 { display:flex; align-items:center; gap:8px; font-size:13.5px; color:var(--t2); background:#fff; border:1px dashed var(--line); border-radius:7px; padding:8px 12px; line-height:1.7; }
+          .todo-row .tr3 .tag { flex-shrink:0; }
+        </style>`;
+    },
+    bindTodo(el) {
+      const area = el.querySelector('#todoArea'); if (!area) return;
+      area.querySelectorAll('.todo-row[data-td-go]').forEach(r => r.onclick = e => {
+        if (e.target.closest('[data-td-note]')) return;
+        APP.go('workbench', { task: r.dataset.tdGo });
+      });
+      area.querySelectorAll('[data-td-note]').forEach(b => b.onclick = e => { e.stopPropagation(); APP.go('workbench', { task: b.dataset.tdNote, tab: 'visit' }); });
     },
     bindFk(el, m) {
       const area = el.querySelector('#fkArea');

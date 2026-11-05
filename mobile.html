@@ -26,7 +26,7 @@ body { font-family:var(--font); background:#20242B; display:flex; justify-conten
 @media (max-width:480px) { body { background:var(--bg); } .phone { max-width:none; height:100vh; box-shadow:none; } }
 
 /* ============ 顶栏 ============ */
-.mhead { background:linear-gradient(96deg,#7E0E19,#A61521 45%,#C0202C); color:#fff; padding:14px 16px 12px; flex-shrink:0; }
+.mhead { background:linear-gradient(96deg,#7E0E19,#A61521 45%,#C0202C); color:#fff; padding:19px 16px 17px; flex-shrink:0; }
 .mhead .r1 { display:flex; align-items:center; gap:8px; }
 .mhead .logo { width:26px; height:26px; border-radius:7px; background:#fff; color:var(--brand-600); font-weight:800; font-size:12px; display:flex; align-items:center; justify-content:center; }
 .mhead .t { font-size:15px; font-weight:700; letter-spacing:.5px; flex:1; }
@@ -35,10 +35,14 @@ body { font-family:var(--font); background:#20242B; display:flex; justify-conten
 .mhead .avatar { width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,.2); border:1px solid rgba(255,255,255,.4); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; }
 .mhead .un { font-size:13px; font-weight:600; }
 .mhead .ud { font-size:11px; color:#FFD9DC; margin-top:1px; }
-.mhead .kpis { display:flex; gap:6px; margin-top:10px; overflow-x:auto; }
-.mhead .kpi { background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.22); border-radius:9px; padding:5px 10px; flex-shrink:0; }
-.mhead .kpi .k { font-size:10px; color:#FFD9DC; }
-.mhead .kpi .v { font-size:15px; font-weight:700; }
+.mhead .urole2 { display:flex; align-items:center; gap:11px; margin-top:17px; }
+.mhead .uav3 { width:52px; height:52px; border-radius:14px; background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.35); color:#fff; font-size:20px; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.mkpis { display:flex; gap:8px; padding:10px 12px 2px; }
+.mkpi { flex:1; min-width:0; background:var(--bg); border:1px solid var(--line); border-radius:10px; padding:10px 4px 9px; text-align:center; }
+.mkpi .k { font-size:10px; color:var(--t3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.mkpi .v { font-size:19px; font-weight:800; color:#B02A35; margin-top:2px; line-height:1.2; font-variant-numeric:tabular-nums; }
+.mkpi.alert .v { color:var(--danger-500); }
+.mkpi.alert .k { color:var(--danger-500); }
 
 /* ============ 主体 ============ */
 .mbody { flex:1; overflow-y:auto; padding:12px 12px 16px; }
@@ -146,6 +150,13 @@ textarea.tarea { width:100%; min-height:88px; resize:vertical; line-height:1.7; 
 .mtab .ti.on { color:var(--brand-600); font-weight:700; }
 .mtab .ti.on .ic { transform:translateY(-1px); }
 
+/* 迭代16：AI 特效 */
+@keyframes mStagIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes mFade{from{opacity:0}to{opacity:1}}
+@keyframes mLogIn{from{background:#FBE7E9;transform:translateX(-12px);opacity:0}to{transform:none;opacity:1}}
+.script-typing::after{content:"▍";color:var(--brand-500);animation:mCaret .8s steps(1) infinite}
+@keyframes mCaret{50%{opacity:0}}
+
 /* Toast */
 #toast { position:absolute; left:50%; transform:translateX(-50%); bottom:86px; background:rgba(26,34,51,.92); color:#fff; padding:9px 16px; border-radius:999px; font-size:12px; display:none; z-index:99; max-width:82%; text-align:center; line-height:1.5; }
 
@@ -160,6 +171,7 @@ textarea.tarea { width:100%; min-height:88px; resize:vertical; line-height:1.7; 
 <body>
 <div class="phone">
   <div class="mhead" id="mHead"></div>
+  <div class="mkpis" id="mKpis"></div>
   <div class="mbody" id="mBody"></div>
   <div class="mtab" id="mTab"></div>
   <div id="toast"></div>
@@ -240,7 +252,7 @@ var D = {
       prods:['项目贷款','结算归集','代发工资'],
       log:[ { d:'10-31', t:'访客纪要', by:'李晓', x:'改扩建项目已有他行报价，客户关注放款节奏与代发联动；建议以"审批时效+结算归集+代发"组合应对。' },
             { d:'10-25', t:'任务下发', by:'分行产品经理 · 陈立', x:'下发客户维护清单：省属国企综合经营。' } ] },
-    { id:'FT6', co:'F004', rm:'rm-drz', type:'产品推介', due:'11-06', status:'待接收', d:'11-03',
+    { id:'FT6', co:'F004', rm:'rm-drz', type:'产品推介', due:'11-03', status:'待接收', d:'10-31',
       note:'算电协同科技贷推介 + 投行培育陪伴（非信贷：结算与资金归集）',
       prods:['科技贷','投行服务'],
       log:[ { d:'11-03', t:'任务下发', by:'分行产品经理 · 陈立', x:'下发客户维护清单：央企子公司组合服务。' } ] },
@@ -287,6 +299,21 @@ function myTasks(){
   if (S.role==='head') return D.tasks.filter(function(t){ return rm(t.rm).unit==='无锡分行营业部'; });
   return D.tasks;
 }
+function isOverdueM(t){ return +t.due.replace('-','')<1105 && t.status!=='已反馈' && t.status!=='已关闭'; }
+function needReviewM(t){ return t.log.some(function(l){return l.t==='访客纪要';}) && !t.log.some(function(l){return l.t==='协同留言'&&l.by.indexOf('产品经理')>=0;}); }
+function needAccM(t){ return t.status==='跟进中' && +t.due.replace('-','')<=1112; }
+function urgeTask(id){
+  var t=null; D.tasks.forEach(function(x){ if(x.id===id) t=x; });
+  if(!t) return;
+  t.log.unshift({ d:'11-05', t:'催办', by:'分行产品经理 · 陈立', x:'已发送催办提醒，请'+rm(t.rm).name+'更新'+co(t.co).short+'跟进进展' });
+  toastMsg('已催办「'+co(t.co).short+' · '+rm(t.rm).name+'」'); renderHead(); renderBody(); renderKpis();
+}
+function reviewTask(id){
+  var t=null; D.tasks.forEach(function(x){ if(x.id===id) t=x; });
+  if(!t) return;
+  t.log.unshift({ d:'11-05', t:'协同留言', by:'分行产品经理 · 陈立', x:'纪要已复核：需求识别与综合服务方案确认无误，可推进落地。' });
+  toastMsg('已复核「'+co(t.co).short+'」纪要，已通知客户经理'); renderHead(); renderBody(); renderKpis();
+}
 function toastMsg(m){ var t=$('#toast'); t.textContent=m; t.style.display='block'; clearTimeout(t._h); t._h=setTimeout(function(){ t.style.display='none'; },2200); }
 var stTag=function(s){ return ({待接收:'tag-gray',跟进中:'tag-blue',已反馈:'tag-green',已关闭:'tag-line'})[s]||'tag-gray'; };
 var progCls={突破:'tag-solid-red',攻坚:'tag-orange',培育:'tag-blue',储备:'tag-gray'};
@@ -296,17 +323,39 @@ function fmt2(n){ return (n<10?'0':'')+n; }
    渲染
    ============================================================ */
 function renderHead(){
-  var u=user(), ts=myTasks();
+  var u=user();
+  renderKpis();
+  var ts=myTasks();
   var ks=[];
-  if (S.role==='rm') ks=[['承接任务',ts.length],['待接收',ts.filter(function(t){return t.status==='待接收';}).length],['跟进中',ts.filter(function(t){return t.status==='跟进中';}).length],['已反馈',ts.filter(function(t){return t.status==='已反馈';}).length]];
-  else if (S.role==='head') ks=[['支行任务',ts.length],['跟进中',ts.filter(function(t){return t.status==='跟进中';}).length],['反馈率',ts.length?Math.round(ts.filter(function(t){return t.status==='已反馈';}).length/ts.length*100)+'%':'—']];
-  else if (S.role==='pm') ks=[['已下发',ts.length],['待接收',ts.filter(function(t){return t.status==='待接收';}).length],['订阅企业',10],['覆盖客户经理',new Set(ts.map(function(t){return t.rm;})).size]];
-  else ks=[['全辖任务',ts.length],['覆盖企业',new Set(ts.map(function(t){return t.co;})).size],['反馈率',ts.length?Math.round(ts.filter(function(t){return t.status==='已反馈';}).length/ts.length*100)+'%':'—']];
+  var od=ts.filter(function(t){return +t.due.replace('-','')<1105 && t.status!=='已反馈' && t.status!=='已关闭';}).length;
+  var rv=ts.filter(function(t){ return t.log.some(function(l){return l.t==='访客纪要';}) && !t.log.some(function(l){return l.t==='协同留言'&&l.by.indexOf('产品经理')>=0;}); }).length;
+  if (S.role==='rm') ks=[['承接任务',ts.length],['待接收',ts.filter(function(t){return t.status==='待接收';}).length],['跟进中',ts.filter(function(t){return t.status==='跟进中';}).length],od?['超期',od]:['已反馈',ts.filter(function(t){return t.status==='已反馈';}).length]];
+  else if (S.role==='head') ks=[['支行任务',ts.length],['跟进中',ts.filter(function(t){return t.status==='跟进中';}).length],od?['超期',od]:['已反馈',ts.filter(function(t){return t.status==='已反馈';}).length],['反馈率',ts.length?Math.round(ts.filter(function(t){return t.status==='已反馈';}).length/ts.length*100)+'%':'—']];
+  else if (S.role==='pm') ks=[['已下发',ts.length],['待接收',ts.filter(function(t){return t.status==='待接收';}).length],['待陪访',ts.filter(function(t){return t.status==='跟进中'&&+t.due.replace('-','')<=1112;}).length],rv?['待复核',rv]:['订阅企业',10]];
+  else ks=[['全辖任务',ts.length],['覆盖企业',new Set(ts.map(function(t){return t.co;})).size],['反馈率',ts.length?Math.round(ts.filter(function(t){return t.status==='已反馈';}).length/ts.length*100)+'%':'—'],od?['超期',od]:['经理',new Set(ts.map(function(t){return t.rm;})).size]];
   $('#mHead').innerHTML =
     '<div class="r1"><div class="logo">京</div><div class="t">产业金融协同工具</div>'+
     '<div class="urole" onclick="toggleRoleSheet()">'+esc(u.role)+' ▾</div></div>'+
-    '<div class="uinfo"><div class="avatar">'+esc(u.av)+'</div><div><div class="un">'+esc(u.name)+'</div></div></div>'+
-    '<div class="kpis">'+ks.map(function(k){ return '<div class="kpi"><div class="k">'+esc(k[0])+'</div><div class="v">'+k[1]+'</div></div>'; }).join('')+'</div>';
+    '<div class="urole2">'+
+      '<div class="uav3">'+esc(u.av)+'</div>'+
+      '<div style="flex-shrink:0"><div class="un" style="font-size:16px">'+esc(u.name)+'</div><div class="ud" style="margin-top:3px;font-size:12px">'+esc(u.role)+' · '+esc(u.dept)+'</div></div>'+
+    '</div>';
+}
+function renderKpis(){
+  var ts=myTasks();
+  var od=ts.filter(function(t){return +t.due.replace('-','')<1105 && t.status!=='已反馈' && t.status!=='已关闭';}).length;
+  var rv=ts.filter(function(t){ return t.log.some(function(l){return l.t==='访客纪要';}) && !t.log.some(function(l){return l.t==='协同留言'&&l.by.indexOf('产品经理')>=0;}); }).length;
+  var ks=[];
+  if (S.role==='rm') ks=[['承接任务',ts.length],['待接收',ts.filter(function(t){return t.status==='待接收';}).length],['跟进中',ts.filter(function(t){return t.status==='跟进中';}).length],od?['超期任务',od,1]:['已反馈',ts.filter(function(t){return t.status==='已反馈';}).length]];
+  else if (S.role==='head') ks=[['支行任务',ts.length],['跟进中',ts.filter(function(t){return t.status==='跟进中';}).length],od?['超期任务',od,1]:['已反馈',ts.filter(function(t){return t.status==='已反馈';}).length],['反馈率',ts.length?Math.round(ts.filter(function(t){return t.status==='已反馈';}).length/ts.length*100)+'%':'—']];
+  else if (S.role==='pm') ks=[['已下发',ts.length],['待接收',ts.filter(function(t){return t.status==='待接收';}).length],['待陪访',ts.filter(function(t){return t.status==='跟进中'&&+t.due.replace('-','')<=1112;}).length],rv?['待复核纪要',rv,1]:['订阅企业',10]];
+  else ks=[['全辖任务',ts.length],['覆盖企业',new Set(ts.map(function(t){return t.co;})).size],['反馈率',ts.length?Math.round(ts.filter(function(t){return t.status==='已反馈';}).length/ts.length*100)+'%':'—'],od?['超期任务',od,1]:['参战经理',new Set(ts.map(function(t){return t.rm;})).size]];
+  var box=document.querySelector('#mKpis'); if(!box) return;
+  var n=ks.length;
+  box.innerHTML=ks.map(function(k){
+    var alert=k[2]?' alert':'';
+    return '<div class="mkpi'+alert+'"><div class="k">'+esc(k[0])+'</div><div class="v">'+k[1]+'</div></div>';
+  }).join('');
 }
 function renderTab(){
   var tabs=[['task','📋','任务'],['op','📄','一页纸'],['visit','🎙','纪要'],['ai','✦','AI'],['my','👤','我的']];
@@ -319,19 +368,33 @@ function switchTab(t){ S.tab=t; renderTab(); renderBody(); }
 function pageTask(){
   var ts0=myTasks(); var kw=(S.kw||'').trim();
   var ts=kw?ts0.filter(function(t){ return (co(t.co).name+co(t.co).short).indexOf(kw)>=0; }):ts0;
-  var h='<div class="card" style="padding:10px 14px"><div class="flex-between" style="gap:8px"><b style="font-size:14px">'+(S.role==='rm'?'我承接的任务':S.role==='head'?'本支行任务':S.role==='pm'?'我下发的任务':'全辖任务')+'</b><span class="muted">'+(kw?'命中 '+ts.length+' / '+ts0.length:'共 '+ts.length+' 项')+'</span></div>'+
+  var h='';
+  if (S.role==='gm'||S.role==='head'){
+    var byRm={}; ts0.forEach(function(t){ var n=rm(t.rm).name; byRm[n]=byRm[n]||{n:0,fb:0}; byRm[n].n++; if(t.status==='已反馈')byRm[n].fb++; });
+    var rk=Object.keys(byRm).map(function(n){ return {n:n,v:byRm[n].n,rate:Math.round(byRm[n].fb/byRm[n].n*100)}; }).sort(function(a,b){return b.v-a.v;});
+    var mxr=rk.length?rk[0].v:1;
+    var best=rk.slice().sort(function(a,b){return b.rate-a.rate;})[0]||{n:'—',rate:0};
+    var worst=rk.slice().sort(function(a,b){return a.rate-b.rate;})[0]||{n:'—',rate:0};
+    h+='<div class="card"><div class="sec-t">客户经理排行<small>任务量 / 反馈率</small></div>'+rk.map(function(x){
+      return '<div style="display:flex;gap:8px;align-items:center;padding:4px 0;font-size:12px"><span style="width:50px;flex-shrink:0;font-weight:600">'+esc(x.n)+'</span><div style="flex:1;height:12px;background:#F6E9EA;border-radius:4px;overflow:hidden"><i style="display:block;height:100%;width:'+(x.v/mxr*100)+'%;background:linear-gradient(90deg,#8E1019,#C0202C)"></i></div><span style="width:30px;text-align:right;font-weight:700;color:var(--brand-600)">'+x.v+'</span><span style="width:32px;text-align:right;color:'+(x.rate>=50?'var(--ok-500)':'var(--t3)')+'">'+x.rate+'%</span></div>';
+    }).join('')+
+    '<div style="margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);font-size:11.5px;line-height:1.9"><span class="tag tag-green">红榜</span>'+esc(best.n)+' 反馈率最高（'+best.rate+'%）　<span class="tag tag-red">黑榜</span>'+esc(worst.n)+' 反馈率最低（'+worst.rate+'%）</div></div>';
+  }
+  h+='<div class="card" style="padding:10px 14px"><div class="flex-between" style="gap:8px"><b style="font-size:14px">'+(S.role==='rm'?'我承接的任务':S.role==='head'?'本支行任务':S.role==='pm'?'我下发的任务':'全辖任务')+'</b><span class="muted">'+(kw?'命中 '+ts.length+' / '+ts0.length:'共 '+ts.length+' 项')+'</span></div>'+
+    (S.role==='pm' ? '<div style="display:flex;gap:6px;margin-top:8px"><span style="flex:1;background:#FFF6F0;border:1px solid #F2D9C4;border-radius:8px;padding:6px 8px;font-size:11px;color:#8B3D1D"><b>'+ts0.filter(function(t){return t.status==='跟进中'&&+t.due.replace('-','')<=1112;}).length+'</b> 项待陪访（7天内到期）</span><span style="flex:1;background:#FDF3F3;border:1px solid #F2D5D6;border-radius:8px;padding:6px 8px;font-size:11px;color:#8E0A20"><b>'+ts0.filter(function(t){ return t.log.some(function(l){return l.t==='访客纪要';}) && !t.log.some(function(l){return l.t==='协同留言'&&l.by.indexOf('产品经理')>=0;}); }).length+'</b> 篇纪要待复核</span></div>' : '')+
     '<input id="tKw" placeholder="按企业名称筛选…" value="'+esc(S.kw||'')+'" style="width:100%;margin-top:8px;border:1px solid var(--line-strong);border-radius:9px;padding:7px 10px;font-size:12.5px;outline:none;font-family:inherit"></div>';
   if (!ts.length) h+='<div class="card"><div class="empty"><div class="e">📭</div>暂无任务</div></div>';
   ts.forEach(function(t){
     var c=co(t.co);
     h+='<div class="card"><div class="tcard"><div class="tdoc">'+esc(c.short.slice(0,2))+'</div><div class="tbody">'+
-      '<div class="tr1"><div class="tn">'+esc(c.short)+'</div><span class="tag '+stTag(t.status)+'">'+t.status+'</span></div>'+
+      '<div class="tr1"><div class="tn">'+esc(c.short)+'</div><span class="tag '+stTag(t.status)+'">'+t.status+'</span>'+(isOverdueM(t)?'<span class="tag tag-red">超期</span>':'')+((S.role==='pm'&&needAccM(t))?'<span class="tag tag-orange">待陪访</span>':'')+((S.role==='pm'&&needReviewM(t))?'<span class="tag tag-violet">待复核</span>':'')+'</div>'+
       '<div class="tmeta">'+esc(t.type)+' · 截止 '+t.due+' · '+esc(rm(t.rm).name)+' · '+esc(c.net)+'</div>'+
       '<div class="tmeta">重点：'+esc(t.prods.join(' / '))+'</div>'+
       (t.log[0]?'<div class="tlast"><b style="color:var(--t1)">'+esc(t.log[0].d)+' '+esc(t.log[0].t)+'</b> — '+esc(t.log[0].x.slice(0,52))+'…</div>':'<div class="tlast" style="color:var(--warn-500)">尚无跟进记录，请尽快接收并拜访</div>')+
       '<div class="tacts">'+
         '<button class="mbtn" onclick="openOp(\''+c.id+'\')">📄 访前一页纸</button>'+
         (S.role==='rm'?'<button class="mbtn pri" onclick="goVisit(\''+t.id+'\')">🎙 去跟进</button>':'<button class="mbtn" onclick="goVisit(\''+t.id+'\')">查看纪要</button>')+
+        ((S.role==='pm'&&t.status!=='已反馈')?'<button class="mbtn ghost-plain" onclick="urgeTask(\''+t.id+'\')">催办</button>':'')+
       '</div></div></div></div>';
   });
   return h;
@@ -451,7 +514,9 @@ function pageVisit(){
   var c=co(t.co);
   var h='<div class="picker">'+ts.map(function(x){ return '<div class="pitem '+(x.id===t.id?'on':'')+'" onclick="goVisit(\''+x.id+'\')">'+esc(co(x.co).short)+'（'+x.status+'）</div>'; }).join('')+'</div>';
   if (S.role!=='rm') {
-    h+='<div class="card"><div class="sub">当前角色（'+esc(user().role)+'）为只读视角，纪要由客户经理语音录入后自动归档：</div></div>';
+    var rvBtn = (S.role==='pm' && needReviewM(t))
+      ? '<button class="mbtn pri" style="width:100%;height:38px" onclick="reviewTask(\''+t.id+'\')">✓ 复核确认该纪要（产品经理）</button>' : '';
+    h+='<div class="card"><div class="sub">当前角色（'+esc(user().role)+'）为只读视角，纪要由客户经理语音录入后自动归档。</div>'+rvBtn+'</div>';
     h+='<div class="card">'+t.log.map(function(l){ return '<div class="logitem"><div class="l1"><span class="tag tag-line">'+esc(l.d)+'</span><span class="lt">'+esc(l.t)+'</span><span class="ld" style="margin-left:auto">'+esc(l.by)+'</span></div><div class="lx">'+esc(l.x)+'</div></div>'; }).join('')+'</div>';
     return h;
   }
@@ -494,11 +559,13 @@ function toggleMic(){
     tip.textContent='AI 转写中…';
     var t=task(S.selTask), c=co(t.co);
     setTimeout(function(){
-      $('#vNote').value=D.script[c.net]||D.script['新型电网'];
-      tip.innerHTML='转写完成（'+tm.textContent+'）· 已填入交流要点，AI 已同步整理';
-      btn.disabled=false;
-      aiDo(true);
-    },1500);
+      tip.textContent='AI 实时转写中…';
+      var full=D.script[c.net]||D.script['新型电网']; var ta=$('#vNote'); ta.value='';
+      var j=0; var iv=setInterval(function(){ ta.value=full.slice(0,j+=2);
+        if(j>=full.length){ clearInterval(iv); ta.value=full;
+          tip.innerHTML='转写完成（'+tm.textContent+'）· 已填入交流要点，AI 已同步整理';
+          btn.disabled=false; aiDo(true); } },22);
+    },300);
   }
 }
 function aiDo(auto){
@@ -512,6 +579,7 @@ function aiDo(auto){
     '<b>风险提示</b>'+(c.pos==='战略'?'战略客户同业竞争激烈，注意报价与服务时效。':'关注回款账期与资本开支节奏，避免期限错配。')+
     '</div></div>';
   $('#aiOut').innerHTML=html;
+  $('#aiOut').style.animation='mFade .4s both';
   $('#aiOut').dataset.done='1';
   if (auto) toastMsg('AI 已完成转写整理');
 }
@@ -522,9 +590,12 @@ function saveVisit(){
   var aiOK=$('#aiOut').dataset.done==='1';
   var peer=$('#vPeer').value.trim()||'关键人';
   t.log.unshift({ d:'11-04', t:'访客纪要', by:user().name, x:'【'+$('#vWay').value+' · '+peer+'】'+note.slice(0,56)+'…（AI 已整理'+(aiOK?'：需求识别+综合方案（含非信贷服务）':'')+'）' });
+  S._justSaved=true;
   if (t.status==='待接收') t.status='跟进中';
   toastMsg('纪要已归档 · 任务更新为「跟进中」，已同步任务跟踪与产品经理');
   renderHead(); renderBody();
+  renderKpis();
+  var nl=document.querySelector('.logitem'); if(nl&&S._justSaved){ nl.style.animation='mLogIn .7s both'; S._justSaved=false; }
 }
 
 /* ---------- AI 页 ---------- */
@@ -550,9 +621,7 @@ function askFree(){
 /* ---------- 我的页 ---------- */
 function pageMy(){
   var u=user();
-  return '<div class="card"><div class="ucard"><div class="uav2">'+esc(u.av)+'</div><div><b class="sm" style="font-size:16px">'+esc(u.name)+'</b>'+
-    '<div class="muted" style="margin-top:2px">'+esc(u.role)+' · '+esc(u.dept)+'</div></div></div></div>'+
-  '<div class="card"><div class="sec-t">关于</div><div class="kvrow"><span class="k">平台</span><span class="v">产业金融协同工具 · 移动工作台</span></div>'+
+  return '<div class="card"><div class="sec-t">关于</div><div class="kvrow"><span class="k">平台</span><span class="v">产业金融协同工具 · 移动工作台</span></div>'+
   '<div class="kvrow"><span class="k">数据时点</span><span class="v">2026-11-04</span></div>'+
   '<div class="kvrow"><span class="k">功能</span><span class="v">任务列表 · 访前一页纸 · 访客纪要（语音转写+AI整理）· AI问答</span></div>'+
   '<div class="kvrow"><span class="k">说明</span><span class="v">录音转写为演示模拟（约1.5秒生成），正式环境接入语音识别服务</span></div></div>';
@@ -580,6 +649,7 @@ function renderBody(){
   else if (S.tab==='ai') h=pageAi();
   else h=pageMy();
   $('#mBody').innerHTML=h;
+  if(S.tab==='op'){ var cs=document.querySelectorAll('#mBody > *'); cs.forEach(function(e,i){ e.style.animation='mStagIn .45s both '+(i*70)+'ms'; }); }
   $('#mBody').scrollTop=0;
   var ki=document.querySelector('#tKw');
   if(ki) ki.oninput=function(){ S.kw=ki.value; renderBody(); var k2=document.querySelector('#tKw'); if(k2){ k2.focus(); k2.setSelectionRange(k2.value.length,k2.value.length);} };

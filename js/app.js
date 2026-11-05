@@ -416,6 +416,76 @@ window.APP = (function () {
     });
   }
 
+  /* ---------- AI 特效工具（迭代16：AI 思考/拉取/反馈动效） ---------- */
+  const AIFX = {
+    played: {},
+    /* 生成流程步骤条：①解析信号→②匹配产品库→③生成模块→④测算校验，期间内容变暗 */
+    flow(box) {
+      return new Promise(res => {
+        if (!box || box.querySelector(':scope > .ai-flow')) { res(); return; }
+        const wrap = document.createElement('div'); wrap.className = 'ai-flow';
+        const steps = ['解析企业信号', '匹配本行产品库', '生成方案模块', '测算与校验'];
+        wrap.innerHTML = steps.map((t, i) => `<div class="ai-fstep"><span class="ic">${i + 1}</span>${t}</div>${i < steps.length - 1 ? '<span class="ai-fline"></span>' : ''}`).join('');
+        box.insertBefore(wrap, box.firstChild);
+        const dims = [...box.children].filter(e => e !== wrap);
+        dims.forEach(e => e.classList.add('ai-dim'));
+        const stEls = [...wrap.querySelectorAll('.ai-fstep')], lnEls = [...wrap.querySelectorAll('.ai-fline')];
+        let i = 0;
+        const tick = () => {
+          if (i > 0) {
+            const prev = stEls[i - 1]; prev.classList.remove('on'); prev.classList.add('done');
+            prev.querySelector('.ic').textContent = '✓';
+            if (lnEls[i - 1]) lnEls[i - 1].classList.add('done');
+          }
+          if (i >= stEls.length) { setTimeout(() => { wrap.remove(); dims.forEach(e => e.classList.remove('ai-dim')); res(); }, 300); return; }
+          stEls[i].classList.add('on'); i++; setTimeout(tick, 400);
+        };
+        tick();
+      });
+    },
+    /* 子块依次淡入 */
+    stagger(scope) {
+      if (!scope) return;
+      [...scope.children].forEach((e, i) => { e.style.setProperty('--d', Math.min(i * 85, 850) + 'ms'); e.classList.add('ai-stag'); });
+    },
+    /* KPI 数字滚动 */
+    countUp(scope) {
+      if (!scope) return;
+      scope.querySelectorAll('.wp-kpi .v').forEach(v => {
+        const m = (v.textContent || '').match(/^(\d+(?:\.\d+)?)(.*)$/); if (!m) return;
+        const n = parseFloat(m[1]), suf = m[2], dec = (m[1].split('.')[1] || '').length;
+        if (!n) return;
+        const t0 = performance.now(), dur = 800;
+        const f = t => { const pr = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - pr, 3); v.textContent = (n * e).toFixed(dec) + suf; if (pr < 1) requestAnimationFrame(f); };
+        requestAnimationFrame(f);
+      });
+    },
+    /* 话术示范打字机（.script 内 .sl 后的文本节点逐字输出） */
+    typewrite(scope) {
+      if (!scope) return;
+      scope.querySelectorAll('.wp-topic .script').forEach((sc, idx) => {
+        const tn = [...sc.childNodes].find(nd => nd.nodeType === 3 && nd.textContent.trim().length > 10);
+        if (!tn) return;
+        const full = tn.textContent; tn.textContent = ''; sc.classList.add('typing');
+        setTimeout(() => {
+          let j = 0;
+          const iv = setInterval(() => {
+            tn.textContent = full.slice(0, j += 2);
+            if (j >= full.length) { clearInterval(iv); sc.classList.remove('typing'); }
+          }, 26);
+        }, 200 + idx * 150);
+      });
+    },
+    /* 纪要转写流式写入输入框 */
+    typewriteTo(t, txt, cb) {
+      t.value = ''; let j = 0;
+      const iv = setInterval(() => {
+        t.value = txt.slice(0, j += 2);
+        if (j >= txt.length) { clearInterval(iv); t.value = txt; cb && cb(); }
+      }, 22);
+    },
+  };
+
   /* ---------- 启动 ---------- */
   function boot() {
     buildSearch(); initSearch(); initMsg(); initAiPanel(); initIndustry(); renderUser();
@@ -435,5 +505,5 @@ window.APP = (function () {
   return { S, $, esc, layerTag, statusTag, riskTag, segTag, scoreRing, aiPanel, kv, toast,
     openModal, closeModal, openDrawer, closeDrawer, confirmDlg, renderTabs, switchTab,
     go, route, setRole, switchUser, canCockpit, switchIndustry, aiChatInit, aiAsk, openNews, openPolicy, openCompanyDrawer, boot,
-    USERS, curUser: curUserMeta, role: roleMeta };
+    USERS, curUser: curUserMeta, role: roleMeta, AIFX };
 })();

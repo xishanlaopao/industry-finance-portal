@@ -7,6 +7,7 @@
    ============================================================ */
 (function () {
   const { $, esc, toast, openModal, kv, renderTabs, switchTab } = APP;
+  const AIFX = () => APP.AIFX;
   const M = () => window.MOCK;
   const S = APP.S;
 
@@ -17,6 +18,12 @@
     '水网': ['项目贷款', '水利专项贷', '资金监管'], '物流网': ['项目贷', '供应链融资', '结算归集'],
   };
   const ROLE = () => { const r = APP.role(); return r; };
+  /* 超期：截止早于 11-05 且未反馈/未关闭 */
+  const isOverdue = t => +t.due.replace('-', '') < 1105 && t.status !== '已反馈' && t.status !== '已关闭';
+  /* 待复核纪要：有访客纪要但尚无产品经理协同留言 */
+  const needReview = t => t.log.some(l => l.t === '访客纪要') && !t.log.some(l => l.t === '协同留言' && l.by.indexOf('产品经理') >= 0);
+  const cName = id => { const c = M().funnel.cos.find(x => x.id === id); return c ? c.short : ''; };
+  const rmName = id => { const r = M().funnel.rms.find(x => x.id === id); return r ? r.name : ''; };
 
   /* ---------- 演示转写文案库（按六张网） ---------- */
   const DEMO_SCRIPT = {
@@ -51,7 +58,12 @@
           <div class="flex" style="gap:8px">
             <button class="btn btn-ghost" onclick="APP.go('funnel',{tab:'co'})">← 返回机会漏斗</button>
             <button class="btn btn-primary btn-sm" onclick="APP.toast('综合服务方案已下载（PDF）')">下载服务方案</button></div></div>
-        ${VIEWS.workbench.planHtml(c)}`;
+        <div id="planBoard">${VIEWS.workbench.planHtml(c)}</div>`;
+      const board = el.querySelector('#planBoard');
+      const FX = AIFX();
+      const first = !FX.played.plan;
+      if (first && board) { FX.played.plan = 1; FX.flow(board).then(() => { FX.stagger(board); FX.countUp(board); }); }
+      else if (board) { FX.stagger(board); FX.countUp(board); }
     },
   };
 
@@ -65,6 +77,34 @@
       return tasks;
     },
     /* ---------- 访前一页纸（六张网企业） ---------- */
+    /* ---------- 企业画像卡（企业详情页调用，复用访前准备画像数据） ---------- */
+    profileHtml(c) {
+      if (!c || c.id[0] !== 'F') return '';
+      const cl = (x, cls) => `<span class="wp-cl ${cls}">${esc(x)}</span>`;
+      const BIZ = {
+        '新型电网': [['核心业务（to G/B）', c.cat === '建设运营商' ? '电网/海风场投资建设运营，项目核准与并网节奏决定资本开支' : '电网装备与海缆/风电配套供货，客户以国网/南网、发电集团与整机厂为主', 1], ['场景延伸（to C/场景）', c.track.indexOf('海上风电') >= 0 ? '海上风电运维、绿电交易与碳资产场景延伸' : '分布式能源、虚拟电厂与充电场景', 2], ['业务壁垒', c.cat === '建设运营商' ? '特许经营与项目资源稀缺，省级平台卡位' : '电网认证周期1-2年构成置换壁垒', 3]],
+        '算力网': [['智算建设与运营', c.cat === '建设运营商' ? '智算中心/超算平台建设运营' : '算力设备/液冷/网络配套供货', 1], ['算电协同场景', '绿电直供、算力交易与边缘计算延伸', 2], ['业务壁垒', '重资产+政府合作卡位；上架算力与运维能力构成壁垒', 3]],
+        '城市地下管网': [['管网建设运营', c.cat === '建设运营商' ? '综合管廊/供排水/燃气投资运营，特许经营现金流稳定' : '管网施工与设备供货，业主为地方平台与水务公司', 1], ['智慧化延伸', '智慧水务/管网监测数字化改造', 2], ['业务壁垒', '特许经营授权与区域管网资源构成自然垄断属性', 3]],
+        '水网': [['水利工程与供水', c.cat === '建设运营商' ? '原水/调水/供水枢纽建设运营，水费+政府购买双现金流' : '水务装备与工程配套', 1], ['节水与水环境', '节水改造、水环境治理，绑定国家水网重大工程', 2], ['业务壁垒', '水利特许经营与水源地资源稀缺', 3]],
+        '物流网': [['物流枢纽运营', c.cat === '建设运营商' ? '机场/铁路/港口/园区枢纽建设运营' : '物流装备与多式联运服务', 1], ['供应链延伸', '冷链、跨境与供应链增值服务', 2], ['业务壁垒', '枢纽资源与航线/班列时刻稀缺，网络效应显著', 3]],
+        '新一代通信网': [['通信设备与器件', c.cat === '建设运营商' ? '通信网络建设运营，运营商集采与政企专网为主' : '光模块/射频/卫星等器件供货', 1], ['AI 与算力带动', 'AI 算力建设带动高速光模块/连接需求', 2], ['业务壁垒', '技术认证与客户验证周期长，高速率环节格局集中', 3]],
+      }[c.net] || [['主营业务', esc(c.track), 1], ['场景延伸', '产业链上下游协同', 2], ['业务壁垒', '细分领域认证与客户壁垒', 3]];
+      const PCS = { 1: '#C0202C', 2: '#2458F5', 3: '#B08A00' };
+      return `
+        <div class="flex-between mb2"><b class="text-sm" style="font-size:var(--fs-md)">客户画像</b><span class="text-xs text-muted">来源：AI 访前准备看板</span></div>
+        <div class="wp-cloud mb2">
+          ${cl(c.listed.indexOf('是') === 0 ? c.listed.slice(2) : '非上市主体', c.listed.indexOf('是') === 0 ? 'wp-cl-a' : 'wp-cl-e')}
+          ${cl(c.net + ' · ' + c.track, 'wp-cl-b')}${cl(c.cat, 'wp-cl-a')}${cl(c.nat, 'wp-cl-c')}
+          ${cl(c.pos + '客户', 'wp-cl-a')}${cl('营销进展：' + c.prog, 'wp-cl-b')}${cl('权重：' + c.wt, 'wp-cl-c')}
+          ${cl(c.rel, 'wp-cl-a')}${cl('四线得分 ' + c.score, 'wp-cl-b')}${cl(c.city + '属地', 'wp-cl-c')}
+        </div>
+        <div class="grid-3 mb2">${BIZ.map(b => `<div class="wp-pcard" style="border-top:3px solid ${PCS[b[2]]}"><div class="t">${esc(b[0])}</div><div class="s">${esc(b[1])}</div></div>`).join('')}</div>
+        <div class="flex mb2" style="gap:6px;flex-wrap:wrap;align-items:center">
+          <span class="text-xs text-muted">✦ 建议服务方案：</span>${(c.prods || []).slice(0, 4).map(pp => `<span class="tag tag-blue" style="height:22px">${esc(pp)}</span>`).join('')}
+          <button class="btn btn-text btn-sm" onclick="APP.go('plan',{co:'${c.id}'})">查看综合服务方案 ›</button>
+        </div>
+        <div class="wp-note"><b>画像小结：</b>围绕「${esc((c.sig || [])[0] || '')}」切入——${esc(c.cat)}（${c.pos}客户 · ${c.prog}档 · ${c.rel}），先以结算归集/代发等非信贷服务建立日常往来，方案窗口建议 <b style="color:var(--danger-500)">11 月内</b> 锁定。</div>`;
+    },
     /* ---------- 访前准备看板（结构对齐《访前准备看板》：首屏1-4，5-10折叠展开） ---------- */
     secHtml(no, t, hint) { return `<div class="wp-sec"><span class="no">${no}</span><b>${t}</b><span class="hint">${hint || ''}</span></div>`; },
     briefHtml(c) {
@@ -276,6 +316,14 @@
           <span class="text-xs text-muted">配套文件：《访前准备》看板。理想态设计，实际以我行产品权限、授信审批及客户确认为准。</span>
           <button class="btn btn-primary btn-sm" onclick="APP.toast('综合服务方案已下载（PDF）')">下载服务方案</button>
         </div>`;
+    },
+    /* 抽屉看板 AI 生成动效（briefDlg 渲染后调用） */
+    rptReveal() {
+      const box = document.querySelector('#drawerBody'); if (!box) return;
+      const FX = AIFX();
+      const first = !FX.played.rpt;
+      if (first) { FX.played.rpt = 1; FX.flow(box).then(() => { FX.stagger(box); FX.countUp(box); }); }
+      else { FX.stagger(box); FX.countUp(box); }
     },
     /* ================= AI智能分析（#/report）专用：访前准备 + 综合服务方案（full 企业专属） ================= */
     rptSide(c, side) {
@@ -556,6 +604,7 @@
       const tasks = this.myTasks();
       if (!S.wbTab) S.wbTab = 'task';
       if (S.params.side) { S.wbSide = S.params.side; S.wbTab = 'task'; delete S.params.side; }
+      if (S.params.tab && ['task', 'visit', 'ai', 'ledger'].includes(S.params.tab)) { S.wbTab = S.params.tab; delete S.params.tab; }
       if (!S.wbSide) S.wbSide = 'brief';
       const selId = S.params.task && tasks.some(t => t.id === S.params.task) ? S.params.task : (tasks[0] || {}).id;
       const sel = tasks.find(t => t.id === selId);
@@ -633,44 +682,127 @@
     },
     paintKpis(el, r, tasks) {
       const box = el.querySelector('#wbKpis');
-      const k = (lab, v, unit) => `<div style="background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);border-radius:10px;padding:8px 14px;min-width:86px">
-        <div style="font-size:11px;color:#FFD9DC">${lab}</div><div style="font-size:20px;font-weight:700" class="fs-num">${v}<span style="font-size:11px;font-weight:400;opacity:.85;margin-left:2px">${unit || ''}</span></div></div>`;
-      const co = id => (M().funnel.cos.find(c => c.id === id) || {}).short || '';
+      const k = (lab, v, unit, red) => `<div style="background:rgba(255,255,255,.14);border:1px solid ${red ? 'rgba(255,211,77,.55)' : 'rgba(255,255,255,.25)'};border-radius:10px;padding:8px 14px;min-width:86px">
+        <div style="font-size:11px;color:${red ? '#FFD34D' : '#FFD9DC'}">${lab}</div><div style="font-size:20px;font-weight:700" class="fs-num">${v}<span style="font-size:11px;font-weight:400;opacity:.85;margin-left:2px">${unit || ''}</span></div></div>`;
+      const od = tasks.filter(isOverdue).length;
+      const rv = tasks.filter(needReview).length;
       let html = '';
       if (r.key === 'rm') {
-        html = k('承接任务', tasks.length, '项') + k('待接收', tasks.filter(t => t.status === '待接收').length, '项')
-          + k('跟进中', tasks.filter(t => t.status === '跟进中').length, '项') + k('已反馈', tasks.filter(t => t.status === '已反馈').length, '项')
-          + k('本周纪要', tasks.reduce((s, t) => s + t.log.filter(l => l.t === '访客纪要').length, 0), '篇');
+        html = k('承接任务', tasks.length) + k('待接收', tasks.filter(t => t.status === '待接收').length)
+          + k('跟进中', tasks.filter(t => t.status === '跟进中').length)
+          + (od ? k('超期任务', od, '', true) : k('已反馈', tasks.filter(t => t.status === '已反馈').length))
+          + k('本周纪要', tasks.reduce((s2, t) => s2 + t.log.filter(l => l.t === '访客纪要').length, 0));
       } else if (r.key === 'head') {
-        html = k('支行任务', tasks.length, '项') + k('跟进中', tasks.filter(t => t.status === '跟进中').length, '项')
-          + k('已反馈', tasks.filter(t => t.status === '已反馈').length, '项')
+        html = k('支行任务', tasks.length) + k('跟进中', tasks.filter(t => t.status === '跟进中').length)
+          + k('已反馈', tasks.filter(t => t.status === '已反馈').length)
+          + (od ? k('超期任务', od, '', true) : '')
           + k('反馈率', tasks.length ? Math.round(tasks.filter(t => t.status === '已反馈').length / tasks.length * 100) : 0, '%');
       } else if (r.key === 'pm') {
-        html = k('已下发', tasks.length, '项') + k('待接收', tasks.filter(t => t.status === '待接收').length, '项')
-          + k('订阅企业', (S.fn ? S.fn.subs : M().funnel.subsSeed).length, '家')
-          + k('企业总览', M().funnel.cos.length, '家');
+        html = k('已下发', tasks.length) + k('待接收', tasks.filter(t => t.status === '待接收').length)
+          + k('待陪访', tasks.filter(t => t.status === '跟进中' && +t.due.replace('-', '') <= 1112).length)
+          + (rv ? k('待复核纪要', rv, '', true) : k('订阅企业', (S.fn ? S.fn.subs : M().funnel.subsSeed).length))
+          + k('企业总览', M().funnel.cos.length);
       } else {
-        html = k('全辖任务', tasks.length, '项') + k('覆盖企业', new Set(tasks.map(t => t.co)).size, '家')
-          + k('参战客户经理', new Set(tasks.map(t => t.rm)).size, '人')
-          + k('整体反馈率', tasks.length ? Math.round(tasks.filter(t => t.status === '已反馈').length / tasks.length * 100) : 0, '%');
+        html = k('全辖任务', tasks.length) + k('覆盖企业', new Set(tasks.map(t => t.co)).size)
+          + k('参战经理', new Set(tasks.map(t => t.rm)).size)
+          + k('整体反馈率', tasks.length ? Math.round(tasks.filter(t => t.status === '已反馈').length / tasks.length * 100) : 0, '%')
+          + (od ? k('超期任务', od, '', true) : k('本周纪要', tasks.reduce((s2, t) => s2 + t.log.filter(l => l.t === '访客纪要').length, 0)));
       }
       box.innerHTML = html;
+    },
+    /* ---------- Tab1：任务跟进（任务列表 + 访前一页纸同页） ---------- */
+    paintTaskTab(box, tasks, selId) {
+      box.innerHTML = `
+        <div style="display:grid;grid-template-columns:1fr 2.05fr;gap:var(--sp-4);align-items:start">
+          <div class="card" style="min-width:0">
+            <div class="card-head">
+              <div class="card-title">${ROLE().key === 'pm' ? '我下发的任务' : ROLE().key === 'head' ? '本支行任务' : ROLE().key === 'gm' ? '全辖任务概览' : '我承接的任务'}</div>
+              <input class="input" id="wbTaskKw" placeholder="按企业名称筛选…" value="${esc(S.wbKw || '')}" style="width:170px;height:28px">
+            </div>
+            <div id="wbTaskList" style="max-height:860px;overflow-y:auto"></div>
+          </div>
+          <div class="card" style="min-width:0">
+            <div class="card-head">
+              <div class="flex" style="gap:6px" id="wbSideTabs">
+                <button class="chip ${S.wbSide === 'brief' ? 'on' : ''}" data-side="brief" style="height:26px">访前准备</button>
+                <button class="chip ${S.wbSide === 'plan' ? 'on' : ''}" data-side="plan" style="height:26px">综合服务方案</button>
+              </div>
+              <span class="card-sub" id="wbOneTitle"></span>
+            </div>
+            <div class="card-pad" style="padding-top:8px" id="wbOnePager"></div>
+          </div>
+        </div>`;
+      this.paintTasks(box, tasks, selId);
+      box.querySelectorAll('[data-side]').forEach(b => b.onclick = () => { S.wbSide = b.dataset.side; this.paintTaskTab(box, this.myTasks(), S.params.task); const k2 = box.querySelector('#wbTaskKw'); if (k2 && S.wbKw) { k2.value = S.wbKw; } });
+      const kw = box.querySelector('#wbTaskKw');
+      kw.oninput = () => { S.wbKw = kw.value.trim(); this.paintTasks(box, tasks, selId); const k2 = box.querySelector('#wbTaskKw'); k2.focus(); k2.setSelectionRange(k2.value.length, k2.value.length); };
+    },
+    /* ---------- Tab2：访客纪要 ---------- */
+    paintVisitTab(box, sel) {
+      box.innerHTML = `<div class="card"><div class="card-head"><div class="card-title">访客纪要<span class="card-sub">语音录入 · AI 自动整理 · 前中后台协同留痕</span></div></div>
+        <div class="card-pad" style="padding-top:8px" id="wbVisit"></div></div>`;
+      this.paintVisit(box, sel);
+    },
+    /* ---------- Tab3：AI 问答 ---------- */
+    paintAiTab(box) {
+      box.innerHTML = `<div class="card"><div class="card-head"><div class="card-title">AI 问答<span class="card-sub">产品 · 政策 · 营销建议</span></div></div>
+        <div class="card-pad" style="padding-top:8px" id="wbAi"></div></div>`;
+      this.paintAi(box);
+    },
+    /* ---------- Tab4：跟进台账 ---------- */
+    paintLedgerTab(box, tasks) {
+      box.innerHTML = `<div class="card"><div class="card-head"><div class="card-title">跟进台账<span class="card-sub">访客纪要 / 协同留言 / 反馈 全留痕</span></div></div>
+        <div class="card-pad" style="padding-top:8px" id="wbLedger"></div></div>`;
+      this.paintLedger(box, tasks);
+    },
+    taskCard(t, selId) {
+      const stTag = s2 => ({ 待接收: 'tag-gray', 跟进中: 'tag-blue', 已反馈: 'tag-green', 已关闭: 'tag-line' }[s2] || 'tag-gray');
+      return `<div class="wb-task ${t.id === selId ? 'on' : ''}" data-wt="${t.id}">
+        <div class="flex-between" style="gap:8px"><b class="text-sm">${esc(cName(t.co))}</b>
+          <span class="flex" style="gap:6px"><span class="tag tag-line" style="height:19px;font-size:10px">${esc(t.type)}</span><span class="tag ${stTag(t.status)}" style="height:19px;font-size:10px">${t.status}</span>${isOverdue(t) ? '<span class="tag tag-red" style="height:19px;font-size:10px">超期</span>' : ''}</span></div>
+        <div class="text-xs text-muted mt1" style="line-height:1.6">截止 ${t.due} · ${esc(rmName(t.rm))} · 重点：${esc(t.prods.slice(0, 3).join(' / '))}</div>
+        ${t.log[0] ? `<div class="wb-task-last">最新：${esc(t.log[0].d)} ${esc(t.log[0].t)} — ${esc(t.log[0].x.slice(0, 40))}…</div>` : '<div class="wb-task-last" style="color:var(--warn-500)">尚无跟进记录，请尽快接收并拜访</div>'}
+      </div>`;
     },
     paintTasks(el, tasks, selId) {
       const box = el.querySelector('#wbTaskList'); if (!box) return;
       const kw = S.wbKw || '';
-      const cName = id => (M().funnel.cos.find(c => c.id === id) || {}).short || '';
       const list = kw ? tasks.filter(t => (cName(t.co) + '').includes(kw)) : tasks;
-      const stTag = s2 => ({ 待接收: 'tag-gray', 跟进中: 'tag-blue', 已反馈: 'tag-green', 已关闭: 'tag-line' }[s2] || 'tag-gray');
-      const rmName = id => (M().funnel.rms.find(x => x.id === id) || {}).name || '';
-      box.innerHTML =
-        `<div class="text-xs text-muted" style="padding:8px 14px 0">${list.length === tasks.length ? '共 ' + list.length + ' 项' : '筛选命中 ' + list.length + ' / ' + tasks.length + ' 项'}</div>` +
-        list.map(t => `<div class="wb-task ${t.id === selId ? 'on' : ''}" data-wt="${t.id}">
-        <div class="flex-between" style="gap:8px"><b class="text-sm">${esc(cName(t.co))}</b>
-          <span class="flex" style="gap:6px"><span class="tag tag-line" style="height:19px;font-size:10px">${esc(t.type)}</span><span class="tag ${stTag(t.status)}" style="height:19px;font-size:10px">${t.status}</span></span></div>
-        <div class="text-xs text-muted mt1" style="line-height:1.6">截止 ${t.due} · ${esc(rmName(t.rm))} · 重点：${esc(t.prods.slice(0, 3).join(' / '))}</div>
-        ${t.log[0] ? `<div class="wb-task-last">最新：${esc(t.log[0].d)} ${esc(t.log[0].t)} — ${esc(t.log[0].x.slice(0, 40))}…</div>` : '<div class="wb-task-last" style="color:var(--warn-500)">尚无跟进记录，请尽快接收并拜访</div>'}
-      </div>`).join('') || '<div class="empty" style="padding:36px 16px"><div class="e-ico">🔍</div><div class="e-title">无匹配任务</div></div>';
+      const rk = ROLE().key;
+      let listHtml = '';
+      if (rk === 'pm') {
+        /* 产品经理：待陪访 / 待复核纪要 / 我下发的任务 三组 */
+        const accompany = tasks.filter(t => t.status === '跟进中' && +t.due.replace('-', '') <= 1112);
+        const review = tasks.filter(needReview);
+        const grp = (title, arr, tip) => `<div class="text-xs" style="font-weight:700;color:var(--brand-600);padding:10px 14px 4px">${title} <span class="text-xs text-muted" style="font-weight:400">（${arr.length}）${tip || ''}</span></div>` +
+          (arr.map(t => this.taskCard(t, selId)).join('') || '<div class="text-xs text-muted" style="padding:2px 14px 6px">暂无</div>');
+        listHtml = grp('待陪访', accompany, '跟进中且 7 天内到期') + grp('待复核纪要', review, '客户经理已归档，待产品经理复核') + grp('我下发的任务', list, '');
+      } else if (rk === 'gm') {
+        /* 总经理：客户经理排行 + 红黑榜 + 全辖任务 */
+        const byRm = {};
+        tasks.forEach(t => { const n = rmName(t.rm); byRm[n] = byRm[n] || { n: 0, fb: 0, od: 0 }; byRm[n].n++; if (t.status === '已反馈') byRm[n].fb++; if (isOverdue(t)) byRm[n].od++; });
+        const rank = Object.entries(byRm).map(([n2, v]) => ({ n2, ...v, rate: Math.round(v.fb / v.n * 100) })).sort((a2, b2) => b2.n - a2.n);
+        const mx = Math.max(1, ...rank.map(x => x.n));
+        const worst = [...rank].sort((a2, b2) => b2.od - a2.od || a2.rate - b2.rate)[0];
+        const best = [...rank].sort((a2, b2) => b2.rate - a2.rate)[0];
+        listHtml = `<div style="padding:10px 14px 2px"><b class="text-sm">客户经理排行（任务量 / 反馈率）</b>
+          ${rank.map(x => `<div class="flex" style="gap:8px;align-items:center;padding:4px 0;font-size:12px">
+            <span style="width:52px;flex-shrink:0;color:var(--t2);font-weight:600">${esc(x.n2)}</span>
+            <div style="flex:1;height:13px;background:#F6E9EA;border-radius:4px;overflow:hidden"><i style="display:block;height:100%;width:${x.n / mx * 100}%;background:linear-gradient(90deg,#8E1019,#C0202C)"></i></div>
+            <span style="width:56px;text-align:right;color:var(--brand-600);font-weight:700">${x.n} 项</span>
+            <span style="width:44px;text-align:right;color:${x.rate >= 50 ? 'var(--ok-500)' : 'var(--t3)'}">${x.rate}%</span>
+            ${x.od ? `<span class="tag tag-red" style="height:18px;font-size:10px">超期${x.od}</span>` : ''}</div>`).join('')}
+          <div class="mt2" style="font-size:11.5px;line-height:1.8">
+            <span class="tag tag-green" style="height:19px">红榜</span>${esc(best.n2)} 反馈率最高（${best.rate}%）
+            <span class="tag tag-red" style="height:19px;margin-left:8px">黑榜</span>${esc(worst.n2)}${worst.od ? ` 超期 ${worst.od} 项` : ` 反馈率最低（${worst.rate}%）`}
+          </div></div>
+          <div class="text-xs" style="font-weight:700;color:var(--brand-600);padding:10px 14px 4px">全辖任务（${list.length}）</div>` +
+          list.map(t => this.taskCard(t, selId)).join('');
+      } else {
+        listHtml = `<div class="text-xs text-muted" style="padding:8px 14px 0">${list.length === tasks.length ? '共 ' + list.length + ' 项' : '筛选命中 ' + list.length + ' / ' + tasks.length + ' 项'}</div>` +
+          (list.map(t => this.taskCard(t, selId)).join('') || '<div class="empty" style="padding:36px 16px"><div class="e-ico">🔍</div><div class="e-title">无匹配任务</div></div>');
+      }
+      box.innerHTML = listHtml;
       box.querySelectorAll('[data-wt]').forEach(d => d.onclick = () => { S.params.task = d.dataset.wt; delete S.params.co; this.render(document.querySelector('#viewRoot')); });
       /* 右栏看板：S.params.co 优先（来自机会漏斗"建议服务方案"跳转），否则随选中任务联动 */
       const coParam = S.params.co && M().funnel.cos.find(x => x.id === S.params.co) ? S.params.co : null;
@@ -685,7 +817,11 @@
         } else {
           opBox.innerHTML = '<div class="text-sm text-muted" style="padding:16px 4px">暂无任务，选择任务后生成看板</div>';
           if (title) title.textContent = '';
+          return;
         }
+        const FX = AIFX();
+        FX.stagger(opBox); FX.countUp(opBox);
+        if (!FX.played.wbScript) { FX.played.wbScript = 1; FX.typewrite(opBox); }
       }
     },
     /* ---------- 访客纪要（语音 + AI 整理 + 协同） ---------- */
@@ -753,11 +889,13 @@
           setTimeout(() => {
             const txt = DEMO_SCRIPT[c.net] || DEMO_SCRIPT['新型电网'];
             const note = el.querySelector('#wbVNote');
-            note.value = txt;
-            tip.textContent = '转写完成（' + timeEl.textContent + '）· 已自动填入，AI 已同步整理';
-            mic.disabled = false; rec = null; sec = 0;
-            this.aiOrganize(el, c, txt);
-          }, 1500);
+            tip.textContent = 'AI 实时转写中…';
+            AIFX().typewriteTo(note, txt, () => {
+              tip.textContent = '转写完成（' + timeEl.textContent + '）· 已自动填入，AI 已同步整理';
+              mic.disabled = false; rec = null; sec = 0;
+              this.aiOrganize(el, c, txt);
+            });
+          }, 400);
         }
       };
       el.querySelector('#wbAiBtn').onclick = () => {
@@ -771,6 +909,7 @@
         const ai = el.querySelector('#wbAiOut').dataset.done === '1';
         const peer = el.querySelector('#wbVPeer').value.trim() || '关键人';
         sel.log.unshift({ d: '11-04', t: '访客纪要', by: APP.curUser().name, x: `【${el.querySelector('#wbVWay').value} · ${peer}】${note.slice(0, 60)}…（AI 已整理${ai ? '：识别需求与产品服务建议，含非信贷服务' : ''}）` });
+        S._logNew = true;
         if (sel.status === '待接收') sel.status = '跟进中';
         toast('纪要已归档，任务状态更新为"跟进中"，过程记录已同步任务跟踪');
         this.render(document.querySelector('#viewRoot'));
@@ -789,12 +928,12 @@
       out.innerHTML = `
         <div class="ai-panel"><div class="ai-head"><span class="ai-badge">AI</span>纪要整理（自动生成 · 请确认）</div>
         <div class="ai-body">
-          <div class="text-xs" style="font-weight:700;color:var(--t2);margin-bottom:4px">识别需求</div>
-          ${d.needs.map(n => `<div class="flex mb2" style="gap:6px;align-items:flex-start"><span style="color:var(--brand-500)">·</span><span class="text-sm text-sub" style="line-height:1.6">${esc(n)}</span></div>`).join('')}
-          <div class="text-xs" style="font-weight:700;color:var(--t2);margin:8px 0 4px">建议综合方案（前中台 + AI 协同 · 强调非信贷服务）</div>
-          ${d.plan.map(p => `<div class="flex mb2" style="gap:6px;align-items:flex-start"><span class="wb-qn">${d.plan.indexOf(p) + 1}</span><span class="text-sm text-sub" style="line-height:1.6">${esc(p)}</span></div>`).join('')}
-          <div class="text-xs" style="font-weight:700;color:var(--t2);margin:8px 0 4px">风险提示</div>
-          <div class="text-sm text-sub" style="line-height:1.6">${esc(d.risk)}</div>
+          <div class="text-xs" style="font-weight:700;color:var(--t2);margin-bottom:4px;animation:aiStagIn .45s both;animation-delay:.05s">识别需求</div>
+          ${d.needs.map(n => `<div class="flex mb2" style="gap:6px;align-items:flex-start;animation:aiStagIn .45s both;animation-delay:.05s"><span style="color:var(--brand-500)">·</span><span class="text-sm text-sub" style="line-height:1.6">${esc(n)}</span></div>`).join('')}
+          <div class="text-xs" style="font-weight:700;color:var(--t2);margin:8px 0 4px;animation:aiStagIn .45s both;animation-delay:.35s">建议综合方案（前中台 + AI 协同 · 强调非信贷服务）</div>
+          ${d.plan.map(p => `<div class="flex mb2" style="gap:6px;align-items:flex-start;animation:aiStagIn .45s both;animation-delay:.35s"><span class="wb-qn">${d.plan.indexOf(p) + 1}</span><span class="text-sm text-sub" style="line-height:1.6">${esc(p)}</span></div>`).join('')}
+          <div class="text-xs" style="font-weight:700;color:var(--t2);margin:8px 0 4px;animation:aiStagIn .45s both;animation-delay:.65s">风险提示</div>
+          <div class="text-sm text-sub" style="line-height:1.6;animation:aiStagIn .45s both;animation-delay:.65s">${esc(d.risk)}</div>
         </div></div>`;
     },
     /* ---------- AI 问答 ---------- */
@@ -832,10 +971,11 @@
       const tTag = t => ({ 访客纪要: 'tag-blue', 协同留言: 'tag-orange', 反馈: 'tag-green', 催办: 'tag-red' }[t] || 'tag-line');
       box.innerHTML = `<div class="tbl-wrap"><table class="tbl"><thead><tr>
         <th style="width:64px">日期</th><th style="width:110px">企业</th><th style="width:84px">类型</th><th style="width:110px">记录人</th><th>内容</th></tr></thead><tbody>
-        ${rows.map(r2 => `<tr><td class="text-sm">${r2.d}</td><td class="text-sm" style="font-weight:600">${esc(r2.co)}</td>
+        ${rows.map(r2 => `<tr${S._logNew && r2 === rows[0] ? ' class="log-new"' : ''}><td class="text-sm">${r2.d}</td><td class="text-sm" style="font-weight:600">${esc(r2.co)}</td>
         <td><span class="tag ${tTag(r2.t)}" style="height:19px;font-size:10px">${esc(r2.t)}</span></td>
         <td class="text-sm">${esc(r2.by)}</td><td class="text-sm text-sub" style="white-space:normal;line-height:1.6">${esc(r2.x)}</td></tr>`).join('') ||
         '<tr><td colspan="5" class="text-sm text-muted" style="padding:20px">暂无跟进记录</td></tr>'}</tbody></table></div>`;
+      S._logNew = false;
     },
   };
 })();

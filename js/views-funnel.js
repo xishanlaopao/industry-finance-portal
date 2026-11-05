@@ -189,7 +189,12 @@
           ${kpi('战略客户（地位）', stat.pos, '原链主口径，地位=战略')}
           ${kpi('突破档（四线）', stat.brk, '突破/攻坚/培育 最高档')}
         </div>
-        <div class="flex mb3" style="gap:10px">
+        <div class="flex mb3" style="gap:10px;flex-wrap:wrap">
+          <div class="fn-ai-engine" title="AI 数据引擎：每日 04:00 自动跑批，从工商公示、舆情监测、招投标、融资事件等公开渠道拉取并整理企业数据（24 小时更新）">
+            <span class="ai-radar"></span>
+            <div><b style="font-size:12.5px">AI 数据引擎</b><span class="breath"></span><span class="text-xs text-muted">24h 自动跑批 · 上次 11-04 04:00 · 工商/舆情/标讯 3 渠道 · 下次约 20h 后</span></div>
+          </div>
+          <span style="flex:1"></span>
           <button class="btn ${showIns ? 'btn-primary' : 'btn-ghost'}" id="fnInsBtn">${showIns ? '收起客户结构洞察 ▴' : '客户结构洞察 ▾'}</button>
           <span class="text-xs text-muted" style="align-self:center">当前筛选命中 ${stat.hit} 家 · 洞察随筛选联动</span>
         </div>
@@ -246,7 +251,10 @@
           <td class="fn-prod-td"><span class="fn-prod-link" data-why="${c.id}" title="点击查看 AI 推荐理由">${esc((c.prods || []).join(' / '))}</span></td>
           <td onclick="event.stopPropagation()" style="text-align:center"><button class="btn btn-text btn-sm" data-sub="${c.id}">${F().subs.includes(c.id) ? '取消订阅' : '订阅'}</button><button class="btn btn-text btn-sm" data-det="${c.id}">详情</button></td></tr>`).join('') ||
         `<tr><td colspan="13"><div class="empty"><div class="e-ico">🏢</div><div class="e-title">当前条件下暂无企业</div></div></td></tr>`}</tbody></table></div>
-        <div class="pager" style="padding:12px 16px">共 ${list.length} 家 · 其中已订阅 ${list.filter(c => F().subs.includes(c.id)).length} 家 · 按综合评分降序 ｜ 建议服务方案由 AI 按金融机构产品库匹配生成，点击查看推荐理由</div></div>`;
+        <div class="pager flex-between" style="padding:12px 16px;gap:10px">
+          <span>共 ${list.length} 家 · 其中已订阅 ${list.filter(c => F().subs.includes(c.id)).length} 家 · 按综合评分降序 ｜ 建议服务方案由 AI 按金融机构产品库匹配生成，点击查看推荐理由</span>
+          <span class="fn-ai-check" title="渠道抓取时间：工商公示 11-04 04:02 · 舆情监测 11-04 04:05 · 招投标 11-04 04:07 · 融资事件 11-04 04:09">✦ AI 已核验 ${stat.all}/${stat.all}</span>
+        </div></div>`;
       /* 交互绑定 */
       box.querySelector('#fnInsBtn').onclick = () => { st.showIns = !st.showIns; this.paintCo(box); };
       box.querySelectorAll('[data-net]').forEach(b => b.onclick = () => {
@@ -263,12 +271,78 @@
       box.querySelectorAll('[data-sub]').forEach(b => b.onclick = e => {
         e.stopPropagation();
         const id = b.dataset.sub, c = coById(id), i = F().subs.indexOf(id);
+        if (i >= 0 && taskOf(id)) { toast(`「${c.short}」已下发跟进任务，不可取消订阅`, 'warn'); return; }
         if (i >= 0) { F().subs.splice(i, 1); toast(`已取消订阅「${c.short}」`); }
         else { F().subs.push(id); toast(`已订阅「${c.short}」，请在"订阅的企业"中统一下发跟进`); }
         this.paintCo(box);
       });
+      /* B3+B4：AI 匹配动效——仅本会话首次进入企业总览播放 */
+      if (!st.prodLit) {
+        st.prodLit = true;
+        requestAnimationFrame(() => {
+          const links = [...box.querySelectorAll('td.fn-prod-td .fn-prod-link')];
+          const bars = [...box.querySelectorAll('.fn-score-bd i')];
+          bars.forEach(b => { const w = b.style.width; b.style.transition = 'width .8s cubic-bezier(.22,.61,.36,1)'; b.style.width = '0%'; requestAnimationFrame(() => requestAnimationFrame(() => { b.style.width = w; })); });
+          if (!links.length) return;
+          links.forEach(el => { el.dataset.txt = el.innerHTML; el.textContent = ''; el.classList.add('fn-skel'); });
+          const BATCH = Math.ceil(links.length / 26);
+          let i = 0;
+          const timer = setInterval(() => {
+            links.slice(i, i + BATCH).forEach(el => { el.classList.remove('fn-skel'); el.innerHTML = el.dataset.txt; });
+            i += BATCH;
+            if (i >= links.length) clearInterval(timer);
+          }, 55);
+        });
+      }
     },
     /* ---------- 自然语言筛选动作 ---------- */
+    /* ---------- 客户结构洞察（随筛选联动） ---------- */
+    insightHtml(list) {
+      const netRows = NETS().map(n => {
+        const rows = list.filter(c => c.net === n);
+        const op = rows.filter(c => c.cat === '建设运营商').length;
+        return { n, op, up: rows.length - op, total: rows.length };
+      });
+      const maxN = Math.max(1, ...netRows.map(r => r.total));
+      const netBars = netRows.map(r => `<div class="fn-ibar"><span class="fn-ib-l">${r.n}</span>
+        <div class="fn-ib-t"><i class="op" style="width:${(r.op / maxN * 100).toFixed(1)}%"></i><i class="up" style="width:${(r.up / maxN * 100).toFixed(1)}%"></i></div>
+        <span class="fn-ib-n">${r.total}</span></div>`).join('');
+      const mxMax = Math.max(1, ...CATS.flatMap(cat => PROGS.map(pg => list.filter(c => c.cat === cat && c.prog === pg).length)));
+      const mxCell = n => { const cls = n >= mxMax * 0.6 ? 'hot' : n >= mxMax * 0.3 ? 'mid' : 'low'; return `<div class="mx-c ${cls}"><b>${n}</b><span>家</span></div>`; };
+      const matrix = '<div class="mx-h"></div>' + PROGS.map(pg => `<div class="mx-h">${pg}</div>`).join('')
+        + CATS.map(cat => `<div class="mx-l">${cat}</div>` + PROGS.map(pg => mxCell(list.filter(c => c.cat === cat && c.prog === pg).length)).join('')).join('');
+      const heatBars = (entries, twoCol) => {
+        const mx = Math.max(1, ...entries.map(e => e[1]));
+        const heat = v => { const t = v / mx; return t >= .75 ? '#8E1019' : t >= .5 ? '#C0202C' : t >= .3 ? '#D96C76' : t >= .15 ? '#E9A7AD' : '#F3C6CA'; };
+        return `<div class="${twoCol ? 'fn-ib-grid2' : ''}">` + entries.map(([l, v]) => `<div class="fn-ibar"><span class="fn-ib-l" title="${esc(l)}">${esc(l)}</span>
+          <div class="fn-ib-t"><i style="width:${(v / mx * 100).toFixed(1)}%;background:${heat(v)}"></i></div>
+          <span class="fn-ib-n">${v}</span></div>`).join('') + '</div>';
+      };
+      const nats = ['民营企业', '央企子公司', '地方国资', '省属国企', '政府及平台', '外资企业', '科研院所']
+        .map(n => [n, list.filter(c => c.nat === n).length]).filter(e => e[1] > 0);
+      const cityNames = [...new Set(list.map(c => c.city))];
+      const cities = cityNames.map(ct => [ct, list.filter(c => c.city === ct).length]).sort((a, b) => b[1] - a[1]);
+      return `
+        <div class="fn-insight">
+          <div class="fn-ibox">
+            <div class="fn-ibox-t">六张网客户分布<em>建设运营商 / 上游供应商</em></div>
+            ${netBars}
+            <div class="fn-ilegend"><span><i style="background:var(--brand-500)"></i>建设运营商</span><span><i style="background:#3FB89B"></i>上游供应商</span></div>
+          </div>
+          <div class="fn-ibox">
+            <div class="fn-ibox-t">客户大类 × 营销进展<em>家</em></div>
+            <div class="fn-matrix">${matrix}</div>
+          </div>
+          <div class="fn-ibox">
+            <div class="fn-ibox-t">企业性质分布<em>家 · 色深=家数</em></div>
+            ${heatBars(nats)}
+          </div>
+          <div class="fn-ibox">
+            <div class="fn-ibox-t">城市分布<em>家 · 色深=家数</em></div>
+            ${heatBars(cities.slice(0, 14), true)}
+          </div>
+        </div>`;
+    },
     setQ(q) { $('#fnNlQ').value = q; this.runNL(); },
     runNL() {
       const q = ($('#fnNlQ') || {}).value;
@@ -404,7 +478,7 @@
           <td onclick="event.stopPropagation()">
             ${t ? `<button class="btn btn-text btn-sm" data-view="${c.id}">跟踪</button>` : `<button class="btn btn-text btn-sm" data-one="${c.id}">下发</button>`}
             <button class="btn btn-text btn-sm" data-det="${c.id}">详情</button>
-            <button class="btn btn-text btn-sm" data-unsub="${c.id}" title="取消订阅">退订</button></td></tr>`; }).join('') ||
+            ${t ? '' : `<button class="btn btn-text btn-sm" data-unsub="${c.id}" title="取消订阅">退订</button>`}</td></tr>`; }).join('') ||
         `<tr><td colspan="16"><div class="empty"><div class="e-ico">📭</div><div class="e-title">暂无订阅企业</div><div class="e-sub text-sm text-muted">在"企业总览"中订阅感兴趣的企业</div></div></td></tr>`}</tbody></table></div></div>`;
       box.querySelectorAll('[data-sel]').forEach(ck => ck.onchange = () => {
         const id = ck.dataset.sel, i = sel.indexOf(id);

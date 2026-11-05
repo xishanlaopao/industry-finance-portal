@@ -573,8 +573,47 @@
       const isPlan = side === 'plan';
       APP.openDrawer((isPlan ? '综合服务方案' : '访前准备') + ' · ' + esc(c.short),
         isPlan ? wb.rptPlanHtml(c) : wb.rptBriefHtml(c));
+      setTimeout(() => wb.rptReveal && wb.rptReveal(), 60);
     },
   };
+
+  /* ---------- V4 六张网企业演示数据填充（工商/股东/上下游，按四维标签确定性生成） ---------- */
+  const FN_LEGAL = ['徐建国', '陈志强', '王明华', '李文斌', '赵国栋', '周建平', '吴志远', '郑海涛'];
+  const FN_ROAD = ['金融大道 88 号', '科技产业园 6 号', '高新区研发一路', '经开区长山路 9 号', '新城工业区纬二路', '港城大道 168 号'];
+  const FN_UPDOWN = {
+    '新型电网': { up: [['华澄材料', '电子特气/基板'], ['中环晶圆', '大宗原材料'], ['京弘设备', '成套设备'], ['锡创软件', '设计与仿真软件']], down: [['国网省电力公司', '电网采购'], ['南网区域公司', '电网采购'], ['五大发电集团', '电源配套'], ['整机厂', '设备配套']] },
+    '算力网': { up: [['澜芯半导体', '算力芯片'], ['中环晶圆', '服务器板卡用料'], ['恒能设备', '液冷与电源设备'], ['云谷数据', '带宽与机柜']], down: [['三大运营商', '集采'], ['智算中心业主', '项目交付'], ['互联网大厂', '算力服务采购'], ['政数局', '政务云']] },
+    '城市地下管网': { up: [['京弘管业', '管材'], ['恒能机电', '泵阀设备'], ['中衡设计', '勘察设计'], ['宏图监理', '工程监理']], down: [['地方城投/水务集团', '业主'], ['市政施工单位', '分包'], ['燃气公司', '运营采购'], ['住建部门', '专项债项目']] },
+    '水网': { up: [['京弘管业', '输水管材'], ['恒能机电', '泵组设备'], ['清源环保', '水处理药剂'], ['中衡设计', '水利设计']], down: [['原水公司', '业主'], ['城投水务平台', '建设运营'], ['自来水公司', '采购'], ['水利部门', '专项工程']] },
+    '物流网': { up: [['恒能重工', '装卸设备'], ['华驰车桥', '车辆部件'], ['中讯系统', '信息系统'], ['恒安能源', '燃料供应']], down: [['制造类货主', '运输合同'], ['园区运营方', '仓储租赁'], ['电商平台', '配送单量'], ['口岸/海关', '通关']] },
+    '新一代通信网': { up: [['中环晶圆', '晶圆代工'], ['华澄材料', '光芯片材料'], ['京弘设备', '贴装与测试设备'], ['恒能电子', '结构件']], down: [['设备商（华为/中兴等）', '器件采购'], ['三大运营商', '集采'], ['数据中心', '光模块采购'], ['车厂/Tier1', '车规模组']] },
+  };
+  const fnHash = str => { let h = 0; for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0; return h; };
+  function fnDemoFill(c) {
+    if (!c || c.id[0] !== 'F') return null;
+    const h = fnHash(c.id + c.name);
+    const soe = /国企|国资|央企|政府|科研/.test(c.nat || '');
+    const legal = soe ? '—（国资监管主体委派）' : FN_LEGAL[h % FN_LEGAL.length];
+    const cap = c.pos === '战略' ? (soe ? (10 + h % 30) + ' 亿元' : (5 + h % 15) + ' 亿元') : c.pos === '腰部' ? (1 + h % 8) + ' 亿元' : (2000 + h % 8000) + ' 万元';
+    const est = 1993 + h % 25;
+    const emp = c.cat === '建设运营商' ? (800 + h % 4000) + ' 人' : (150 + h % 1800) + ' 人';
+    const uscc = '9132' + String(10000 + h % 90000).slice(0, 5) + 'MA1' + String(1000000 + h % 9000000).slice(0, 7) + 'X';
+    const addr = (c.city || '南京') + '市' + (c.zone || '') + (c.zone.indexOf('区') < 0 && c.zone.indexOf('县') < 0 ? '区' : '') + FN_ROAD[h % FN_ROAD.length];
+    const scope = c.net + '领域内的' + c.track.split('·')[0] + '相关业务：投资建设、装备制造、系统集成、技术服务与运营维护（演示口径，正式环境以工商登记为准）';
+    const qual = ['高新技术企业'];
+    if (c.score >= 85) qual.push('国家级专精特新"小巨人"');
+    else if (c.score >= 70) qual.push('省级专精特新中小企业');
+    if (c.listed && c.listed.indexOf('是') === 0) qual.push('上市/挂牌公司');
+    if (c.cat === '建设运营商') qual.push('特许经营/重大项目主体');
+    let holders = [], ctrl = '';
+    if (/央企/.test(c.nat)) { holders = [{ n: '央企集团公司（国务院国资委）', t: '央企', pct: 100 }]; ctrl = '国务院国资委 → 央企集团公司 → ' + c.short; }
+    else if (/省属国企/.test(c.nat)) { holders = [{ n: '省属国资运营公司', t: '国资', pct: 100 }]; ctrl = '省国资委 → 省属国资运营公司 → ' + c.short; }
+    else if (/地方国资|政府/.test(c.nat)) { holders = [{ n: (c.city || '南京') + '市城投集团', t: '国资', pct: 51 + h % 40 }, { n: '省产业基金', t: '机构', pct: 5 + h % 8 }]; ctrl = (c.city || '南京') + '市国资委 → 城投集团 → ' + c.short; }
+    else { holders = [{ n: FN_LEGAL[h % FN_LEGAL.length] + '（实际控制人）', t: '自然人', pct: 25 + h % 20 }, { n: (c.short.slice(0, 2)) + '投资控股有限公司', t: '法人', pct: 15 + h % 15 }, { n: '员工持股平台', t: '法人', pct: 5 + h % 8 }]; ctrl = FN_LEGAL[h % FN_LEGAL.length] + ' → ' + c.short.slice(0, 2) + '投资控股 → ' + c.short; }
+    const UD = FN_UPDOWN[c.net] || FN_UPDOWN['新型电网'];
+    const ud = { up: UD.up.map((u, i) => ({ n: u[0], w: u[1], ours: (h + i) % 4 === 0 })), down: UD.down.map((u, i) => ({ n: u[0], w: u[1], ours: (h + i) % 5 === 0 })) };
+    return { legal, cap, est: est + '', emp, uscc, addr, scope, qual, holders, ctrl, ud };
+  }
 
   /* ================= 企业详情（公开信息 · 非AI报告） ================= */
   VIEWS.company = {
@@ -583,6 +622,8 @@
       if (!c) { el.innerHTML = '<div class="card card-pad"><div class="empty"><div class="e-ico">🏢</div><div class="e-title">企业不存在或已下架</div></div></div>'; return; }
       if (!S.subs) S.subs = { cos: [], segs: [] };
       const subed = S.subs.cos.includes(c.id);
+      const demo = fnDemoFill(c) || {};
+      if (demo.legal) { c.legal = demo.legal; c.cap = demo.cap; c.est = demo.est; c.emp = demo.emp; c.uscc = demo.uscc; c.addr = demo.addr; c.scope = demo.scope; c.qual = demo.qual; c.holders = demo.holders; c.ctrl = demo.ctrl; c.ud = demo.ud; }
       const relNews = M().news.filter(n => (n.cos || []).includes(c.id) || (n.ind || '集成电路与电子材料') === c.industry).slice(0, 6);
       const chain = (c.ctrl || '').split('→').map(s => s.trim()).filter(Boolean);
       const short = s => s.replace('与电子材料', '').replace('与人工智能', '').replace('与大健康', '');
@@ -597,11 +638,13 @@
             <div class="flex" style="gap:14px;align-items:center">
               <div class="cp-logo">${esc(c.short.slice(0, 2))}</div>
               <div><div style="font-size:var(--fs-xl);font-weight:700">${esc(c.short)}</div>
-              <div class="flex mt2" style="gap:6px;flex-wrap:wrap">${layerTag(c.layer)}${statusTag(c.status)}<span class="tag tag-cyan">${short(c.industry)}</span><span class="tag tag-line">${c.seg}</span>${c.city ? `<span class="tag tag-line">${c.city}·${c.zone}</span>` : ''}</div></div>
+              <div class="flex mt2" style="gap:6px;flex-wrap:wrap">${layerTag(c.layer)}${statusTag(c.status)}<span class="tag tag-cyan">${short(c.industry)}</span><span class="tag tag-line">${c.seg}</span>${c.city ? `<span class="tag tag-line">${c.city}·${c.zone}</span>` : ''}</div>
+              ${demo.legal ? `<div class="flex mt2" style="gap:6px;flex-wrap:wrap">${c.cat ? `<span class="tag tag-gray" style="height:20px">${esc(c.cat)}</span>` : ''}${c.prog ? `<span class="tag tag-blue" style="height:20px">营销进展：${c.prog}</span>` : ''}${c.pos ? `<span class="tag tag-violet" style="height:20px">地位：${c.pos}</span>` : ''}${c.wt ? `<span class="tag tag-cyan" style="height:20px">权重：${c.wt}</span>` : ''}${c.score ? `<span class="tag tag-solid-red" style="height:20px">四线得分 ${c.score}</span>` : ''}</div>` : ''}</div>
             </div>
             <div class="text-xs text-muted">公开信息聚合 · 数据时点 2026-09-28</div>
           </div>
         </div>
+        ${(window.VIEWS.workbench && window.VIEWS.workbench.profileHtml(c)) ? `<div class="card card-pad mb4">${window.VIEWS.workbench.profileHtml(c)}</div>` : ''}
         <div class="card card-pad mb4"><div class="flex-between mb3"><b style="font-size:var(--fs-md)">基本信息<span class="text-xs text-muted" style="font-weight:400;margin-left:8px">公开信息 · 工商数据</span></b></div>
           <div class="kv-grid">${[['法定代表人', c.legal], ['注册资本', c.cap], ['成立时间', c.est + ' 年'], ['统一社会信用代码', c.uscc], ['企业类型', c.type], ['员工规模', c.emp], ['所在地区', (c.city || '无锡') + ' · ' + c.zone], ['产业园区', c.park || '—'], ['注册地址', c.addr || '—'], ['经营范围', c.scope || '—'], ['资质认证', (c.qual || []).join('、') || '—']].map(([k, v]) => kv(k, esc(String(v)))).join('')}</div></div>
         <div class="card card-pad mb4"><div class="flex-between mb3"><b style="font-size:var(--fs-md)">股份穿透</b><span class="text-xs text-muted">工商公示 · 持股5%以上股东</span></div>
@@ -620,11 +663,14 @@
             <div><div class="text-sm" style="font-weight:600;margin-bottom:8px">下游客户</div>
               ${(c.ud && c.ud.down.length) ? c.ud.down.map(u => `<div class="flex-between cp-ud"><span class="text-sm"><b>${esc(u.n)}</b> <span class="text-xs text-muted">· ${u.w}</span></span>${u.ours ? '<span class="tag tag-green" style="height:18px;font-size:10px">本行客户</span>' : ''}</div>`).join('') : '<div class="text-sm text-muted">暂无公开披露数据</div>'}</div>
           </div></div>
-        <div class="card card-pad"><div class="flex-between mb3"><b style="font-size:var(--fs-md)">相关资讯</b><span class="text-xs text-muted">企业关联 + 同产业动态</span></div>
+        <div class="card card-pad"><div class="flex-between mb3"><b style="font-size:var(--fs-md)">${relNews.length ? '相关资讯' : 'AI 捕获信号'}</b><span class="text-xs text-muted">${relNews.length ? '企业关联 + 同产业动态' : 'AI 数据引擎 24h 跑批 · 来源：公开渠道'}</span></div>
           ${relNews.length ? relNews.map(n => `<div class="nl-row" onclick="APP.openNews('${n.id}')">
             <div class="nl-l1"><span class="tag ${(n.cos || []).includes(c.id) ? 'tag-solid-red' : 'tag-blue'}" style="height:19px;font-size:10px;padding:0 6px;flex-shrink:0">${(n.cos || []).includes(c.id) ? '企业动态' : '产业动态'}</span><span class="nl-t">${esc(n.title)}</span><span class="nl-d">${n.date.slice(5)}</span></div>
             <div class="nl-l2"><span>${n.date}</span>·<span>${esc(n.source)}</span><span class="nl-ai"><span class="ai-badge" style="font-size:9px;height:15px;padding:0 4px;flex-shrink:0">AI</span><span class="t">${esc(n.ai)}</span></span><span class="nl-more">详情 ›</span></div>
-          </div>`).join('') : '<div class="text-sm text-muted">暂无相关资讯</div>'}
+          </div>`).join('') : `<div class="timeline">
+          ${(c.sig || []).map((sg, i) => `<div class="tl-item ${i === 0 ? '' : ''}"><div class="tl-time">11-04 04:0${i + 2} · AI 数据引擎</div><div class="tl-title">${esc(c.sigLv + ' 级信号' + (i === 0 ? '（最新）' : ' · 依据'))}</div><div class="tl-desc">${esc(sg)}</div></div>`).join('')}
+          ${c.opp ? `<div class="tl-item tl-warn"><div class="tl-time">机会地</div><div class="tl-title">${esc(c.opp)}</div><div class="tl-desc">AI 从项目公开信息中识别的落地机会区域</div></div>` : ''}
+        </div>`}
         </div>`;
       $('#cpSub').onclick = () => {
         const i = S.subs.cos.indexOf(c.id);

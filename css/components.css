@@ -983,3 +983,38 @@ table.fn-tbl td.fn-prod-td { white-space:normal; overflow:visible; padding-top:8
 .wp-hbar .bt i { display:block; height:100%; border-radius:5px; }
 .wp-hbar .bn { width:86px; text-align:right; color:var(--brand-600); font-weight:700; flex-shrink:0; font-variant-numeric:tabular-nums; }
 .wp-more-btn { width:100%; }
+
+/* ========== 迭代16：AI 思考/拉取/反馈特效 ========== */
+@keyframes aiStagIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+.ai-stag { opacity:0; animation:aiStagIn .5s var(--d,0ms) both cubic-bezier(.22,.61,.36,1); }
+.ai-dim { opacity:.22; filter:blur(1px); transition:opacity .3s, filter .3s; }
+/* AI 生成流程步骤条 */
+.ai-flow { display:flex; align-items:center; background:#fff; border:1px solid var(--line); border-radius:12px; padding:13px 18px; margin-bottom:14px; box-shadow:var(--sh-sm); }
+.ai-fstep { display:flex; align-items:center; gap:7px; font-size:12.5px; color:var(--t3); white-space:nowrap; }
+.ai-fstep .ic { width:22px; height:22px; border-radius:50%; border:2px solid var(--line-strong); display:flex; align-items:center; justify-content:center; font-size:11px; color:var(--t3); background:#fff; flex-shrink:0; }
+.ai-fstep.on { color:var(--t1); font-weight:600; }
+.ai-fstep.on .ic { border-color:var(--brand-500); border-top-color:transparent; color:var(--brand-600); animation:aiSpin .7s linear infinite; }
+.ai-fstep.done { color:var(--t2); }
+.ai-fstep.done .ic { background:var(--brand-500); border-color:var(--brand-500); color:#fff; animation:none; }
+.ai-fline { flex:1; height:2px; background:var(--line); margin:0 10px; min-width:24px; border-radius:1px; }
+.ai-fline.done { background:var(--brand-500); }
+@keyframes aiSpin { to { transform:rotate(360deg); } }
+/* 骨架屏（建议服务方案列逐行点亮） */
+.fn-skel { display:block !important; height:12px; border-radius:6px; -webkit-line-clamp:unset !important;
+  background:linear-gradient(90deg,#F1E9EA 25%,#FBF5F6 37%,#F1E9EA 63%); background-size:400% 100%; animation:fnSkel 1s ease infinite; }
+@keyframes fnSkel { 0% { background-position:100% 0; } 100% { background-position:-100% 0; } }
+/* A1 AI 数据引擎（雷达扫描 + 呼吸灯） */
+.fn-ai-engine { display:flex; align-items:center; gap:9px; background:linear-gradient(120deg,#FDF7F8,#FBF0F1); border:1px solid #F3D3D6; border-radius:10px; padding:6px 12px; }
+.ai-radar { width:26px; height:26px; border-radius:50%; position:relative; border:2px solid #E7B6BB; overflow:hidden; flex-shrink:0; background:#fff; }
+.ai-radar::before { content:""; position:absolute; inset:0; background:conic-gradient(rgba(192,32,44,.5),transparent 30%); animation:aiSpin 2.2s linear infinite; border-radius:50%; }
+.ai-radar::after { content:""; position:absolute; left:50%; top:50%; width:3px; height:3px; background:var(--brand-600); border-radius:50%; transform:translate(-50%,-50%); }
+.breath { display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--ok-500); margin:0 6px 1px 5px; animation:breath 1.6s ease infinite; }
+@keyframes breath { 0%,100% { box-shadow:0 0 0 0 rgba(22,163,74,.4); } 50% { box-shadow:0 0 0 5px rgba(22,163,74,0); } }
+/* A2 AI 已核验徽标 */
+.fn-ai-check { font-size:12px; color:var(--brand-600); font-weight:600; cursor:default; white-space:nowrap; }
+/* C6 话术打字机光标 */
+.wp-topic .script.typing::after { content:"▍"; color:var(--brand-500); animation:caret .8s steps(1) infinite; }
+@keyframes caret { 50% { opacity:0; } }
+/* D8 台账写入光点 */
+.log-new td { animation:logIn .7s both; }
+@keyframes logIn { from { background:#FBE7E9; transform:translateX(-10px); opacity:0; } to { transform:none; opacity:1; } }
