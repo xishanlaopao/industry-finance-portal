@@ -150,6 +150,11 @@ textarea.tarea { width:100%; min-height:88px; resize:vertical; line-height:1.7; 
 .mtab .ti.on { color:var(--brand-600); font-weight:700; }
 .mtab .ti.on .ic { transform:translateY(-1px); }
 
+.mb2 { margin-bottom:9px; }
+.mt2 { margin-top:9px; }
+.opb-more { display:block; width:100%; border:1px solid var(--line-strong); background:#fff; border-radius:9px; padding:12px 12px; font-size:12.5px; color:var(--t2); text-align:center; line-height:1.5; cursor:pointer; }
+.opb-more:hover { border-color:var(--brand-500); color:var(--brand-600); }
+
 /* 迭代22：访前准备看板（与 PC 端一致结构） */
 .opb-hero { display:flex; justify-content:space-between; align-items:center; gap:10px; background:linear-gradient(115deg,#FDF7F8,#FCF0F1 55%,#FBEBED); border:1px solid #F3D3D6; border-radius:13px; padding:14px 15px; }
 .opb-hero .ey { font-size:10px; letter-spacing:2px; color:#B4525B; }
@@ -231,32 +236,32 @@ textarea.tarea { width:100%; min-height:88px; resize:vertical; line-height:1.7; 
 var D = {
   nets: ['新型电网', '算力网', '城市地下管网', '物流网', '新一代通信网', '海上风电'],
   cos: [
-    { id:'F001', short:'中天科技', name:'江苏中天科技股份有限公司', cat:'上游供应商', net:'新型电网', track:'海底电缆·高压海缆/海缆附件', city:'南通', zone:'如东县', score:100, prog:'突破', pos:'战略', wt:'主攻', listed:'是·上交所主板(600522)', nat:'民营企业', rel:'高度相关',
+    { id:'F001', short:'中天科技', name:'江苏中天科技股份有限公司', cat:'上游供应商', net:'新型电网', track:'海底电缆·高压海缆/海缆附件', city:'南通', zone:'如东县', score:100, prog:'突破', pos:'战略', wt:'主攻', listed:'是·上交所主板(600522)', nat:'民营企业', rel:'高度相关', sigLv:'A',
       recent:'海缆/风电塔筒龙头，在手订单充足，如东基地扩产在即',
       sig:['经营四线得分 100（A 级信号 · 高度相关）','客户大类：上游供应商 ｜ 海底电缆 ｜ 民营企业'],
       prods:['项目贷款','并购贷款','绿色信贷','债券承销','供应链金融'],
       internal:{credit:0,used:0,deposit:0,settle:0,products:[]} },
-    { id:'F011', short:'江苏省数据', name:'江苏省数据集团有限公司', cat:'建设运营商', net:'算力网', track:'智算中心及算力调度', city:'南京', zone:'建邺区', score:96, prog:'突破', pos:'战略', wt:'主攻', listed:'否', nat:'省属国企', rel:'高度相关',
+    { id:'F011', short:'江苏省数据', name:'江苏省数据集团有限公司', cat:'建设运营商', net:'算力网', track:'智算中心及算力调度', city:'南京', zone:'建邺区', score:96, prog:'突破', pos:'战略', wt:'主攻', listed:'否', nat:'省属国企', rel:'高度相关', sigLv:'A',
       recent:'省属数据集团，智算中心二期资本开支约 8 亿',
       sig:['经营四线得分 96（A 级信号 · 高度相关）','客户大类：建设运营商 ｜ 智算中心 ｜ 省属国企'],
       prods:['项目贷','科技贷','政府存款','结算'],
       internal:{credit:0,used:0,deposit:0,settle:0,products:[]} },
-    { id:'F069', short:'南京城建', name:'南京市城市建设投资控股(集团)有限责任公司', cat:'建设运营商', net:'城市地下管网', track:'综合管廊及生命线', city:'南京', zone:'玄武区', score:88, prog:'攻坚', pos:'战略', wt:'择优', listed:'否', nat:'地方国资', rel:'高度相关',
+    { id:'F069', short:'南京城建', name:'南京市城市建设投资控股(集团)有限责任公司', cat:'建设运营商', net:'城市地下管网', track:'综合管廊及生命线', city:'南京', zone:'玄武区', score:88, prog:'攻坚', pos:'战略', wt:'择优', listed:'否', nat:'地方国资', rel:'高度相关', sigLv:'A',
       recent:'管廊二期项目公司月底注册，资金监管招标在即',
       sig:['经营四线得分 88（A 级信号 · 高度相关）','客户大类：建设运营商 ｜ 综合管廊 ｜ 地方国资'],
       prods:['项目贷','专项债配套','结算'],
       internal:{credit:0,used:0,deposit:0,settle:0,products:[]} },
-    { id:'F003', short:'国信集团', name:'江苏省国信集团', cat:'建设运营商', net:'新型电网', track:'海上风电', city:'南京', zone:'玄武区', score:98, prog:'突破', pos:'战略', wt:'主攻', listed:'否', nat:'省属国企', rel:'高度相关', opp:'盐城市-大丰区、东台市',
+    { id:'F003', short:'国信集团', name:'江苏省国信集团', cat:'建设运营商', net:'新型电网', track:'海上风电', city:'南京', zone:'玄武区', score:98, prog:'突破', pos:'战略', wt:'主攻', listed:'否', nat:'省属国企', rel:'高度相关', sigLv:'A', opp:'盐城市-大丰区、东台市',
       recent:'省属能源平台，大丰 800MW 海上风电核准公示',
       sig:['经营四线得分 98（A 级信号 · 高度相关）','客户大类：建设运营商 ｜ 海上风电 ｜ 省属国企'],
       prods:['项目贷','绿色贷款','并购贷','债券承销'],
       internal:{credit:0,used:0,deposit:0,settle:0,products:[]} },
-    { id:'F012', short:'东部机场', name:'东部机场集团有限公司', cat:'建设运营商', net:'物流网', track:'航空物流', city:'南京', zone:'江宁区', score:96, prog:'突破', pos:'战略', wt:'次攻', listed:'否', nat:'省属国企', rel:'高度相关',
+    { id:'F012', short:'东部机场', name:'东部机场集团有限公司', cat:'建设运营商', net:'物流网', track:'航空物流', city:'南京', zone:'江宁区', score:96, prog:'突破', pos:'战略', wt:'次攻', listed:'否', nat:'省属国企', rel:'高度相关', sigLv:'A',
       recent:'省属机场集团，改扩建+航空物流枢纽建设',
       sig:['经营四线得分 96（A 级信号 · 高度相关）','客户大类：建设运营商 ｜ 航空物流 ｜ 省属国企'],
       prods:['项目贷','银团','债券承销','结算'],
       internal:{credit:0,used:0,deposit:0,settle:0,products:[]} },
-    { id:'F004', short:'国电南瑞', name:'国电南瑞科技股份有限公司', cat:'上游供应商', net:'算力网', track:'算电协同', city:'南京', zone:'江宁区', score:98, prog:'突破', pos:'腰部', wt:'主攻', listed:'是·上交所主板(600406)', nat:'央企子公司', rel:'高度相关',
+    { id:'F004', short:'国电南瑞', name:'国电南瑞科技股份有限公司', cat:'上游供应商', net:'算力网', track:'算电协同', city:'南京', zone:'江宁区', score:98, prog:'突破', pos:'腰部', wt:'主攻', listed:'是·上交所主板(600406)', nat:'央企子公司', rel:'高度相关', sigLv:'A',
       recent:'电网自动化龙头，算电协同核心供应商',
       sig:['经营四线得分 98（A 级信号 · 高度相关）','客户大类：上游供应商 ｜ 算电协同 ｜ 央企子公司'],
       prods:['科技贷','投行服务','结算'],
@@ -515,7 +520,7 @@ function pageOp(){
     (c.prog==='突破'?'<b>方案窗口在 11 月内</b>，错过需等下一周期；':c.prog==='攻坚'?'年底前是授信落地窗口；':'以建立联系为主，不急于报价；')+
     '首访锁财务口 → 两周内提交定制方案 → 纳入年度授信盘子。切忌泛泛推销与低价竞争；带<b>'+esc((c.prods||[]).slice(0,2).join('、'))+'</b>要点与测算上门；他行合作、股价话题不主动评论；未公开数据按内幕信息管理；不承诺额度、利率、审批时限。</div></div>'+
   /* 折叠 5-10 */
-  '<details class="mb2" style="margin-bottom:10px"><summary class="mbtn" style="width:100%;text-align:center;cursor:pointer;list-style:none">展开更多：股权治理 · 集团架构 · 财务速览 · 资本表现 · 行业地位 · 风险排查（5-10）▾</summary><div style="padding-top:8px">'+
+  '<details class="mb2" style="margin-bottom:10px"><summary class="opb-more" style="list-style:none">展开更多：股权治理 · 集团架构 · 财务速览 · 资本表现 · 行业地位 · 风险排查（5-10）▾</summary><div style="padding-top:8px">'+
   '<div class="opb-sec"><span class="no">5</span><b>股权与治理要点</b></div>'+
   '<div class="card mb2"><ul style="padding-left:18px;font-size:12px;color:var(--t2);line-height:2">'+
     '<li><b style="color:var(--brand-600)">控制链：</b>'+(c.nat.indexOf('国企')>=0||c.nat.indexOf('国资')>=0||c.nat.indexOf('央企')>=0?esc(c.nat)+'背景，实际控制人为相应国资监管主体，治理规范':'民营控股，实际控制人为自然人，关注股权质押与代持情况')+'</li>'+
