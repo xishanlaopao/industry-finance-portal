@@ -113,6 +113,7 @@
 - 机会漏斗：https://xishanlaopao.github.io/industry-finance-portal/#/funnel
 - PC 工作台：https://xishanlaopao.github.io/industry-finance-portal/#/workbench
 - 移动端工作台：https://xishanlaopao.github.io/industry-finance-portal/mobile.html
+- 系统功能介绍（看图说话版）：https://xishanlaopao.github.io/industry-finance-portal/演示材料/系统功能介绍.html
 
 **离线方式**：双击 `index.html` 即可在浏览器打开（无需联网、无外部依赖；logo 为本地资源）。移动端工作台双击 `mobile.html` 打开（同为离线单文件）。
 
