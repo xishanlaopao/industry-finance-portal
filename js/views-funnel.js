@@ -198,16 +198,12 @@
   VIEWS.funnel = {
     render(el) {
       F();
-      const rk = ROLE_KEY();
       el.innerHTML = `
         <div class="page-head"><div class="page-title">机会漏斗</div>
           <div class="flex" style="gap:8px">
-            ${rk === 'rm' ? `<button class="btn btn-ghost" id="fnManual">＋ 手工录入客户</button><button class="btn btn-ghost" id="fnClaimPool">🙋 客户池认领</button>` : ''}
             <button class="btn btn-primary" id="fnImport">导入企业</button></div></div>
         <div id="fnTabs"></div>`;
       const imp = el.querySelector('#fnImport'); if (imp) imp.onclick = () => this.importDlg();
-      const man = el.querySelector('#fnManual'); if (man) man.onclick = () => this.manualDlg();
-      const clm = el.querySelector('#fnClaimPool'); if (clm) clm.onclick = () => { S.params.tab = 'co'; this.render(el); toast('请在客户总览中点「主动认领」，认领即时生效并留痕'); };
       const tabs = [
         { id: 'co', name: '客户清单', count: M().funnel.cos.length },
         { id: 'proj', name: '项目清单', count: (M().manage || { projects: [] }).projects.length },
@@ -683,56 +679,6 @@
         toast(`已下发 ${cos.length} 家企业至「${rmById(rmId).name} · ${rmById(rmId).unit}」，任务状态：待接收`);
         st.subSel = [];
         S.params.tab = 'task'; this.render(document.querySelector('#viewRoot'));
-      };
-    },
-
-    /* ---------- 手工录入客户（客户经理：任意客户 → 入客户池 → AI分析/方案闭环） ---------- */
-    manualDlg() {
-      openModal({ small: true, title: '手工录入客户', body: `
-        <div class="text-xs text-muted mb3" style="line-height:1.7">客户经理可录入任意客户（不限于AI筛选名单）。录入后自动入客户池，可配合生成客户画像 / 深度分析 / 拜访要点与综合服务方案。</div>
-        <div class="form">
-          <div class="form-item"><label class="form-label">企业名称 *</label><input class="input" id="mnName" placeholder="如：无锡某某精密制造有限公司"></div>
-          <div class="grid-2">
-            <div class="form-item"><label class="form-label">所在地区</label><input class="input" id="mnCity" placeholder="如：无锡·锡山区"></div>
-            <div class="form-item"><label class="form-label">所属方向</label>
-              <select class="select" id="mnNet">${NETS().map(n => `<option>${n}</option>`).join('')}</select></div>
-          </div>
-          <div class="form-item"><label class="form-label">主营 / 线索情况（AI 将据此出画像与方案）</label>
-            <textarea class="input" id="mnNote" rows="3" placeholder="如：为本地头部车企供应精密结构件，年营收约1.2亿，账期90天，近期计划扩产"></textarea></div>
-        </div>`,
-        foot: `<button class="btn btn-ghost" onclick="APP.closeModal()">取消</button><button class="btn btn-primary" id="mnGo">录入并生成AI作战包</button>` });
-      $('#mnGo').onclick = () => {
-        const name = $('#mnName').value.trim();
-        if (!name) return toast('请输入企业名称', 'warn');
-        const net = $('#mnNet').value, note = $('#mnNote').value.trim();
-        const loc = ($('#mnCity').value.trim() || '无锡').split(/[·\-]/);
-        const id = 'FM' + Date.now().toString(36);
-        const u = APP.curUser();
-        M().funnel.cos.unshift({
-          id, name, short: name.replace(/(股份有限公司|有限责任公司|有限公司|集团|（.*?）)/g, '').slice(0, 8) || name.slice(0, 8),
-          net, track: note ? note.slice(0, 12) : net + '相关', city: loc[0], zone: loc[1] || '—', opp: '',
-          listed: '否', nat: '民营企业', prog: '培育', pos: '基础', wt: '承接',
-          layer: '储备', status: '潜在', cap: '—', score: 60, sigLv: 'B', rel: '一般相关',
-          prods: NET_PROD[net] || ['流动资金贷款'], src: 'MANUAL',
-          sig: ['客户经理手工录入（' + u.name + '）', note || '待补充企业情况'],
-          recent: note || '客户经理录入，待补充公开信息', tags: ['手工录入'],
-          industry: net, seg: note ? note.slice(0, 12) : '—', est: '—', emp: '—', legal: '—', uscc: '—', type: '民营企业', park: '—', addr: '—', scope: '—', qual: [],
-          grade: 'C', ipo: '',
-          internal: { credit: 0, used: 0, deposit: 0, settle: 0, products: [] },
-          imp: { by: u.name + ' · ' + u.dept, d: '2026-11-04', note: '手工录入客户' },
-        });
-        /* 同步生成自认领任务，进工作台闭环 */
-        F().claims.push(id);
-        F().tasks.unshift({
-          id: 'FTM' + Date.now().toString(36), co: id, rm: 'rm-drz', type: '营销跟进', due: '11-20', status: '待接收', d: '2026-11-04',
-          note: note || `跟进手工录入客户「${name}」`,
-          prods: NET_PROD[net] || ['流动资金贷款'],
-          log: [{ d: '11-04', t: '手工录入', by: u.name + ' · ' + u.dept, x: `手工录入客户「${name}」并自认领跟进；${note || '待补充企业情况'}` }],
-        });
-        APP.closeModal();
-        toast(`已录入「${name}」并生成跟进任务，可在「访前作战包」中选择该客户生成三目标内容`);
-        S.packCo = id; S.packGoal = 'profile';
-        APP.go('pack');
       };
     },
 
