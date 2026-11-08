@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>北斗·产融智航系统 · 北京银行无锡分行 · V3</title>
+  <title>北斗·产融智航系统 · 北京银行南京分行 · V4</title>
   <style>
 /* ============================================================
    产业金融智能平台 · 设计 Token V2（门户版）
@@ -526,9 +526,9 @@ select.rf-ctl { width:190px; cursor:pointer; }
 .graph-node { cursor:pointer; }
 .graph-node:hover { filter:brightness(1.12); }
 /* AI问述 */
-.ai-fab { position:fixed; right:26px; bottom:86px; z-index:80; height:52px; padding:0 22px; border:none; border-radius:26px; background:linear-gradient(135deg,#6D3BF5,#0090FF); color:#fff; font-size:var(--fs-md); font-weight:700; box-shadow:0 8px 24px rgba(47,70,220,.4); display:flex; align-items:center; gap:8px; transition:.15s; }
+.ai-fab { position:fixed; right:26px; bottom:24px; z-index:80; height:52px; padding:0 22px; border:none; border-radius:26px; background:linear-gradient(135deg,#6D3BF5,#0090FF); color:#fff; font-size:var(--fs-md); font-weight:700; box-shadow:0 8px 24px rgba(47,70,220,.4); display:flex; align-items:center; gap:8px; transition:.15s; }
 .ai-fab:hover { transform:translateY(-2px); box-shadow:0 12px 28px rgba(47,70,220,.5); }
-.ai-panel-box { position:fixed; right:20px; bottom:84px; width:440px; max-width:94vw; height:560px; max-height:78vh; background:#fff; border-radius:16px; box-shadow:var(--sh-lg); z-index:85; display:none; flex-direction:column; overflow:hidden; border:1px solid var(--line); }
+.ai-panel-box { position:fixed; right:20px; bottom:88px; width:440px; max-width:94vw; height:560px; max-height:78vh; background:#fff; border-radius:16px; box-shadow:var(--sh-lg); z-index:85; display:none; flex-direction:column; overflow:hidden; border:1px solid var(--line); }
 .ai-panel-box.show { display:flex; animation:pop .18s ease; }
 .aip-head { background:linear-gradient(120deg,#5B2BD9,#0072E0); color:#fff; padding:14px 18px; display:flex; justify-content:space-between; align-items:center; }
 .aip-head .t { font-weight:700; font-size:var(--fs-md); display:flex; gap:8px; align-items:center; }
@@ -1121,7 +1121,7 @@ table.fn-tbl td.fn-prod-td { white-space:normal; overflow:visible; padding-top:8
     </main>
     <!-- 页脚 -->
     <footer class="pfoot">
-      北京银行无锡分行 · 北斗·产融智航系统 · 数据时点 2026-09-28
+      北京银行南京分行 · 北斗·产融智航系统 · 数据时点 2026-09-28
     </footer>
   </div>
 
@@ -1149,9 +1149,9 @@ table.fn-tbl td.fn-prod-td { white-space:normal; overflow:visible; padding-top:8
   </aside>
 
   <!-- 脚本（顺序勿变；迭代升版时递增 ?v=） -->
-  <script src="config/nav.js?v=194"></script>
-  <script src="data/jxmap.js?v=194"></script>
-  <script src="data/mock.js?v=194"></script>
+  <script src="config/nav.js?v=196"></script>
+  <script src="data/jxmap.js?v=196"></script>
+  <script src="data/mock.js?v=196"></script>
   <script>
 /* ============================================================
    轻量 SVG 图表库（无外部依赖，离线可用）
@@ -1196,7 +1196,7 @@ window.CH = (function () {
       paths += `<polyline points="${pts}" fill="none" stroke="${s.color}" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>`;
       if (dots) s.data.forEach((v, i) => { paths += `<circle cx="${X(i)}" cy="${Y(v)}" r="3" fill="#fff" stroke="${s.color}" stroke-width="2"/>`; });
       const li = s.data.length - 1;
-      paths += `<text x="${X(li) + 6}" y="${Y(s.data[li]) + 3}" font-size="10" fill="${s.color}" font-weight="600">${yFmt(s.data[li])}</text>`;
+      paths += `<text x="${W - 4}" y="${Y(s.data[li]) + 3}" text-anchor="end" font-size="10" fill="${s.color}" font-weight="600">${yFmt(s.data[li])}</text>`;
     });
     return `<div class="chart-box"><svg viewBox="0 0 ${W} ${H}">${g}${xl}${paths}</svg></div>`;
   }
@@ -1435,7 +1435,7 @@ window.CH = (function () {
    ============================================================ */
 window.APP = (function () {
   const S = {
-    view: 'dashboard', role: 'manager', params: {}, industry: 'ic',
+    view: 'workbench', role: 'manager', params: {}, industry: 'ic',
     newsFilter: { seg: '全部', region: '全部', etype: '全部' },
     custLayer: '全部', custStatus: '全部', custKw: '',
     oppList: null, addedCust: [], removedCust: [], inputs: [],
@@ -1502,10 +1502,10 @@ window.APP = (function () {
   /* ---------- 路由 ---------- */
   function go(view, params) { Object.assign(S.params, params || {}); location.hash = '#/' + view; }
   function route() {
-    const v = (location.hash || '#/dashboard').replace('#/', '') || 'dashboard';
+    const v = (location.hash || '#/workbench').replace('#/', '') || 'workbench';
     const conf = window.NAV_ITEMS[v];
-    S.view = (conf ? v : 'dashboard');
-    if (S.view === 'cockpit' && !canCockpit()) S.view = 'dashboard';
+    S.view = (conf ? v : 'workbench');
+    if (S.view === 'cockpit' && !canCockpit()) S.view = 'workbench';
     const root = $('#viewRoot'); window.scrollTo(0, 0);
     renderNav();
     /* 非试点行业：展示专版开通进度页（平台定位：热门产业挖掘与管理） */
@@ -1518,7 +1518,7 @@ window.APP = (function () {
       return;
     }
     const view = window.VIEWS[S.view];
-    $('#crumbBar').innerHTML = `当前位置：首页 ${window.NAV_ITEMS[S.view] && window.NAV_ITEMS[S.view].id !== 'dashboard' ? `<span style="margin:0 6px;color:var(--line-strong)">/</span> <b>${window.NAV_ITEMS[S.view].name}</b>` : ''}`;
+    $('#crumbBar').innerHTML = `当前位置：${window.NAV_ITEMS[S.view] ? `<b>${window.NAV_ITEMS[S.view].name}</b>` : ''}`;
     view.render(root);
   }
   function buildIndustryPage(ind) {
@@ -1564,18 +1564,21 @@ window.APP = (function () {
     $('#indApply').onclick = () => { menu.classList.remove('show'); toast('已登记新行业开通意向：请提供行业名称，战略团队将在3个工作日内完成评估'); };
   }
 
-  /* ---------- 顶部导航 / 用户（V3：不区分角色） ---------- */
+  /* ---------- 顶部导航 / 用户（V4：五大一级导航） ---------- */
   function renderNav() {
     const nav = $('#pnav');
-    nav.innerHTML = window.NAV.filter(it => it.id !== 'cockpit' || canCockpit()).map(it => `
-      <div class="pnav-item ${S.view === it.id ? 'active' : ''}" data-view="${it.id}">${it.name}</div>`).join('');
+    /* 主导航：隐藏路由（dashboard/report/news/cockpit/company 等）按别名归入对应一级项高亮 */
+    const ALIAS = { dashboard: 'insight', news: 'insight', report: 'pack', cockpit: 'manage' };
+    const active = ALIAS[S.view] || S.view;
+    nav.innerHTML = window.NAV.filter(it => it.id !== 'workbench' || true).map(it => `
+      <div class="pnav-item ${active === it.id ? 'active' : ''}" data-view="${it.id}">${it.name}</div>`).join('');
     nav.querySelectorAll('.pnav-item').forEach(n => n.onclick = () => go(n.dataset.view));
   }
   /* ---------- 用户与角色（对齐过程管理演示：客户经理/支行长/分行产品经理/公司部负责人） ---------- */
   const USERS = [
-    { id: 'drz', name: '邓瑞忠', av: '邓', role: '客户经理', roleShort: '客户经理', dept: '无锡分行营业部', key: 'rm',
+    { id: 'drz', name: '邓瑞忠', av: '邓', role: '客户经理', roleShort: '客户经理', dept: '南京分行营业部', key: 'rm',
       tip: '客户经理（本人名下任务）', range: '我承接的下发任务' },
-    { id: 'lq', name: '陆青', av: '陆', role: '支行长', roleShort: '支行长', dept: '无锡分行营业部', key: 'head',
+    { id: 'lq', name: '陆青', av: '陆', role: '支行长', roleShort: '支行长', dept: '南京分行营业部', key: 'head',
       tip: '支行长（本支行）', range: '本支行任务与人员' },
     { id: 'cl', name: '陈立', av: '陈', role: '分行产品经理', roleShort: '产品经理', dept: '公司银行部', key: 'pm',
       tip: '分行产品经理（全辖 · 可操作）', range: '机会漏斗 · 订阅 · 下发' },
@@ -1600,16 +1603,15 @@ window.APP = (function () {
     $('#uRole').textContent = curUser.role + ' · ' + curUser.dept;
     $('#uAv').textContent = curUser.av;
   }
+  /* ---------- 用户菜单（工作台现为一级导航，菜单仅保留切换/退出） ---------- */
   function renderUserMenu() {
     const um = $('#userMenu');
     um.innerHTML = `
-      <div class="dd-item" id="uWb" style="color:var(--brand-600);font-weight:600">🧭 工作台</div>
       <div class="dd-item" id="uSwitch">👥 切换角色</div>
       <div class="dd-item" id="uLogout">↩️ 退出登录</div>`;
-    um.querySelector('#uWb').onclick = () => { um.classList.remove('show'); go('workbench'); };
     um.querySelector('#uSwitch').onclick = () => {
       um.classList.remove('show');
-      openModal({ small: true, title: '切换角色（演示）', body: `
+      openModal({ small: true, title: '切换角色', body: `
         <div style="display:flex;flex-direction:column;gap:6px">
           ${USERS.map(u => `<div class="dd-item ${u.id === curUser.id ? 'on' : ''}" data-su="${u.id}" style="border:1px solid var(--line);border-radius:10px">
             <div class="avatar" style="width:28px;height:28px">${u.av}</div>
@@ -1627,7 +1629,7 @@ window.APP = (function () {
     if (!u || u === curUser) return;
     curUser = u;
     renderUser(); renderUserMenu();
-    if (S.view === 'cockpit' && !canCockpit()) { go('dashboard'); return; }
+    if (S.view === 'cockpit' && !canCockpit()) { go('workbench'); return; }
     route();
     toast(`已切换：${u.name}（${u.role} · ${u.dept}）`);
   }
@@ -1841,7 +1843,7 @@ window.APP = (function () {
         <button class="btn btn-primary btn-sm" id="dwView">⚡ 生成AI报告</button>
       </div>`);
     setTimeout(() => {
-      $('#dwView').onclick = () => { closeDrawer(); S.reportCo = id; go('report', { co: id, tab: 'detail' }); VIEWS.report.gen(id); };
+      $('#dwView').onclick = () => { closeDrawer(); S.packCo = id; S.packGoal = 'detail'; S.reportCo = id; go('pack'); VIEWS.report.gen(id); };
       $('#dwOpp').onclick = () => { closeDrawer(); go('funnel', { tab: 'sub' }); };
       $('#dwTask').onclick = () => { closeDrawer(); go('funnel', { tab: 'task' }); };
     });
@@ -1921,7 +1923,7 @@ window.APP = (function () {
   function boot() {
     buildSearch(); initSearch(); initMsg(); initAiPanel(); initIndustry(); renderUser();
     window.addEventListener('hashchange', route);
-    if (!location.hash) location.hash = '#/dashboard'; else route();
+    if (!location.hash) location.hash = '#/workbench'; else route();
     $('#modalX').onclick = closeModal;
     $('#mask').addEventListener('click', e => { if (e.target.id === 'mask') closeModal(); });
     $('#drawerX').onclick = closeDrawer;
@@ -1975,7 +1977,9 @@ window.APP = (function () {
   const sigTag = v => `<span class="tag ${v === 'A' ? 'tag-red' : v === 'B' ? 'tag-blue' : 'tag-gray'}" style="height:19px;font-size:10px;padding:0 6px;font-weight:700">${v}</span>`;
   const srcTag = c => c.src === 'AI'
     ? `<span class="tag tag-cyan" style="height:19px;font-size:10px;padding:0 6px">✦ AI筛选</span>`
-    : `<span class="tag tag-violet" style="height:19px;font-size:10px;padding:0 6px" title="导入人：${esc(c.imp.by)} · ${c.imp.d}${c.imp.note ? ' · ' + esc(c.imp.note) : ''}">📥 导入</span>`;
+    : (c.src === 'MANUAL' || c.src === 'CLAIM')
+      ? `<span class="tag tag-blue" style="height:19px;font-size:10px;padding:0 6px" title="${c.src === 'MANUAL' ? '客户经理手工录入' : '客户经理/支行主动认领'}">🙋 ${c.src === 'MANUAL' ? '手工录入' : '自认领'}</span>`
+      : `<span class="tag tag-violet" style="height:19px;font-size:10px;padding:0 6px" title="导入人：${esc(c.imp.by)} · ${c.imp.d}${c.imp.note ? ' · ' + esc(c.imp.note) : ''}">📥 导入</span>`;
   const pmTag = id => (F().tags[id] || []).map(t => `<span class="tag tag-violet" style="height:17px;font-size:10px;padding:0 5px" title="${esc(t.by)} · ${t.d}"># ${esc(t.t)}</span>`).join(' ');
   const scoreBar = s => `<div class="fn-score"><b class="fs-num">${s}</b><div class="fn-score-bd"><i style="width:${s}%;background:${s >= 80 ? 'var(--brand-500)' : s >= 60 ? '#2458F5' : '#93A4C8'}"></i></div></div>`;
 
@@ -1985,19 +1989,41 @@ window.APP = (function () {
       subs: [...M().funnel.subsSeed],
       tasks: M().funnel.tasksSeed.map(t => Object.assign({}, t, { log: t.log.map(x => Object.assign({}, x)) })),
       tags: {},                /* coId -> [{t, by, d}] 产品经理备注标签 */
-      f: { nets: [], track: '全部', prog: '全部', pos: '全部', wt: '全部', src: '全部', score: '全部', cat: '全部', sig: '全部', lst: '全部', rel: '全部', kw: '' },
+      f: { nets: [], track: '全部', prog: '全部', pos: '全部', wt: '全部', src: '全部', score: '全部', cat: '全部', sig: '全部', lst: '全部', rel: '全部', kw: '', acc: '全部', plist: '全部' },
       conds: [],               /* 自然语言解析出的筛选条件 chips */
+      accChips: [],            /* 已选准入标准 chips（多选） */
+      claims: [],              /* 客户经理/支行自认领的企业 id（留痕） */
+      projSel: [],             /* 项目清单勾选 */
     };
     return S.fn;
   }
+  /* 准入标准（总行/长三角两类） */
+  const ACC = {
+    '总行战略客户准入': { lv: '总行', cond: c => c.pos === '战略' && c.score >= 80, tip: '战略地位 + 四线得分≥80' },
+    '总行科技金融白名单': { lv: '总行', cond: c => /专精特新|高新技术|小巨人/.test((c.qual || []).join('') + c.tags.join('') + c.name) || c.score >= 85, tip: '资质/高评分科技企业' },
+    '长三角区域准入': { lv: '长三角', cond: c => true, tip: '苏/浙/沪/皖属地企业默认符合' },
+    '长三角基建项目库': { lv: '长三角', cond: c => c.cat === '建设运营商' || /项目|基建|工程/.test(c.track), tip: '建设运营商或项目类赛道' },
+  };
+  /* 正负面清单 */
+  const LISTS = {
+    '正面清单·重大项目配套': { kind: 'pos', cond: c => (c.sig || []).join('').indexOf('重大项目') >= 0 || c.cat === '建设运营商' || c.score >= 82 },
+    '正面清单·专精特新': { kind: 'pos', cond: c => /专精特新|小巨人|高新技术/.test((c.qual || []).join('') + c.tags.join('') + c.name) },
+    '正面清单·上市/拟上市': { kind: 'pos', cond: c => c.listed.indexOf('是') === 0 || (c.ipo && c.ipo.length) },
+    '负面清单·两高过剩产能': { kind: 'neg', cond: c => /化工|冶炼|铸造|电镀|印染/.test(c.track + c.name) },
+    '负面清单·失信/涉诉预警': { kind: 'neg', cond: c => false },
+  };
   const coById = id => M().funnel.cos.find(c => c.id === id);
   const rmById = id => M().funnel.rms.find(r => r.id === id);
   const taskOf = coId => F().tasks.find(t => t.co === coId);
   const tagListOf = coId => F().tags[coId] || [];
+  const ROLE_KEY = () => APP.role().key;   /* rm 客户经理 / head 支行长 / pm 产品经理 / gm 负责人 */
+  /* 预打标：给企业库补准入/清单命中口径（演示：命中=正面绿标，未命中负面=通过） */
+  function accHit(c) { return Object.entries(ACC).filter(([k, a]) => a.cond(c)).map(([k]) => k); }
+  function listHit(c) { const pos = Object.entries(LISTS).filter(([k, l]) => l.kind === 'pos' && l.cond(c)).map(([k]) => k); const neg = Object.entries(LISTS).filter(([k, l]) => l.kind === 'neg' && l.cond(c)).map(([k]) => k); return { pos, neg }; }
 
   /* ---------- 筛选 ---------- */
   function filteredCos() {
-    const f = F().f, conds = F().conds, subs = F().subs;
+    const f = F().f, conds = F().conds, subs = F().subs, st = F();
     const minScore = f.score === '全部' ? 0 : +f.score.replace('+', '');
     const cv = k => { const arr = conds.filter(c => c.k === k).map(c => c.v); return arr.length ? arr : null; };
     const nlNet = cv('net'), nlCity = cv('city'), nlProg = cv('prog'), nlPos = cv('pos'), nlWt = cv('wt');
@@ -2006,19 +2032,35 @@ window.APP = (function () {
     const nlSrc = (conds.find(c => c.k === 'src') || {}).v;
     const nlSub = (conds.find(c => c.k === 'sub') || {}).v;
     const nlLst = (conds.find(c => c.k === 'lst') || {}).v;
+    const nlAcc = cv('acc');      /* 自然语言：准入标准（命中其一） */
+    const nlPlist = (conds.find(c => c.k === 'plist') || {}).v;  /* 自然语言：正面/负面清单 */
+    /* 准入标准：多选 chips 命中其一即通过；负面清单命中任一即剔除；正面清单要求命中其一 */
+    const accOk = c => (!st.accChips.length || st.accChips.some(k => ACC[k] && ACC[k].cond(c))) && (!nlAcc || nlAcc.some(k => ACC[k] && ACC[k].cond(c)));
+    const lh = c => listHit(c);
+    const plistOk = (v, c) => {
+      if (!v || v === '正面') return !v || lh(c).pos.length > 0;
+      if (v === '负面剔除') return lh(c).neg.length === 0;
+      if (v === '正面·重大项目') return lh(c).pos.some(k => k.indexOf('重大项目') >= 0);
+      if (v === '正面·专精特新') return lh(c).pos.some(k => k.indexOf('专精特新') >= 0);
+      if (v === '正面·上市/拟上市') return lh(c).pos.some(k => k.indexOf('上市') >= 0);
+      return true;
+    };
+    const listOk = c => plistOk(f.plist, c) && plistOk(nlPlist, c);
     return M().funnel.cos.filter(c =>
       (f.nets.length === 0 || f.nets.includes(c.net)) &&
       (f.track === '全部' || c.track === f.track) &&
       (f.prog === '全部' || c.prog === f.prog) &&
       (f.pos === '全部' || c.pos === f.pos) &&
       (f.wt === '全部' || c.wt === f.wt) &&
-      (f.src === '全部' || f.src === c.src) &&
+      (f.src === '全部' || f.src === c.src ||
+        (f.src === 'CLAIM' && st.claims.includes(c.id))) &&
       (f.cat === '全部' || c.cat === f.cat) &&
       (f.sig === '全部' || c.sigLv === f.sig) &&
       (f.rel === '全部' || c.rel === f.rel) &&
       (f.lst === '全部' || (f.lst === '上市' ? c.listed.indexOf('是') === 0 : c.listed.indexOf('是') !== 0)) &&
       (c.score >= minScore) &&
       (!f.kw || (c.name + c.short + c.track).includes(f.kw)) &&
+      accOk(c) && listOk(c) &&
       (!nlNet || nlNet.includes(c.net)) &&
       (!nlCity || nlCity.includes(c.city)) &&
       (!nlProg || nlProg.includes(c.prog)) &&
@@ -2049,6 +2091,8 @@ window.APP = (function () {
     const conds = [];
     const eat = re => { q = q.replace(re, ' '); };
     NET_KW.forEach(([n, re]) => { if (re.test(q)) { conds.push({ k: 'net', v: n }); eat(re); } });
+    /* "六张网"泛指全部六张网企业（不限定单一网），仅从语句中移除 */
+    eat(/六张网/g);
     CITIES.forEach(ct => { if (q.includes(ct)) { conds.push({ k: 'city', v: ct }); eat(new RegExp(ct, 'g')); } });
     PROGS.forEach(p => { if (q.includes(p) || (p === '培育' && /培养/.test(q))) { conds.push({ k: 'prog', v: p }); eat(p === '培育' ? /培育|培养/g : new RegExp(p, 'g')); } });
     POSS.forEach(p => { if (q.includes(p)) { conds.push({ k: 'pos', v: p }); eat(new RegExp(p, 'g')); } });
@@ -2063,6 +2107,17 @@ window.APP = (function () {
     if (/AI筛选|网上筛选|网络筛选|AI发现/.test(q)) { conds.push({ k: 'src', v: 'AI' }); eat(/AI筛选|网上筛选|网络筛选|AI发现/g); }
     if (/订阅/.test(q)) { conds.push({ k: 'sub', v: 1 }); eat(/订阅/g); }
     RELS.forEach(r2 => { if (q.includes(r2)) { conds.push({ k: 'rel', v: r2 }); eat(new RegExp(r2, 'g')); } });
+    /* 准入标准与正负面清单（支持"总行正面清单/长三角准入/负面剔除"等口语） */
+    Object.keys(ACC).forEach(a => {
+      const kw = a.replace(/^总行|^长三角/, '');
+      const lv = a.slice(0, 2);
+      if (q.includes(a) || (q.includes(kw) && q.includes(lv))) { conds.push({ k: 'acc', v: a }); eat(new RegExp((lv + '|' + kw).replace(/[()]/g, '\\$&'), 'g')); }
+    });
+    if (/正面清单|正清单|正面/.test(q)) { conds.push({ k: 'plist', v: '正面' }); eat(/正面清单|正清单|正面/g); }
+    if (/负面清单|负清单|负面剔除|剔除/.test(q)) { conds.push({ k: 'plist', v: '负面剔除' }); eat(/负面清单|负清单|负面剔除|剔除/g); }
+    if (/重大项目|重大工程/.test(q) && !conds.some(c => c.k === 'plist' && c.v === '正面')) { conds.push({ k: 'plist', v: '正面·重大项目' }); eat(/重大项目|重大工程/g); }
+    if (/专精特新/.test(q) && !conds.some(c => c.k === 'plist')) { conds.push({ k: 'plist', v: '正面·专精特新' }); }
+    if (/项目/.test(q)) { conds.push({ k: 'proj', v: 1 }); eat(/项目清单|项目/g); }
     /* 剩余语义片段：命中细分赛道则作赛道条件，否则聚合成产品经理自定义标签 */
     const STOP = ['企业', '公司', '客户', '筛选', '适合', '需要', '要求', '优先', '重点', '推', '主推', '切入', '关注', '以上', '并且', '同时', '具有', '业务', '拓展', '营销', '评分'];
     const segs = q.split(/[，,。、；;：:\s的和或与及把里中在]/).map(x => x.trim()).filter(x => x.length >= 2 && !STOP.includes(x));
@@ -2079,7 +2134,7 @@ window.APP = (function () {
     if (tagSegs.length) conds.push({ k: 'tag', v: tagSegs.slice(0, 2).join('·').slice(0, 16) });
     return conds;
   }
-  const condLabel = c => ({ net: '六张网', city: '地区', prog: '营销进展', pos: '地位', wt: '权重', score: '评分', src: '来源', sub: '订阅', cat: '客户大类', nat: '性质', lst: '上市', track: '赛道', rel: '相关度', tag: '生成标签' }[c.k] || c.k);
+  const condLabel = c => ({ net: '六张网', city: '地区', prog: '营销进展', pos: '地位', wt: '权重', score: '评分', src: '来源', sub: '订阅', cat: '客户大类', nat: '性质', lst: '上市', track: '赛道', rel: '相关度', acc: '准入标准', plist: '清单', proj: '范围', tag: '生成标签' }[c.k] || c.k);
 
   /* ============================================================
      视图
@@ -2088,22 +2143,29 @@ window.APP = (function () {
   VIEWS.funnel = {
     render(el) {
       F();
+      const rk = ROLE_KEY();
       el.innerHTML = `
         <div class="page-head"><div class="page-title">机会漏斗</div>
           <div class="flex" style="gap:8px">
+            ${rk === 'rm' ? `<button class="btn btn-ghost" id="fnManual">＋ 手工录入客户</button><button class="btn btn-ghost" id="fnClaimPool">🙋 客户池认领</button>` : ''}
             <button class="btn btn-primary" id="fnImport">导入企业</button></div></div>
         <div id="fnTabs"></div>`;
-      $('#fnImport').onclick = () => this.importDlg();
+      const imp = el.querySelector('#fnImport'); if (imp) imp.onclick = () => this.importDlg();
+      const man = el.querySelector('#fnManual'); if (man) man.onclick = () => this.manualDlg();
+      const clm = el.querySelector('#fnClaimPool'); if (clm) clm.onclick = () => { S.params.tab = 'co'; this.render(el); toast('请在客户总览中点「主动认领」，认领即时生效并留痕'); };
       const tabs = [
-        { id: 'co', name: '企业总览', count: M().funnel.cos.length },
+        { id: 'co', name: '客户清单', count: M().funnel.cos.length },
+        { id: 'proj', name: '项目清单', count: (M().manage || { projects: [] }).projects.length },
         { id: 'sub', name: '订阅的企业', count: F().subs.length },
         { id: 'task', name: '任务下发与跟踪', count: F().tasks.length }];
       let act = S.params.tab;
-      if (!['co', 'sub', 'task'].includes(act)) act = 'co';
+      if (!['co', 'sub', 'task', 'proj'].includes(act)) act = 'co';
+      delete S.params.tab;   /* 一次性消费，避免角色切换后残留 */
       renderTabs($('#fnTabs'), tabs, act, t => { act = t; S.params.tab = t; paint(); });
       const paint = () => {
         const box = switchTab($('#fnTabs'), tabs, act, paint);
         if (act === 'co') this.paintCo(box);
+        if (act === 'proj') this.paintProj(box);
         if (act === 'sub') this.paintSub(box);
         if (act === 'task') this.paintTask(box);
       }; paint();
@@ -2147,6 +2209,19 @@ window.APP = (function () {
           <div class="card-pad" style="padding-top:8px">${this.insightHtml(list)}</div>
         </div>` : ''}
         <div class="fn-filter-card">
+          <div class="fn-frow" style="align-items:center">
+            <span class="fn-flabel">智能筛选</span>
+            <div class="fn-fgroup" style="flex:1;align-items:center">
+              <span class="ai-badge" style="flex-shrink:0">AI</span>
+              <input class="input" id="fnNlQ" placeholder="一句话筛选：如 六张网 总行正面清单 / 无锡 算力网 评分85以上 / 长三角 重大项目" value="${esc(st.nlQ || '')}" style="flex:1;min-width:240px;height:28px">
+              <button class="btn btn-primary btn-sm" id="fnNlGo" style="height:28px">解析筛选</button>
+              ${st.conds.length ? `<button class="btn btn-text btn-sm" id="fnNlClr" style="height:24px;font-size:11px">清空条件</button>` : ''}
+            </div>
+          </div>
+          ${st.conds.length ? `<div class="fn-frow"><span class="fn-flabel">命中条件</span><div class="fn-fgroup" style="flex-wrap:wrap;gap:5px">
+            ${st.conds.map((c, i) => `<span class="tag tag-violet" style="height:22px;cursor:pointer" data-nlcond="${i}" title="点击移除该条件">${condLabel(c)}：${esc(String(c.v))} ✕</span>`).join('')}
+            <span class="text-xs text-muted">当前命中 ${filteredCos().length} 家企业${st.conds.some(c => c.k === 'proj') ? ' · 含"项目"关键词时项目清单同步按所属网/要点筛选' : ''}</span>
+          </div></div>` : ''}
           <div class="fn-frow">
             <span class="fn-flabel">六张网</span>
             <div class="fn-fgroup">${netChip('全部')}${NETS().map(netChip).join('')}
@@ -2170,30 +2245,41 @@ window.APP = (function () {
               <span class="f-label">客户大类</span>${dimChip('cat', CATS)}
               <span class="fn-sep"></span><span class="f-label">上市</span>${['全部', '上市', '未上市'].map(x => `<button class="chip ${f.lst === x ? 'on' : ''}" data-dim="lst" data-v="${x}" style="height:24px;font-size:11px;padding:0 10px">${x}</button>`).join('')}
               <span class="fn-sep"></span><span class="f-label">相关度</span>${dimChip('rel', RELS)}
-              <span class="fn-sep"></span><span class="f-label">来源</span>${['全部', 'AI', 'IMP'].map(x => `<button class="chip ${f.src === x ? 'on' : ''}" data-dim="src" data-v="${x}" style="height:24px;font-size:11px;padding:0 10px">${x === 'AI' ? 'AI筛选' : x === 'IMP' ? '导入' : '全部'}</button>`).join('')}
+              <span class="fn-sep"></span><span class="f-label">来源</span>${['全部', 'AI', 'IMP', 'CLAIM'].map(x => `<button class="chip ${f.src === x ? 'on' : ''}" data-dim="src" data-v="${x}" style="height:24px;font-size:11px;padding:0 10px">${x === 'AI' ? 'AI筛选' : x === 'IMP' ? '导入' : x === 'CLAIM' ? '自认领' : '全部'}</button>`).join('')}
+            </div>
+          </div>
+          <div class="fn-frow">
+            <span class="fn-flabel">准入与清单</span>
+            <div class="fn-fgroup">
+              <span class="f-label">准入标准</span>${Object.keys(ACC).map(a => `<button class="chip ${st.accChips.includes(a) ? 'on' : ''}" data-acc="${esc(a)}" style="height:24px;font-size:11px;padding:0 10px" title="${esc(ACC[a].lv)} · ${esc(ACC[a].tip)}">${ACC[a].lv}·${a.replace(ACC[a].lv, '')}</button>`).join('')}
+              <span class="fn-sep"></span><span class="f-label">清单</span>${['全部', '正面·重大项目', '正面·专精特新', '正面·上市/拟上市', '负面剔除'].map(x => `<button class="chip ${f.plist === x ? 'on' : ''}" data-dim="plist" data-v="${x}" style="height:24px;font-size:11px;padding:0 10px">${x}</button>`).join('')}
+              ${st.accChips.length ? `<button class="btn btn-text btn-sm" id="accClr" style="height:22px;font-size:11px">清空准入</button>` : ''}
             </div>
           </div>
         </div>
-        <div class="card"><div class="tbl-wrap"><table class="tbl fn-tbl" style="min-width:1589px"><thead><tr>
-          <th style="width:176px">企业名称</th><th style="width:90px">客户大类</th><th style="width:196px">上市情况</th><th style="width:108px">六张网</th>
-          <th style="width:148px">细分赛道</th><th style="width:88px">企业性质</th><th style="width:112px">地区</th>
-          <th style="width:76px">营销进展</th><th style="width:74px">地位</th><th style="width:74px">权重</th>
-          <th style="width:100px">综合评分</th><th style="width:200px">✦ 建议服务方案</th><th style="width:147px">操作</th></tr></thead><tbody>
-        ${list.sort((a, b) => b.score - a.score).map(c => `<tr data-co="${c.id}">
-          <td title="${esc(c.name)}"><b class="text-sm">${esc(c.short)}</b>${c.src === 'IMP' ? ' <span class="tag tag-violet" style="height:17px;font-size:10px;padding:0 5px">📥 导入</span>' : ''}${pmTag(c.id) ? `<div style="margin-top:2px">${pmTag(c.id)}</div>` : ''}</td>
-          <td>${catTag(c.cat)}</td>
-          <td title="${esc(c.listed)}">${c.listed.indexOf('是') === 0 ? '是·' + esc(c.listed.slice(2)) : '<span class="text-muted">否</span>'}</td>
-          <td title="${esc(c.track)}${c.opp ? ' ｜ 机会地：' + esc(c.opp) : ''}">${esc(c.net)}</td>
-          <td title="${esc(c.track)}${c.opp ? ' ｜ 机会地：' + esc(c.opp) : ''}">${esc(c.track)}</td>
-          <td>${esc(c.nat)}</td>
-          <td title="${esc(c.city)}·${esc(c.zone)}${c.opp ? ' ｜ 机会地：' + esc(c.opp) : ''}">${esc(c.city)}·${esc(c.zone)}</td>
+        <div class="card"><div class="tbl-wrap"><table class="tbl fn-tbl" style="min-width:1080px"><thead><tr>
+          <th style="width:220px">企业</th><th style="width:96px">六张网</th><th style="width:130px">细分赛道</th><th style="width:84px">地区</th>
+          <th style="width:80px">营销进展</th><th style="width:70px">地位</th><th style="width:70px">权重</th>
+          <th style="width:88px">综合评分</th><th style="min-width:190px">✦ 建议服务方案</th><th style="width:150px">操作</th></tr></thead><tbody>
+        ${list.sort((a, b) => b.score - a.score).map(c => { const rk = ROLE_KEY();
+          const isClaimed = st.claims.includes(c.id) || taskOf(c.id);
+          const opHtml = rk === 'rm'
+            ? `<button class="btn btn-text btn-sm" data-claim="${c.id}" ${isClaimed ? 'disabled style="color:var(--t3)"' : ''}>${st.claims.includes(c.id) ? '✓ 已认领' : taskOf(c.id) ? '已承接' : '认领'}</button><button class="btn btn-text btn-sm" data-det="${c.id}">详情</button>`
+            : `<button class="btn btn-text btn-sm" data-one-disp="${c.id}" ${taskOf(c.id) ? 'disabled style="color:var(--t3)"' : ''}>${taskOf(c.id) ? '已下发' : '下发'}</button><button class="btn btn-text btn-sm" data-det="${c.id}">详情</button>`;
+          return `<tr data-co="${c.id}">
+          <td title="${esc(c.name)}">
+            <b class="text-sm">${esc(c.short)}</b>${c.src && c.src !== 'AI' ? ' ' + srcTag(c) : ''}${c.listed.indexOf('是') === 0 ? ' <span class="tag tag-cyan" style="height:17px;font-size:10px;padding:0 5px" title="' + esc(c.listed.slice(2)) + '">' + esc(c.listed.slice(2).replace(/\(/, ' ').replace(/\)/, '')) + '</span>' : ''}
+            <div class="text-xs text-muted" style="margin-top:2px">${esc(c.cat)} · ${esc(c.nat)}${pmTag(c.id) ? ' ' + pmTag(c.id) : ''}</div></td>
+          <td title="${esc(c.net)}${c.opp ? ' ｜ 机会地：' + esc(c.opp) : ''}"><span class="text-sm">${esc(c.net)}</span></td>
+          <td title="${esc(c.track)}${c.opp ? ' ｜ 机会地：' + esc(c.opp) : ''}"><span class="text-sm text-sub">${esc(c.track)}</span></td>
+          <td title="${esc(c.city)}·${esc(c.zone)}${c.opp ? ' ｜ 机会地：' + esc(c.opp) : ''}">${esc(c.city)}<div class="text-xs text-muted" style="margin-top:2px">${esc(c.zone)}</div></td>
           <td><span class="tag ${progTag(c.prog)}" style="height:19px;font-size:10px;padding:0 6px">${c.prog}</span></td>
           <td><span class="tag ${posTag(c.pos)}" style="height:19px;font-size:10px;padding:0 6px">${c.pos}</span></td>
           <td><span class="tag ${wtTag(c.wt)}" style="height:19px;font-size:10px;padding:0 6px">${c.wt}</span></td>
           <td>${scoreBar(c.score)}</td>
           <td class="fn-prod-td"><span class="fn-prod-link" data-why="${c.id}" title="点击查看 AI 推荐理由">${esc((c.prods || []).join(' / '))}</span></td>
-          <td onclick="event.stopPropagation()" style="text-align:center"><button class="btn btn-text btn-sm" data-sub="${c.id}">${F().subs.includes(c.id) ? '取消订阅' : '订阅'}</button><button class="btn btn-text btn-sm" data-det="${c.id}">详情</button></td></tr>`).join('') ||
-        `<tr><td colspan="13"><div class="empty"><div class="e-ico">🏢</div><div class="e-title">当前条件下暂无企业</div></div></td></tr>`}</tbody></table></div>
+          <td onclick="event.stopPropagation()" style="text-align:center;white-space:nowrap">${opHtml}</td></tr>`; }).join('') ||
+        `<tr><td colspan="9"><div class="empty"><div class="e-ico">🏢</div><div class="e-title">当前条件下暂无企业</div></div></td></tr>`}</tbody></table></div>
         <div class="pager flex-between" style="padding:12px 16px;gap:10px">
           <span>共 ${list.length} 家 · 其中已订阅 ${list.filter(c => F().subs.includes(c.id)).length} 家 · 按综合评分降序 ｜ 建议服务方案由 AI 按金融机构产品库匹配生成，点击查看推荐理由</span>
           <span class="fn-ai-check" title="渠道抓取时间：工商公示 11-04 04:02 · 舆情监测 11-04 04:05 · 招投标 11-04 04:07 · 融资事件 11-04 04:09">✦ AI 已核验 ${stat.all}/${stat.all}</span>
@@ -2207,6 +2293,29 @@ window.APP = (function () {
         f.track = '全部'; this.paintCo(box);
       });
       box.querySelectorAll('[data-dim]').forEach(b => b.onclick = () => { const k = b.dataset.dim; f[k] = f[k] === b.dataset.v ? '全部' : b.dataset.v; this.paintCo(box); });
+      box.querySelectorAll('[data-acc]').forEach(b => b.onclick = () => {
+        const a = b.dataset.acc, i = st.accChips.indexOf(a);
+        if (i >= 0) st.accChips.splice(i, 1); else st.accChips.push(a);
+        this.paintCo(box);
+      });
+      const accClr = box.querySelector('#accClr'); if (accClr) accClr.onclick = () => { st.accChips = []; this.paintCo(box); };
+      box.querySelectorAll('[data-claim]').forEach(b => b.onclick = e => {
+        e.stopPropagation();
+        const id = b.dataset.claim, c = coById(id);
+        if (st.claims.includes(id) || taskOf(id)) return;
+        confirmDlg(`主动认领「${esc(c.short)}」？<br><span class="text-xs text-muted">认领即时生效：自动生成客户经理跟进任务（来源标记"自认领"），全程留痕，产品经理可在任务跟踪中查看。</span>`, () => {
+          st.claims.push(id);
+          const u = APP.curUser();
+          st.tasks.unshift({
+            id: 'FTC' + Date.now().toString(36), co: id, rm: 'rm-drz', type: '营销跟进', due: '11-18', status: '待接收', d: '2026-11-04',
+            note: `${u.name} 主动认领（自认领）：结合AI作战包出方案后拜访；同步摸排非信贷综合服务机会`,
+            prods: (c.prods || []).slice(0, 3),
+            log: [{ d: '11-04', t: '自认领', by: `${u.name} · ${u.dept}`, x: `客户经理主动认领「${c.short}」（来源：客户池认领），进入跟进流程；产品经理可见` }],
+          });
+          toast(`已认领「${c.short}」，任务已生成（来源：自认领）`);
+          this.paintCo(box);
+        });
+      });
       const trk = box.querySelector('#fnTrack'); trk.onchange = () => { f.track = trk.value; this.paintCo(box); };
       const kw = box.querySelector('#fnKw'); kw.oninput = () => { f.kw = kw.value.trim(); this.paintCo(box); const k2 = box.querySelector('#fnKw'); k2.focus(); k2.setSelectionRange(k2.value.length, k2.value.length); };
       box.querySelectorAll('[data-why]').forEach(el => el.onclick = e => { e.stopPropagation(); APP.go('plan', { co: el.dataset.why }); });
@@ -2219,6 +2328,21 @@ window.APP = (function () {
         else { F().subs.push(id); toast(`已订阅「${c.short}」，请在"订阅的企业"中统一下发跟进`); }
         this.paintCo(box);
       });
+      /* 产品经理：客户清单行内直接下发 */
+      box.querySelectorAll('[data-one-disp]').forEach(b => b.onclick = e => {
+        e.stopPropagation();
+        if (b.disabled) return;
+        const id = b.dataset.oneDisp;
+        this.dispatchDlg([id]);
+      });
+      /* 智能筛选（自然语言） */
+      const nlGo = box.querySelector('#fnNlGo');
+      if (nlGo) nlGo.onclick = () => this.runNL();
+      const nlClr = box.querySelector('#fnNlClr');
+      if (nlClr) nlClr.onclick = () => this.clearCond();
+      box.querySelectorAll('[data-nlcond]').forEach(t => t.onclick = () => this.rmCond(+t.dataset.nlcond));
+      const nlQ = box.querySelector('#fnNlQ');
+      if (nlQ) nlQ.addEventListener('keydown', e => { if (e.key === 'Enter') this.runNL(); });
       /* B3+B4：AI 匹配动效——仅本会话首次进入企业总览播放 */
       if (!st.prodLit) {
         st.prodLit = true;
@@ -2286,25 +2410,36 @@ window.APP = (function () {
           </div>
         </div>`;
     },
-    setQ(q) { $('#fnNlQ').value = q; this.runNL(); },
+    setQ(q) { const st = F(); st.nlQ = q; this.runNL(); },
     runNL() {
       const q = ($('#fnNlQ') || {}).value;
       if (!q || !q.trim()) return toast('请输入一句话筛选要求', 'warn');
       const st = F();
+      st.nlQ = q.trim();
       st.conds = parseNL(q);
-      if (!st.conds.length) return toast('未能解析出有效条件，请换个说法（如：无锡，算力网，评分85以上）', 'warn');
+      if (!st.conds.length) return toast('未能解析出有效条件，请换个说法（如：六张网 总行正面清单 / 无锡 算力网 评分85以上）', 'warn');
+      /* "项目"关键词：项目清单按所属网/要点关键词同步筛选 */
+      if (st.conds.some(c => c.k === 'proj')) {
+        st.pjF = st.pjF || { net: '全部', stage: '全部', prog: '全部', kw: '' };
+        const netCond = st.conds.find(c => c.k === 'net');
+        st.pjF.net = netCond ? netCond.v : '全部';
+        st.pjF.kw = st.nlQ.replace(/六张网|总行|长三角|正面清单|负面清单|正面|负面|准入|清单|项目/g, '').trim().slice(0, 12);
+      }
       const tagCond = st.conds.find(c => c.k === 'tag');
-      this.paintCo(document.querySelector('#fnTabs .tab-panel'));
+      /* 自然语言筛选作用于客户清单；当前不在该 Tab 时自动切回 */
+      const panel = document.querySelector('#fnTabs .tab-panel');
+      if (S.params.tab && S.params.tab !== 'co') { S.params.tab = 'co'; this.render(document.querySelector('#viewRoot')); return; }
+      this.paintCo(panel);
       if (tagCond) {
         const hits = filteredCos();
         hits.forEach(c => {
           st.tags[c.id] = st.tags[c.id] || [];
-          if (!st.tags[c.id].some(t => t.t === tagCond.v)) st.tags[c.id].push({ t: tagCond.v, by: '分行产品经理 · 陈立', d: '11-04' });
+          if (!st.tags[c.id].some(t => t.t === tagCond.v)) st.tags[c.id].push({ t: tagCond.v, by: APP.curUser().role + ' · ' + APP.curUser().name, d: '11-04' });
         });
         toast(`AI 已解析 ${st.conds.length} 个条件，命中 ${hits.length} 家，并生成备注标签「${tagCond.v}」`);
         this.paintCo(document.querySelector('#fnTabs .tab-panel'));
       } else {
-        toast(`AI 已解析 ${st.conds.length} 个筛选条件`);
+        toast(`AI 已解析 ${st.conds.length} 个筛选条件，命中 ${filteredCos().length} 家`);
       }
     },
     rmCond(i) {
@@ -2316,7 +2451,7 @@ window.APP = (function () {
     clearCond() {
       const st = F();
       st.conds.forEach(c => { if (c.k === 'tag') Object.keys(st.tags).forEach(id => { st.tags[id] = st.tags[id].filter(t => t.t !== c.v); }); });
-      st.conds = [];
+      st.conds = []; st.nlQ = '';
       this.paintCo(document.querySelector('#fnTabs .tab-panel'));
     },
 
@@ -2332,7 +2467,7 @@ window.APP = (function () {
         <div class="flex mb2" style="gap:8px"><b>Excel 名单导入</b><span class="text-xs text-muted">支持 xlsx / csv · 导入后来源标记为"导入"</span></div>
         <div class="drop" id="fnDrop"><b>拖拽文件到此处，或点击选择</b>示例：六张网补充名单.xlsx（4 行）<div class="mt2"><button class="btn btn-ghost btn-sm" id="fnParse">解析示例文件</button><button class="btn btn-text btn-sm" id="fnTpl">下载导入模板</button></div></div>
         <div id="fnParseOut" class="mt3"></div>`,        foot: `<button class="btn btn-ghost" onclick="APP.closeModal()">关闭</button>` });
-      $('#fnTpl').onclick = () => toast('模板已开始下载：六张网企业导入模板.xlsx（演示）');
+      $('#fnTpl').onclick = () => toast('模板已开始下载：六张网企业导入模板.xlsx');
       const drop = $('#fnDrop');
       drop.onclick = () => $('#fnParse').click();
       $('#fnParse').onclick = e => {
@@ -2496,6 +2631,170 @@ window.APP = (function () {
       };
     },
 
+    /* ---------- 手工录入客户（客户经理：任意客户 → 入客户池 → AI分析/方案闭环） ---------- */
+    manualDlg() {
+      openModal({ small: true, title: '手工录入客户', body: `
+        <div class="text-xs text-muted mb3" style="line-height:1.7">客户经理可录入任意客户（不限于AI筛选名单）。录入后自动入客户池，可配合生成客户画像 / 深度分析 / 拜访要点与综合服务方案。</div>
+        <div class="form">
+          <div class="form-item"><label class="form-label">企业名称 *</label><input class="input" id="mnName" placeholder="如：无锡某某精密制造有限公司"></div>
+          <div class="grid-2">
+            <div class="form-item"><label class="form-label">所在地区</label><input class="input" id="mnCity" placeholder="如：无锡·锡山区"></div>
+            <div class="form-item"><label class="form-label">所属方向</label>
+              <select class="select" id="mnNet">${NETS().map(n => `<option>${n}</option>`).join('')}</select></div>
+          </div>
+          <div class="form-item"><label class="form-label">主营 / 线索情况（AI 将据此出画像与方案）</label>
+            <textarea class="input" id="mnNote" rows="3" placeholder="如：为本地头部车企供应精密结构件，年营收约1.2亿，账期90天，近期计划扩产"></textarea></div>
+        </div>`,
+        foot: `<button class="btn btn-ghost" onclick="APP.closeModal()">取消</button><button class="btn btn-primary" id="mnGo">录入并生成AI作战包</button>` });
+      $('#mnGo').onclick = () => {
+        const name = $('#mnName').value.trim();
+        if (!name) return toast('请输入企业名称', 'warn');
+        const net = $('#mnNet').value, note = $('#mnNote').value.trim();
+        const loc = ($('#mnCity').value.trim() || '无锡').split(/[·\-]/);
+        const id = 'FM' + Date.now().toString(36);
+        const u = APP.curUser();
+        M().funnel.cos.unshift({
+          id, name, short: name.replace(/(股份有限公司|有限责任公司|有限公司|集团|（.*?）)/g, '').slice(0, 8) || name.slice(0, 8),
+          net, track: note ? note.slice(0, 12) : net + '相关', city: loc[0], zone: loc[1] || '—', opp: '',
+          listed: '否', nat: '民营企业', prog: '培育', pos: '基础', wt: '承接',
+          layer: '储备', status: '潜在', cap: '—', score: 60, sigLv: 'B', rel: '一般相关',
+          prods: NET_PROD[net] || ['流动资金贷款'], src: 'MANUAL',
+          sig: ['客户经理手工录入（' + u.name + '）', note || '待补充企业情况'],
+          recent: note || '客户经理录入，待补充公开信息', tags: ['手工录入'],
+          industry: net, seg: note ? note.slice(0, 12) : '—', est: '—', emp: '—', legal: '—', uscc: '—', type: '民营企业', park: '—', addr: '—', scope: '—', qual: [],
+          grade: 'C', ipo: '',
+          internal: { credit: 0, used: 0, deposit: 0, settle: 0, products: [] },
+          imp: { by: u.name + ' · ' + u.dept, d: '2026-11-04', note: '手工录入客户' },
+        });
+        /* 同步生成自认领任务，进工作台闭环 */
+        F().claims.push(id);
+        F().tasks.unshift({
+          id: 'FTM' + Date.now().toString(36), co: id, rm: 'rm-drz', type: '营销跟进', due: '11-20', status: '待接收', d: '2026-11-04',
+          note: note || `跟进手工录入客户「${name}」`,
+          prods: NET_PROD[net] || ['流动资金贷款'],
+          log: [{ d: '11-04', t: '手工录入', by: u.name + ' · ' + u.dept, x: `手工录入客户「${name}」并自认领跟进；${note || '待补充企业情况'}` }],
+        });
+        APP.closeModal();
+        toast(`已录入「${name}」并生成跟进任务，可在「访前作战包」中选择该客户生成三目标内容`);
+        S.packCo = id; S.packGoal = 'profile';
+        APP.go('pack');
+      };
+    },
+
+    /* ---------------- Tab 2.5：项目清单（与企业客户清单并行 · 产品经理下发） ---------------- */
+    paintProj(box) {
+      const st = F();
+      if (!st.pjF) st.pjF = { net: '全部', stage: '全部', prog: '全部', kw: '' };
+      const pf = st.pjF;
+      const allProjs = (M().manage || { projects: [] }).projects;
+      const projs = allProjs.filter(p =>
+        (pf.net === '全部' || p.net === pf.net) &&
+        (pf.stage === '全部' || p.stage === pf.stage) &&
+        (pf.prog === '全部' || p.prog === pf.prog) &&
+        (!pf.kw || (p.name + p.note).includes(pf.kw)));
+      if (!st.projSel) st.projSel = [];
+      const sel = st.projSel.filter(id => projs.some(p => p.id === id));
+      const taskOfProj = p => st.tasks.find(t => t.proj === p.id);
+      const cName = id => { const c = M().funnel.cos.find(x => x.id === id); return c ? c.short : '—'; };
+      const stTag = s => ({ 储备: 'tag-gray', 前期对接: 'tag-blue', 方案阶段: 'tag-orange', 已批复: 'tag-green', 已投放: 'tag-solid-red' }[s] || 'tag-gray');
+      const pjChip = (k, v) => `<button class="chip ${pf[k] === v ? 'on' : ''}" data-pjf="${k}" data-pjv="${esc(v)}" style="height:24px;font-size:11px;padding:0 10px">${v}</button>`;
+      box.innerHTML = `
+        <div class="card card-pad mb3">
+          <div class="flex mb2" style="gap:8px"><b>项目储备漏斗</b><span class="text-xs text-muted">六张网重大项目 · 与客户清单并行，由产品经理下发跟进</span></div>
+          <div class="fn-funnel">
+            <div class="fn-stage"><div class="fn-s-n fs-num">${allProjs.length}</div><div class="fn-s-l">项目清单</div></div><span class="fn-arrow">›</span>
+            <div class="fn-stage"><div class="fn-s-n fs-num">${allProjs.filter(p => taskOfProj(p)).length}</div><div class="fn-s-l">已下发</div></div><span class="fn-arrow">›</span>
+            <div class="fn-stage fn-stage-end"><div class="fn-s-n fs-num">${allProjs.filter(p => p.stage === '已批复' || p.stage === '已投放').length}</div><div class="fn-s-l">已批复/投放</div></div>
+          </div>
+        </div>
+        <div class="fn-filter-card mb3">
+          <div class="fn-frow">
+            <span class="fn-flabel">项目筛选</span>
+            <div class="fn-fgroup">
+              <span class="f-label">所属网</span>${['全部', ...NETS()].map(v => pjChip('net', v)).join('')}
+              <span class="fn-sep"></span><span class="f-label">阶段</span>${['全部', '储备', '前期对接', '方案阶段', '已批复', '已投放'].map(v => pjChip('stage', v)).join('')}
+              <span class="fn-sep"></span><span class="f-label">营销进展</span>${['全部', '突破', '攻坚', '培育', '储备'].map(v => pjChip('prog', v)).join('')}
+              <input class="input" id="pjKw" placeholder="搜索项目…" value="${esc(pf.kw)}" style="width:150px;height:26px;margin-left:auto">
+            </div>
+          </div>
+        </div>
+        <div class="filter-bar">
+          <b style="margin-right:6px">项目清单（${projs.length} 个）</b>
+          <span class="text-xs text-muted">勾选后下发客户经理，项目关联企业同步生成跟进任务；随项目深入，纪要/协同/方案同闭环</span>
+          <span style="flex:1"></span>
+          <button class="btn btn-ghost btn-sm" id="pjAll">${sel.length === projs.length && projs.length ? '取消全选' : '全选'}</button>
+          <button class="btn btn-primary btn-sm" id="pjDsp">下发选中（${sel.length}）</button>
+        </div>
+        <div class="card"><div class="tbl-wrap"><table class="tbl"><thead><tr>
+          <th style="width:40px"></th><th style="min-width:190px">项目名称</th><th style="width:96px">关联客户</th><th style="width:96px">所属网</th>
+          <th style="width:88px">投资额</th><th style="width:80px">阶段</th><th style="width:74px">营销进展</th><th style="min-width:200px">项目要点 / 金融服务切入</th><th style="width:96px">操作</th></tr></thead><tbody>
+        ${projs.map(p => { const t = taskOfProj(p), rm = t ? rmById(t.rm) : null; return `<tr>
+          <td>${t ? '<span class="tag tag-green" style="height:19px;font-size:10px;padding:0 5px">已下发</span>' : `<input type="checkbox" data-pjsel="${p.id}" ${sel.includes(p.id) ? 'checked' : ''} style="accent-color:var(--brand-500)">`}</td>
+          <td><b class="text-sm">${esc(p.name)}</b></td>
+          <td class="text-sm">${esc(cName(p.co))}</td>
+          <td class="text-sm">${esc(p.net)}</td>
+          <td class="text-sm fs-num">${esc(p.amt)}</td>
+          <td><span class="tag ${stTag(p.stage)}" style="height:19px;font-size:10px;padding:0 6px">${p.stage}</span></td>
+          <td><span class="tag ${progTag(p.prog)}" style="height:19px;font-size:10px;padding:0 6px">${p.prog}</span></td>
+          <td class="text-sm text-sub" style="white-space:normal;line-height:1.6">${esc(p.note)}</td>
+          <td onclick="event.stopPropagation()" style="white-space:nowrap">${t ? `<span class="text-xs text-muted">${esc(rm ? rm.name : '')} 承接</span>` : `<button class="btn btn-text btn-sm" data-pjone="${p.id}">下发</button>`}</td></tr>`; }).join('') ||
+        '<tr><td colspan="9"><div class="empty"><div class="e-ico">🏗</div><div class="e-title">当前条件下暂无项目</div></div></td></tr>'}</tbody></table></div></div>`;
+      box.querySelectorAll('[data-pjf]').forEach(b => b.onclick = () => { pf[b.dataset.pjf] = b.dataset.pjv; this.paintProj(box); });
+      const pjKw = box.querySelector('#pjKw');
+      if (pjKw) pjKw.oninput = () => { pf.kw = pjKw.value.trim(); this.paintProj(box); const k2 = box.querySelector('#pjKw'); k2.focus(); k2.setSelectionRange(k2.value.length, k2.value.length); };
+      box.querySelectorAll('[data-pjsel]').forEach(ck => ck.onchange = () => {
+        const id = ck.dataset.pjsel, i = sel.indexOf(id);
+        if (ck.checked && i < 0) sel.push(id); if (!ck.checked && i >= 0) sel.splice(i, 1);
+        this.paintProj(box);
+      });
+      const all = box.querySelector('#pjAll');
+      if (all) all.onclick = () => { st.projSel = (sel.length === projs.length && projs.length) ? [] : projs.filter(p => !taskOfProj(p)).map(p => p.id); this.paintProj(box); };
+      const dsp = box.querySelector('#pjDsp');
+      if (dsp) dsp.onclick = () => {
+        const ids = sel.filter(id => projs.some(p => p.id === id) && !taskOfProj(projs.find(p => p.id === id)));
+        if (!ids.length) return toast('请先勾选未下发项目', 'warn');
+        this.projDispatchDlg(ids);
+      };
+      box.querySelectorAll('[data-pjone]').forEach(b => b.onclick = () => this.projDispatchDlg([b.dataset.pjone]));
+    },
+    /* 项目清单下发弹窗（项目任务与企业任务同闭环） */
+    projDispatchDlg(ids) {
+      const projs = (M().manage || { projects: [] }).projects.filter(p => ids.includes(p.id));
+      openModal({ wide: true, title: `下发项目跟进清单（${projs.length} 个）`, body: `
+        <div class="mb3" style="padding:10px 14px;background:var(--blue-50);border-radius:10px">
+          <div class="text-sm" style="font-weight:600;margin-bottom:4px">下发项目</div>
+          <div class="flex wrap" style="gap:6px">${projs.map(p => `<span class="tag tag-line" style="height:22px">${esc(p.name)}（${esc(p.net)} · ${esc(p.amt)}）</span>`).join('')}</div>
+        </div>
+        <div class="form">
+          <div class="grid-2">
+            <div class="form-item"><label class="form-label">承接客户经理</label>
+              <select class="select" id="pjRm">${M().funnel.rms.map(r => `<option value="${r.id}">${esc(r.name)} · ${esc(r.unit)}</option>`).join('')}</select></div>
+            <div class="form-item"><label class="form-label">完成时限</label><select class="select" id="pjDue"><option>11-12</option><option selected>11-18</option><option>11-25</option></select></div>
+          </div>
+          <div class="form-item"><label class="form-label">跟进要点（AI 预填，可修改）</label><textarea class="input" id="pjNote" rows="3"></textarea></div>
+        </div>`,
+        foot: `<button class="btn btn-ghost" onclick="APP.closeModal()">取消</button><button class="btn btn-primary" id="pjGo">确认下发</button>`,
+        onOpen: () => {
+          $('#pjNote').value = projs.map(p => `${p.name}（${p.net}·${p.amt}）：${p.note}`).join('\n');
+        } });
+      $('#pjGo').onclick = () => {
+        const rmId = $('#pjRm').value, due = $('#pjDue').value, note = $('#pjNote').value.trim();
+        const st = F();
+        projs.forEach(p => {
+          if (st.tasks.find(t => t.proj === p.id)) return;
+          st.tasks.unshift({
+            id: 'FTP' + Date.now().toString(36) + p.id, co: p.co, proj: p.id, rm: rmId, type: '项目跟进', due, status: '待接收', d: '2026-11-04',
+            note: note || `跟进项目「${p.name}」`, prods: p.prods || ['项目贷款'],
+            log: [{ d: '11-04', t: '任务下发', by: '分行产品经理 · 陈立', x: `下发项目跟进清单：${p.name}（${p.net} · ${p.amt}）` }],
+          });
+        });
+        APP.closeModal();
+        toast(`已下发 ${projs.length} 个项目至「${rmById(rmId).name} · ${rmById(rmId).unit}」`);
+        st.projSel = [];
+        S.params.tab = 'task'; this.render(document.querySelector('#viewRoot'));
+      };
+    },
+
     /* ---------------- Tab 3：任务下发与跟踪（仅已下发） ---------------- */
     paintTask(box) {
       const st = F();
@@ -2564,7 +2863,7 @@ window.APP = (function () {
           <div class="flex-between mb3"><b class="text-sm">跟进全过程（前中后台协同留痕）</b>
             <span class="text-xs" style="color:var(--brand-500);cursor:pointer" id="tkWb">去工作台记录访客纪要 ›</span></div>
           <div class="timeline">
-            ${t.log.map(l => `<div class="tl-item ${l.t === '访客纪要' ? '' : l.t === '协同留言' ? 'tl-warn' : l.t === '反馈' ? 'tl-ok' : ''}">
+            ${t.log.map(l => `<div class="tl-item ${l.t.indexOf("访客纪要") >= 0 ? '' : l.t === '协同留言' ? 'tl-warn' : l.t === '反馈' ? 'tl-ok' : ''}">
               <div class="tl-time">${l.d} · ${esc(l.by)}</div>
               <div class="tl-title">${esc(l.t)}</div>
               <div class="tl-desc" style="white-space:normal">${esc(l.x)}</div></div>`).join('') || '<div class="text-sm text-muted">暂无跟进记录</div>'}
@@ -2628,7 +2927,7 @@ window.APP = (function () {
           <div class="hero2-main">
             <div class="hero2-brand">
               <div class="hero2-title">北斗·产融智航系统</div>
-              <div class="hero2-en">BOB WUXI · INDUSTRIAL FINANCE INTELLIGENCE</div>
+              <div class="hero2-en">BOB NANJING · INDUSTRIAL FINANCE INTELLIGENCE</div>
               <div class="hero2-sub">洞察产业 · 链动金融</div>
             </div>
             <div class="hero2-search">
@@ -2659,12 +2958,17 @@ window.APP = (function () {
           </div>
         </div>
 
-        <!-- ===== 第一行：任务待办 · 订阅推送并排 ===== -->
-        <div class="home-row">
-          <div class="card" style="display:flex;flex-direction:column">
-            <div class="sec-head" style="padding:14px 16px 4px"><div class="sec-title"><span class="tbar"></span>任务待办</div>
-              <span class="sec-more" onclick="APP.go('workbench')">进入工作台 ›</span></div>
-            <div id="todoArea" style="flex:1;display:flex;flex-direction:column;min-height:0">${this.todoArea(m)}</div>
+        <!-- ===== 第一行：近期政策 · 同业动态 · 订阅监控（原管理驾驶舱看板集合内容） ===== -->
+        <div class="home-row" style="grid-template-columns:minmax(0,1.05fr) minmax(0,1.05fr) 336px">
+          <div class="card" style="display:flex;flex-direction:column;min-width:0;overflow:hidden">
+            <div class="sec-head" style="padding:14px 16px 4px"><div class="sec-title"><span class="tbar"></span>近期政策<span class="text-xs text-muted" style="font-weight:400;margin-left:8px">政策库 · 申报窗口提醒</span></div>
+              <span class="sec-more" onclick="APP.go('news',{cat:'政策资讯'})">全部政策 ›</span></div>
+            <div id="insPolicy" style="flex:1;min-height:0;overflow-y:auto"></div>
+          </div>
+          <div class="card" style="display:flex;flex-direction:column;min-width:0;overflow:hidden">
+            <div class="sec-head" style="padding:14px 16px 4px"><div class="sec-title"><span class="tbar"></span>同业动态<span class="text-xs text-muted" style="font-weight:400;margin-left:8px">他行新产品 / 战略合作 / 授信动作</span></div>
+              <span class="sec-more" onclick="APP.go('news',{cat:'同行资讯'})">全部同业 ›</span></div>
+            <div id="insPeer" style="flex:1;min-height:0;overflow-y:auto"></div>
           </div>
           <div class="card rail-sub">
             <div class="rs-head"><b>异常数据监控<span class="text-xs text-muted" style="font-weight:400;margin-left:8px">T+1跑批 · 10-19 06:00</span></b><span class="rs-manage" id="rkMore">更多 ›</span></div>
@@ -2678,7 +2982,7 @@ window.APP = (function () {
           </div>
         </div>
 
-        <!-- ===== 第二行：重点机会挖掘 · 关键指标 ===== -->
+        <!-- ===== 第二行：重点机会挖掘 · 贷款产品 ===== -->
         <div class="home-grid">
           <div class="card">
             <div class="sec-head" style="padding:14px 16px 4px"><div class="sec-title">重点机会挖掘</div>
@@ -2691,7 +2995,8 @@ window.APP = (function () {
             <div id="lpList" style="flex:1;min-height:0;display:flex;flex-direction:column"></div>
           </div>
         </div>`;
-      this.bindTodo(el);
+      this.renderInsPolicy(el, m);
+      this.renderInsPeer(el, m);
       this.renderLp(el, m);
       this.renderRisk(el, m);
       this.renderSub(el, m);
@@ -2756,6 +3061,25 @@ window.APP = (function () {
           ${this.pinGroup(pinned)}
           <div class="fk-feed">${this.homeFeed(m, cat)}</div>
         </div>`;
+    },
+    /* 近期政策（政策库前6条 · 点击进政策详情） */
+    renderInsPolicy(el, m) {
+      const box = el.querySelector('#insPolicy'); if (!box) return;
+      const pols = m.policies.slice(0, 6);
+      const lvTag = l => l === '国家' ? 'tag-red' : l === '江苏省' ? 'tag-blue' : 'tag-cyan';
+      box.innerHTML = pols.map(p => `<div class="nl-row" onclick="APP.openPolicy('${p.id}')">
+        <div class="nl-l1" style="min-width:0"><span class="tag ${lvTag(p.level)}" style="height:19px;font-size:10px;padding:0 6px;flex-shrink:0">${esc(p.level)}</span><span class="tag tag-violet" style="height:19px;font-size:10px;padding:0 6px;flex-shrink:0">${esc(p.type)}</span><span class="nl-t">${esc(p.title)}</span><span class="nl-d">${p.date.slice(5)}</span></div>
+        <div class="nl-l2" style="min-width:0"><span style="flex-shrink:0">${p.date} · ${esc(p.dept)}</span><span class="nl-ai" style="min-width:0"><span class="ai-badge" style="font-size:9px;height:15px;padding:0 4px;flex-shrink:0">AI</span><span class="t" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(p.ai)}</span></span><span class="nl-more" style="flex-shrink:0">详情 ›</span></div>
+      </div>`).join('') || '<div class="text-sm text-muted" style="padding:14px 2px">暂无政策</div>';
+    },
+    /* 同业动态（peerNews 前6条 · 单行省略不换行） */
+    renderInsPeer(el, m) {
+      const box = el.querySelector('#insPeer'); if (!box) return;
+      const rows = m.peerNews.slice(0, 6);
+      box.innerHTML = rows.map(p => `<div class="nl-row" style="cursor:default">
+        <div class="nl-l1" style="min-width:0"><span class="tag tag-orange" style="height:19px;font-size:10px;padding:0 6px;flex-shrink:0">同行资讯</span><span class="tag tag-red" style="height:19px;font-size:10px;padding:0 6px;flex-shrink:0">${esc(p.bank)}</span><span class="nl-t">${esc(p.title)}</span><span class="nl-d">${p.date.slice(5)}</span></div>
+        <div class="nl-l2" style="min-width:0"><span style="flex-shrink:0">${p.date} · ${esc(p.type)}</span><span class="nl-ai" style="min-width:0"><span class="t" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(p.detail)}</span></span></div>
+      </div>`).join('') || '<div class="text-sm text-muted" style="padding:14px 2px">暂无同业动态</div>';
     },
     renderLp(el, m) {
       const box = el.querySelector('#lpList'), q = el.querySelector('#lpQ');
@@ -2913,7 +3237,7 @@ window.APP = (function () {
       const F = APP.S.fn || { tasks: m.funnel.tasksSeed, subs: m.funnel.subsSeed };
       let tasks = F.tasks;
       if (rk === 'rm') tasks = tasks.filter(t => t.rm === 'rm-drz');
-      else if (rk === 'head') tasks = tasks.filter(t => (m.funnel.rms.find(r => r.id === t.rm) || {}).unit === '无锡分行营业部');
+      else if (rk === 'head') tasks = tasks.filter(t => (m.funnel.rms.find(r => r.id === t.rm) || {}).unit === '南京分行营业部');
       const cName = id => { const c = m.funnel.cos.find(x => x.id === id); return c ? c.short : ''; };
       const rName = id => { const r = m.funnel.rms.find(x => x.id === id); return r ? r.name : ''; };
       const stTag = s2 => ({ 待接收: 'tag-gray', 跟进中: 'tag-blue', 已反馈: 'tag-green', 已关闭: 'tag-line' }[s2] || 'tag-gray');
@@ -3077,6 +3401,9 @@ window.APP = (function () {
       kw.oninput = () => { P.kw = kw.value.trim(); P.pg = 1; this.paintMain(box); const k2 = box.querySelector('#nsKw'); k2.focus(); k2.setSelectionRange(k2.value.length, k2.value.length); };
     },
   };
+
+  /* 市场洞察 = 原门户首页（去掉任务待办，上浮近期政策/同业动态） */
+  VIEWS.insight = VIEWS.dashboard;
 })();
 
 </script>
@@ -3116,34 +3443,244 @@ window.APP = (function () {
   const srcTip = key => { const a = RPT_SRC[key]; if (!a || !a.length) return '';
     return `<span class="src-tip text-xs text-muted" style="margin-left:auto;font-weight:400">来源<span class="src-pop"><span class="sp-t text-sm">数据来源</span>${a.map(([title, time, publisher]) => `<span class="sp-l text-xs text-sub" style="display:block;line-height:1.7;padding:5px 0;border-bottom:1px solid var(--line)"><b>发布方/平台：</b>${esc(publisher)}<br><b>原文章标题：</b>${esc(title)}<br><b>时间：</b>${esc(time)}</span>`).join('')}</span></span>`; };
 
-  /* ================= AI智能分析（企业报告 + 产业链分析 + 我的报告） ================= */
-  VIEWS.report = {
+  /* ================= 访前作战包（一级导航） =================
+     首屏：承接任务列表 + 企业模糊搜索；点击任务/搜索 → 进入该企业四Tab作战包
+     Tab1 客户画像：企业全部信息（工商/标签/股权/上下游/合作历史）
+     Tab2 行业分析：所属行业景气看板
+     Tab3 访前话术：建议对接人 · 六大议题 · 话术示范 · 拜访注意事项
+     Tab4 推荐服务方案：综合服务方案看板 */
+  VIEWS.pack = {
+    /* 企业字段兜底：mock.companies 企业补齐六张网字段 */
+    normCo(c) {
+      if (!c || c.id[0] === 'F') return c;
+      c.listed = c.listed || (c.ipo ? '是·' + c.ipo : '否');
+      c.prog = c.prog || c.status || '培育';
+      c.pos = c.pos || (c.layer === '龙头' ? '战略' : c.layer === '拟上市' ? '腰部' : '基础');
+      c.wt = c.wt || (c.status === '攻坚' ? '主攻' : '择优');
+      c.rel = c.rel || '较高相关';
+      c.cat = c.cat || '上游供应商';
+      c.net = c.net || c.industry || '集成电路与电子材料';
+      c.sigLv = c.sigLv || (c.score >= 80 ? 'A' : 'B');
+      c.nat = c.nat || '民营企业';
+      c.zone = c.zone || (c.city || '无锡');
+      c.track = c.track || c.seg || c.net;
+      c.sig = c.sig || ['客户资料完善中（' + (c.seg || '') + '）'];
+      c.opp = c.opp || '';
+      return c;
+    },
     render(el) {
+      const m = M();
+      if (S.params.co && m.coById(S.params.co)) { S.packCo = S.params.co; delete S.params.co; }
+      if (!S.packTab) S.packTab = 'profile';
+      if (S.packKw == null) S.packKw = '';
+      /* 未选企业：任务列表首屏 */
+      if (!S.packCo || !m.coById(S.packCo)) { this.paintList(el); return; }
+      const c = this.normCo(m.coById(S.packCo));
+      const wb = window.VIEWS.workbench;
       el.innerHTML = `
-        <div class="card card-pad mb4" style="background:linear-gradient(120deg,#7E0E19 0%,#A61521 55%,#C0202C 130%);border:none;color:#fff;box-shadow:0 6px 20px rgba(142,16,25,.25)">
-          <div style="font-size:var(--fs-xl);font-weight:700">AI 智能分析</div>
-        </div>
-        <div id="rptTabs"></div>`;
-      if (!S.rptMy) S.rptMy = [
-        { co: 'JH', kind: '企业报告', t: '2026-09-28 10:32', by: '李晓' },
-        { co: 'TH', kind: '企业报告', t: '2026-09-26 16:05', by: '陈斌' },
-        { co: 'SX', kind: '企业报告', t: '2026-09-25 09:40', by: '王倩' },
-        { co: 'ic', kind: '产业链报告', title: '集成电路产业分析报告', t: '2026-09-22 14:10', by: '李晓' },
-        { co: 'HN', kind: '企业报告', t: '2026-09-18 14:21', by: '李晓' }];
-      if (S.visitReports && S.visitReports.length) {
-        S.visitReports.forEach(v => { if (!S.rptMy.some(x => x.id === v.id)) S.rptMy.unshift({ id: v.id, co: v.co, kind: '访后报告', title: v.title, t: v.t, by: v.by }); });
-      }
-      const tabs = [{ id: 'detail', name: '企业分析报告' }, { id: 'visit', name: '访后报告' }, { id: 'chain', name: '产业链报告' }, { id: 'mine', name: '我的报告', count: S.rptMy.length }];
-      let act = ['mine','chain','visit'].includes(S.params.tab) ? S.params.tab : 'detail';
-      renderTabs($('#rptTabs'), tabs, act, t => { act = t; S.params.tab = t; paint(); });
+        <div class="page-head"><div class="page-title">访前作战包 · ${esc(c.short)}</div>
+          <div class="flex" style="gap:8px">
+            <button class="btn btn-ghost" id="pkBack">← 返回任务列表</button>
+            <button class="btn btn-primary btn-sm" id="pkDl">下载作战包</button></div></div>
+        <div id="pkTabs"></div>`;
+      el.querySelector('#pkBack').onclick = () => { S.packCo = null; this.render(el); };
+      el.querySelector('#pkDl').onclick = () => toast('访前作战包已下载（PDF）');
+      const tabs = [
+        { id: 'profile', name: '客户画像' },
+        { id: 'industry', name: '行业分析' },
+        { id: 'script', name: '访前话术' },
+        { id: 'plan', name: '推荐服务方案' }];
+      let act = ['profile', 'industry', 'script', 'plan'].includes(S.packTab) ? S.packTab : 'profile';
+      renderTabs(el.querySelector('#pkTabs'), tabs, act, t => { act = t; S.packTab = t; paint(); });
       const paint = () => {
-        const box = switchTab($('#rptTabs'), tabs, act, paint);
-        if (act === 'detail') this.paintDetail(box);
-        if (act === 'visit') VIEWS.visitReport.renderInline(box);
-        if (act === 'chain') { this.paintChain(box); }
-        if (act === 'mine') this.paintMine(box);
+        const box = switchTab(el.querySelector('#pkTabs'), tabs, act, paint);
+        if (act === 'profile') box.innerHTML = this.profileTab(c);
+        if (act === 'industry') box.innerHTML = this.industryTab(c);
+        if (act === 'script') box.innerHTML = wb.briefHtml(c);
+        if (act === 'plan') box.innerHTML = wb.planHtml(c);
+        const FX = APP.AIFX;
+        FX.stagger(box); FX.countUp(box);
+        if (!FX.played.pkScript) { FX.played.pkScript = 1; FX.typewrite(box); }
       }; paint();
     },
+    /* ---------- 首屏：承接的任务列表 + 企业搜索 ---------- */
+    paintList(el) {
+      const m = M();
+      const wb = window.VIEWS.workbench;
+      const tasks = wb ? wb.myTasks() : (S.fn ? S.fn.tasks : m.funnel.tasksSeed);
+      const kw = S.packKw || '';
+      const list = kw ? tasks.filter(t => { const c = m.coById(t.co); return c && (c.name + c.short).includes(kw); }) : tasks;
+      const stTag = s => ({ 待接收: 'tag-gray', 跟进中: 'tag-blue', 已反馈: 'tag-green', 已关闭: 'tag-line' }[s] || 'tag-gray');
+      const card = t => { const c = m.coById(t.co); if (!c) return ''; const rm = (m.funnel.rms.find(r => r.id === t.rm) || {}).name || '';
+        return `<div class="wb-task" data-pk="${t.co}" style="cursor:pointer">
+          <div class="flex-between" style="gap:8px"><b class="text-sm">${esc(c.short)}</b>
+            <span class="flex" style="gap:6px"><span class="tag tag-line" style="height:19px;font-size:10px">${esc(t.type)}</span><span class="tag ${stTag(t.status)}" style="height:19px;font-size:10px">${t.status}</span></span></div>
+          <div class="text-xs text-muted mt1" style="line-height:1.6">截止 ${t.due} · ${esc(rm)} · 重点：${esc((t.prods || []).slice(0, 3).join(' / '))}</div>
+          <div class="wb-task-last">${t.log && t.log[0] ? '最新：' + esc(t.log[0].d) + ' ' + esc(t.log[0].t) : '尚未跟进'}</div>
+        </div>`; };
+      el.innerHTML = `
+        <div class="page-head"><div class="page-title">访前作战包</div></div>
+        <!-- 大搜索框：输入企业名 → AI 准备作战包 -->
+        <div class="card card-pad mb4" style="background:linear-gradient(115deg,#7E0E19 0%,#A61521 55%,#C0202C 130%);border:none;color:#fff;text-align:center;padding:30px 24px">
+          <div style="font-size:var(--fs-xl);font-weight:700">输入客户名称，AI 为您准备访前作战包</div>
+          <div class="mt1" style="font-size:12px;opacity:.85">客户画像 · 行业分析 · 访前话术 · 推荐服务方案，一键备齐</div>
+          <div style="position:relative;max-width:620px;margin:16px auto 0">
+            <span style="position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:18px">🔍</span>
+            <input id="pkQ" placeholder="输入企业名称，如：晶汇封测 / 中天科技…" autocomplete="off"
+              style="width:100%;height:48px;border:none;border-radius:24px;padding:0 130px 0 44px;font-size:var(--fs-md);outline:none">
+            <button id="pkGo" style="position:absolute;right:5px;top:5px;height:38px;padding:0 22px;border:none;border-radius:19px;background:#8E1019;color:#fff;font-weight:700;cursor:pointer">AI 准备</button>
+            <div id="pkSug" style="display:none;position:absolute;top:52px;left:0;width:100%;background:#fff;border-radius:12px;box-shadow:0 14px 36px rgba(0,0,0,.22);padding:6px;z-index:40;text-align:left"></div>
+          </div>
+          <div class="flex mt3" style="gap:6px;justify-content:center;flex-wrap:wrap">
+            <span class="text-xs" style="opacity:.8">试试：</span>
+            ${(m.companies.slice(0, 4)).map(c => `<span class="tag" data-pksug="${c.id}" style="height:22px;background:rgba(255,255,255,.18);color:#fff;cursor:pointer;font-size:10px">${esc(c.short)}</span>`).join('')}
+          </div>
+        </div>
+        <!-- 承接任务快选 -->
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">${APP.role().key === 'rm' ? '我承接的任务' : APP.role().key === 'head' ? '本支行任务' : APP.role().key === 'pm' ? '我下发的任务' : '全辖任务'}（${list.length}）<span class="card-sub">点击任务直接进入该企业作战包</span></div>
+            <input class="input" id="pkKw" placeholder="筛选任务…" value="${esc(kw)}" style="width:170px;height:28px">
+          </div>
+          <div style="padding:6px 0 10px;max-height:520px;overflow-y:auto">
+            ${list.map(card).join('') || `<div class="empty" style="padding:44px 16px"><div class="e-ico">🔍</div><div class="e-title">${kw ? '未找到匹配企业' : '暂无承接任务'}</div><div class="e-sub text-sm text-muted">${kw ? '换个关键词试试' : '任务由产品经理在机会漏斗下发'}</div></div>`}
+          </div>
+        </div>`;
+      /* 大搜索框：模糊联想 → 选中后 AI 五步准备特效 → 进四Tab */
+      const q = el.querySelector('#pkQ'), sug = el.querySelector('#pkSug');
+      const fuzzy = (c, k) => { const hay = c.name + c.short + (c.seg || '') + (c.track || ''); return hay.includes(k) || [...k].every(ch => hay.includes(ch)); };
+      const showSug = () => {
+        const k = q.value.trim();
+        if (!k) { sug.style.display = 'none'; return; }
+        const hits = m.companies.filter(c => fuzzy(c, k)).slice(0, 6);
+        const hitsF = m.funnel.cos.filter(c => !m.companies.some(y => y.id === c.id) && fuzzy(c, k)).slice(0, 4);
+        const all = hits.concat(hitsF);
+        sug.innerHTML = all.length ? all.map(c => `<div data-pkco="${c.id}" style="padding:8px 10px;border-radius:8px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:8px">
+          <b class="text-sm">${esc(c.short)}</b><span class="text-xs text-muted">${esc(c.seg || c.net || '')}</span></div>`).join('')
+          : '<div style="padding:10px;font-size:12px;color:var(--t3)">未找到匹配企业</div>';
+        sug.style.display = 'block';
+        sug.querySelectorAll('[data-pkco]').forEach(it => it.onmousedown = () => { sug.style.display = 'none'; q.value = m.coById(it.dataset.pkco).short; this.aiPrepare(el, it.dataset.pkco); });
+      };
+      q.oninput = showSug; q.onfocus = showSug;
+      q.onblur = () => setTimeout(() => { sug.style.display = 'none'; }, 180);
+      q.addEventListener('keydown', e => { if (e.key === 'Enter') { const k = q.value.trim(); if (!k) return; const hit = m.companies.find(c => fuzzy(c, k)) || m.funnel.cos.find(c => fuzzy(c, k)); hit ? this.aiPrepare(el, hit.id) : toast('未找到匹配企业', 'warn'); } });
+      el.querySelector('#pkGo').onclick = () => { const k = q.value.trim(); if (!k) return toast('请输入企业名称', 'warn'); const hit = m.companies.find(c => fuzzy(c, k)) || m.funnel.cos.find(c => fuzzy(c, k)); hit ? this.aiPrepare(el, hit.id) : toast('未找到匹配企业', 'warn'); };
+      el.querySelectorAll('[data-pksug]').forEach(sg => sg.onclick = () => this.aiPrepare(el, sg.dataset.pksug));
+      /* 任务快选 */
+      const inp = el.querySelector('#pkKw');
+      inp.oninput = () => { S.packKw = inp.value.trim(); this.paintList(el); const k2 = el.querySelector('#pkKw'); k2.focus(); k2.setSelectionRange(k2.value.length, k2.value.length); };
+      el.querySelectorAll('[data-pk]').forEach(d => d.onclick = () => { S.packCo = d.dataset.pk; S.packTab = 'profile'; this.render(el); });
+    },
+    /* AI 准备作战包：五步特效 → 四Tab */
+    aiPrepare(el, coId) {
+      const c = M().coById(coId);
+      if (!c) return;
+      const steps = ['检索企业公开信息（工商 / 股权 / 舆情）', '匹配行内数据与历史合作记录', '分析所属行业景气与产业链位置', '生成客户画像与行业分析', '匹配产品库，输出访前话术与服务方案'];
+      openModal({ small: true, title: `AI 正在准备访前作战包 · ${esc(c.short)}`, body: `
+        <div style="padding:10px 4px">
+          ${steps.map((s, i) => `<div class="flex mb3" style="gap:10px"><span class="rank-pill" style="background:#F0F2F7;color:var(--t3)" id="pkstep${i}">${i + 1}</span>
+          <span class="text-sm" style="line-height:24px">${s}</span></div>`).join('')}
+          <div class="mt2" style="height:5px;background:#F0F2F7;border-radius:3px;overflow:hidden"><i id="pkbar" style="display:block;height:100%;width:0;background:linear-gradient(90deg,#8E1019,#C0202C);transition:width .5s"></i></div>
+        </div>`, foot: '' });
+      steps.forEach((_, i) => setTimeout(() => {
+        const p = document.querySelector('#pkstep' + i);
+        if (p) { p.textContent = '✓'; p.style.background = 'var(--ok-50)'; p.style.color = 'var(--ok-500)'; }
+        const bar = document.querySelector('#pkbar');
+        if (bar) bar.style.width = ((i + 1) / steps.length * 100) + '%';
+      }, 500 + i * 520));
+      setTimeout(() => {
+        APP.closeModal();
+        S.packCo = coId; S.packTab = 'profile'; S.packKw = '';
+        this.render(el);
+        toast(`「${c.short}」访前作战包已备齐`);
+      }, 500 + steps.length * 520 + 300);
+    },
+    /* ---------- Tab1 客户画像：企业全部信息 ---------- */
+    profileTab(c) {
+      const m = M();
+      const fn = fnDemoFill(c);
+      if (fn) { c.legal = fn.legal; c.cap = fn.cap; c.est = fn.est; c.emp = fn.emp; c.uscc = fn.uscc; c.addr = fn.addr; c.scope = fn.scope; c.qual = fn.qual; c.holders = fn.holders; c.ctrl = fn.ctrl; c.ud = fn.ud; }
+      const o = c.internal || { credit: 0, used: 0, deposit: 0, settle: 0, products: [] };
+      const kpi = (k, v, d) => `<div class="wp-kpi"><div class="k">${k}</div><div class="v">${v}</div><div class="d">${d || ''}</div></div>`;
+      const cl = (x, cls) => `<span class="wp-cl ${cls}">${esc(x)}</span>`;
+      const chain = (c.ctrl || '').split('→').map(s => s.trim()).filter(Boolean);
+      return `
+        <div class="wp-hero">
+          <div><div class="eyebrow">客户画像 · 企业全景信息</div><h2>${esc(c.name)}</h2>
+            <div class="sub">${c.listed.indexOf('是') === 0 ? esc(c.listed.slice(2)) + ' ｜ ' : ''}${esc(c.city)}·${esc(c.zone)} ｜ ${esc(c.net)}·${esc(c.track)} ｜ 数据时点 2026-11-04</div></div>
+          <div class="wp-verdict"><div class="lv">${c.prog === '突破' ? '重点介入' : c.prog === '攻坚' ? '适度介入' : '培育跟踪'}</div><div class="sm">${c.pos}客户 · ${c.prog}档</div></div>
+        </div>
+        <div class="wp-kpis">
+          ${kpi('综合评分', c.score, c.sigLv + ' 级信号 · ' + c.rel)}
+          ${kpi('客户大类', c.cat === '建设运营商' ? '运营商' : '供应商', esc(c.nat))}
+          ${kpi('营销进展', c.prog, '地位 ' + c.pos + ' · 权重 ' + c.wt)}
+          ${kpi('上市情况', c.listed.indexOf('是') === 0 ? '是' : '否', c.listed.indexOf('是') === 0 ? c.listed.slice(2, 16) : '非上市主体')}
+          ${kpi('行内合作', o.credit ? o.credit + '亿' : '未合作', (o.products || []).slice(0, 2).join('/') || '新客户')}
+          ${kpi('建议服务方案', (c.prods || []).length + ' 项', (c.prods || []).slice(0, 2).join(' / '))}
+        </div>
+        <div class="card card-pad mb3">
+          <div class="wp-cloud mb2">
+            ${cl(c.listed.indexOf('是') === 0 ? c.listed.slice(2) : '非上市主体', c.listed.indexOf('是') === 0 ? 'wp-cl-a' : 'wp-cl-e')}
+            ${cl(c.net + ' · ' + c.track, 'wp-cl-b')}${cl(c.cat, 'wp-cl-a')}${cl(c.nat, 'wp-cl-c')}${cl(c.pos + '客户', 'wp-cl-a')}
+            ${cl('营销进展：' + c.prog, 'wp-cl-b')}${cl('权重：' + c.wt, 'wp-cl-c')}${cl(c.rel, 'wp-cl-a')}
+            ${cl('四线得分 ' + c.score, 'wp-cl-b')}${cl(c.city + '属地', 'wp-cl-c')}
+          </div>
+          <div class="wp-note"><b>AI 信号：</b>${esc((c.sig || []).join('；'))}</div>
+        </div>
+        <div class="card card-pad mb3"><div class="flex-between mb3"><b>基本信息</b><span class="text-xs text-muted">工商公示数据</span></div>
+          <div class="kv-grid">${[['法定代表人', c.legal || '—'], ['注册资本', c.cap || '—'], ['成立时间', (c.est || '—') + (String(c.est || '').indexOf('年') < 0 && c.est !== '—' ? ' 年' : '')], ['统一社会信用代码', c.uscc || '—'], ['企业性质', c.nat], ['员工规模', c.emp || '—'], ['注册地址', c.addr || '—'], ['经营范围', (c.scope || '—').slice(0, 40) + ((c.scope || '').length > 40 ? '…' : '')], ['资质认证', (c.qual || []).join('、') || '—']].map(([k, v]) => kv(k, esc(String(v)))).join('')}</div></div>
+        <div class="card card-pad mb3"><div class="flex-between mb3"><b>股权与控制链</b><span class="text-xs text-muted">穿透至实际控制人</span></div>
+          ${(c.holders || []).length ? `<div class="tbl-wrap"><table class="tbl"><thead><tr><th>股东名称</th><th>类型</th><th style="width:200px">持股比例</th></tr></thead><tbody>
+            ${(c.holders || []).map(h => `<tr><td><b class="text-sm">${esc(h.n)}</b></td><td><span class="tag tag-line">${esc(h.t)}</span></td>
+              <td><div class="mini-bar-wrap"><div class="mb" style="flex:1"><i style="width:${h.pct}%;background:var(--brand-500)"></i></div><b class="fs-num text-sm">${h.pct}%</b></div></td></tr>`).join('')}</tbody></table></div>` : '<div class="text-sm text-muted">暂无公示数据</div>'}
+          ${chain.length ? `<div class="mt2 text-sm">实际控制人路径：${chain.map(x => `<span class="tag tag-line" style="height:20px">${esc(x)}</span>`).join('<span style="color:var(--t3)"> → </span>')}</div>` : ''}
+        </div>
+        <div class="card card-pad mb3"><div class="flex-between mb3"><b>上下游与机会</b><span class="text-xs text-muted">公开信息聚合</span></div>
+          ${(c.ud && c.ud.up) ? `<div class="grid-2">
+            <div><div class="text-sm" style="font-weight:600;margin-bottom:6px">上游供应商</div>${c.ud.up.map(u => `<div class="flex-between" style="padding:4px 0"><span class="text-sm"><b>${esc(u.n)}</b> <span class="text-xs text-muted">· ${esc(u.w)}</span></span>${u.ours ? '<span class="tag tag-green" style="height:18px;font-size:10px">本行客户</span>' : ''}</div>`).join('')}</div>
+            <div><div class="text-sm" style="font-weight:600;margin-bottom:6px">下游客户</div>${c.ud.down.map(u => `<div class="flex-between" style="padding:4px 0"><span class="text-sm"><b>${esc(u.n)}</b> <span class="text-xs text-muted">· ${esc(u.w)}</span></span>${u.ours ? '<span class="tag tag-green" style="height:18px;font-size:10px">本行客户</span>' : ''}</div>`).join('')}</div></div>`
+          : '<div class="text-sm text-muted mb2">暂无公开披露的上下游数据</div>'}
+          ${c.opp ? `<div class="wp-note mt2"><b>机会地：</b>${esc(c.opp)}</div>` : ''}
+        </div>
+        <div class="card card-pad">
+          <div class="flex-between mb2"><b class="text-sm">最新动态</b><span class="text-xs text-muted">${c.ipo ? '资本进程' : 'AI 数据引擎'}</span></div>
+          <div class="text-sm text-sub">${c.ipo ? `<span class="tag tag-cyan mb2" style="display:inline-flex">${esc(c.ipo)}</span><br>` : ''}${esc(c.recent || '—')}</div>
+        </div>`;
+    },
+    /* ---------- Tab2 行业分析：所属行业景气看板 ---------- */
+    industryTab(c) {
+      const m = M();
+      const ci = m.cockpitInd.ciInds;
+      const keyByNet = { '新一代通信网': 'ic', '算力网': 'ai', '新型电网': 'ev', '物流网': 'low', '水网': 'low', '城市地下管网': 'low' };
+      const key = (c.industry && Object.keys(ci).find(k => ci[k].name.indexOf(String(c.industry).slice(0, 2)) >= 0)) || keyByNet[c.net] || 'ic';
+      const ind = ci[key];
+      const CH = window.CH;
+      return `
+        <div class="card card-pad mb4">
+          <div class="flex-between wrap" style="gap:10px">
+            <div><div class="card-title" style="font-size:var(--fs-lg)">${esc(ind.name)} · 行业分析</div>
+              <div class="text-xs text-muted mt1">${esc(c.short)} 所属行业 ｜ 与「管理视图 · 产业分析」同口径</div></div>
+            <button class="btn btn-ghost btn-sm" onclick="APP.go('manage')">完整产业分析 ›</button>
+          </div>
+          <div class="kpi-grid mt3 mb0" style="grid-template-columns:repeat(4,1fr)">
+            ${ind.kpi.map(([k, v]) => kv(k, '<b style="font-size:20px">' + v + '</b>')).join('')}
+          </div>
+        </div>
+        <div class="card card-pad mb4"><div class="card-title mb3" style="font-size:var(--fs-md)">细分环节景气度（指数 &gt;100 为景气扩张）</div>
+          <div class="flex wrap" style="gap:18px;justify-content:space-around">${ind.boom.map(b => CH.gauge({ val: b.idx, label: `${b.name}（环比${b.mom}）` })).join('')}</div></div>
+        <div class="grid-2 mb4">
+          <div class="card card-pad"><div class="card-title mb3" style="font-size:var(--fs-md)">行业市场规模走势</div>${CH.line({ labels: ind.size.labels, series: ind.size.series, h: 220 })}</div>
+          <div class="card card-pad"><div class="card-title mb3" style="font-size:var(--fs-md)">行业投融资热度（季度事件数）</div>${CH.line({ labels: ind.invest.labels, series: ind.invest.series, h: 220 })}</div>
+        </div>
+        <div class="grid-3 mb4">${ind.metrics.map(([k, v]) => `<div class="card card-pad" style="padding:14px 16px"><div class="text-xs text-muted">${k}</div><div class="text-md mt2" style="font-weight:700">${esc(v)}</div></div>`).join('')}</div>
+        ${aiPanel(ind.name + ' · 行业AI解读', esc(ind.ai))}`;
+    },
+  };
+
+  /* ================= AI智能分析（企业报告 + 产业链分析 + 我的报告） =================
+     注：render 由文件末尾的别名实现（访前作战包·深度分析），此处保留对象与其它方法 */
+  VIEWS.report = {
+    render(el) { /* 由文件末尾 VIEWS.report.render 别名覆盖 */ },
     gen(coId, req, mat) {
       const c = M().coById(coId); if (!c) return;
       openModal({ small: true, title: `正在生成报告 · ${esc(c.short)}`, body: `
@@ -3278,6 +3815,8 @@ window.APP = (function () {
     paintDetail(box) {
       const m = M(), F = S._rptForm = S._rptForm || { kw: '', req: '', mat: '' };
       const selCo = m.coById(S.reportCo);
+      /* 作战包/抽屉带入企业：搜索框预填当前企业，免二次选择 */
+      if (selCo && S._rptCoId !== selCo.id && !F.kw) { F.kw = selCo.short; S._rptCoId = selCo.id; }
       const r = (selCo && selCo.id === 'TH' && m.reportTH) ? m.reportTH : (selCo && selCo.id === 'XJH' && m.reportXJH) ? m.reportXJH : m.report;
       if (!S.rptHist) S.rptHist = ['XJH', 'JH', 'TH'];
       if (!Array.isArray(F.files)) F.files = [];
@@ -3660,6 +4199,37 @@ window.APP = (function () {
     },
   };
 
+  /* ================= 旧 AI智能分析 路由别名（隐藏路由 → 访前作战包） =================
+     深度分析已并入作战包四Tab（客户画像/行业分析/访前话术/推荐服务方案）；企业AI报告仅保留"我的报告"入口直达 */
+  VIEWS.report.render = function (el) {
+    const S = APP.S;
+    const cur = S.packCo && M().coById(S.packCo);
+    el.innerHTML = `
+        <div class="card card-pad mb4" style="background:linear-gradient(120deg,#7E0E19 0%,#A61521 55%,#C0202C 130%);border:none;color:#fff;box-shadow:0 6px 20px rgba(142,16,25,.25)">
+          <div style="font-size:var(--fs-xl);font-weight:700">我的报告</div>
+          <div class="text-xs mt1" style="opacity:.85">企业分析报告 / 产业链报告 历史存档</div>
+        </div>
+        <div id="rptTabs"></div>`;
+    if (!S.rptMy) S.rptMy = [
+      { co: 'JH', kind: '企业报告', t: '2026-09-28 10:32', by: '李晓' },
+      { co: 'TH', kind: '企业报告', t: '2026-09-26 16:05', by: '陈斌' },
+      { co: 'SX', kind: '企业报告', t: '2026-09-25 09:40', by: '王倩' },
+      { co: 'ic', kind: '产业链报告', title: '集成电路产业分析报告', t: '2026-09-22 14:10', by: '李晓' },
+      { co: 'HN', kind: '企业报告', t: '2026-09-18 14:21', by: '李晓' }];
+    if (S.visitReports && S.visitReports.length) {
+      S.visitReports.forEach(v => { if (!S.rptMy.some(x => x.id === v.id)) S.rptMy.unshift({ id: v.id, co: v.co, kind: '访后报告', title: v.title, t: v.t, by: v.by }); });
+    }
+    const tabs = [{ id: 'detail', name: '企业分析报告' }, { id: 'chain', name: '产业链报告' }, { id: 'mine', name: '我的报告', count: S.rptMy.length }];
+    let act = ['mine', 'chain'].includes(S.params.tab) ? S.params.tab : 'detail';
+    renderTabs($('#rptTabs'), tabs, act, t => { act = t; S.params.tab = t; paint(); });
+    const paint = () => {
+      const box = switchTab($('#rptTabs'), tabs, act, paint);
+      if (act === 'detail') this.paintDetail(box);
+      if (act === 'chain') { this.paintChain(box); }
+      if (act === 'mine') this.paintMine(box);
+    }; paint();
+  };
+
   /* ---------- V4 六张网企业演示数据填充（工商/股东/上下游，按四维标签确定性生成） ---------- */
   const FN_LEGAL = ['徐建国', '陈志强', '王明华', '李文斌', '赵国栋', '周建平', '吴志远', '郑海涛'];
   const FN_ROAD = ['金融大道 88 号', '科技产业园 6 号', '高新区研发一路', '经开区长山路 9 号', '新城工业区纬二路', '港城大道 168 号'];
@@ -3682,7 +4252,7 @@ window.APP = (function () {
     const emp = c.cat === '建设运营商' ? (800 + h % 4000) + ' 人' : (150 + h % 1800) + ' 人';
     const uscc = '9132' + String(10000 + h % 90000).slice(0, 5) + 'MA1' + String(1000000 + h % 9000000).slice(0, 7) + 'X';
     const addr = (c.city || '南京') + '市' + (c.zone || '') + (c.zone.indexOf('区') < 0 && c.zone.indexOf('县') < 0 ? '区' : '') + FN_ROAD[h % FN_ROAD.length];
-    const scope = c.net + '领域内的' + c.track.split('·')[0] + '相关业务：投资建设、装备制造、系统集成、技术服务与运营维护（演示口径，正式环境以工商登记为准）';
+    const scope = c.net + '领域内的' + c.track.split('·')[0] + '相关业务：投资建设、装备制造、系统集成、技术服务与运营维护（以工商登记为准）';
     const qual = ['高新技术企业'];
     if (c.score >= 85) qual.push('国家级专精特新"小巨人"');
     else if (c.score >= 70) qual.push('省级专精特新中小企业');
@@ -3899,10 +4469,10 @@ window.APP = (function () {
       t: nowStr(), by: '邓瑞忠', files,
       profile: { name: isXJH ? '无锡鑫巨宏智能科技股份有限公司' : co.name, short: co.short, legal: isXJH ? '孙亮亮' : (co.legal || '—'), cap: isXJH ? '6,315万元' : (co.cap || '—'), est: isXJH ? '2013年1月7日' : ((co.est || '—') + ' 年'), uscc: isXJH ? '91320214060193094K' : (co.uscc || '—'), addr: isXJH ? '无锡市新吴区新锦路106号' : (co.addr || ((co.city || '无锡') + (co.zone || ''))), seg: co.seg, layer: co.layer, emp: co.emp || '—', scope: co.scope || '集成电路相关研发、生产与销售', listing: isXJH ? '新三板上市公司' : '—', controller: isXJH ? '孙亮亮' : '—', shareholders: isXJH ? '控股股东：无锡鑫巨宏创业投资有限公司（45.298%）；吴洁（13.5894%）；孙亮亮（11.5061%）；其他股东（29.6065%）' : '—', industryPosition: isXJH ? '国家级专精特新“小巨人”企业，400G及以上中高端光模块芯片基座全球市占率约29%' : '—' },
       visit: { date: '2026-10-18', site: (co.city || '无锡') + (co.zone || ''), people: '邓瑞忠 / 李晓', note: '', counterpart:'孙亮亮及财务负责人' },
-      credit: { amount:'8,000', rate:'1年期央行LPR', branch:'北京银行无锡分行', rating:'A-', proposal:'申请综合授信额度8,000万元，品种包括流动资金贷款、银行承兑汇票及贸易融资，期限不超过一年。', levelChoice:'省级□　市本级☑　区县级□　国家级开发区□　省级园区□　其他□', featureChoice:'省市重大项目□　产业升级☑　技术改造□　行内联动□　绿色业务□　支农业务□　文化业务□', timeChoice:'1个月内□　3个月内☑　半年内□　半年以上□', renewalChoice:'是□　否□　不涉及☑', syndicateChoice:'是□　否☑　牵头行：无' },
+      credit: { amount:'8,000', rate:'1年期央行LPR', branch:'北京银行南京分行', rating:'A-', proposal:'申请综合授信额度8,000万元，品种包括流动资金贷款、银行承兑汇票及贸易融资，期限不超过一年。', levelChoice:'省级□　市本级☑　区县级□　国家级开发区□　省级园区□　其他□', featureChoice:'省市重大项目□　产业升级☑　技术改造□　行内联动□　绿色业务□　支农业务□　文化业务□', timeChoice:'1个月内□　3个月内☑　半年内□　半年以上□', renewalChoice:'是□　否□　不涉及☑', syndicateChoice:'是□　否☑　牵头行：无' },
       stmt: { score, note: stmtNote, hasFin: has('fin'), hasTax: has('tax'), hasBank: has('bank'), mismatch: has('fin')&&has('tax')&&has('bank') ? [{title:'财报收入与纳税申报收入存在差异',detail:'请核对收入确认期间、免税/不征税项目及申报口径。'},{title:'财报收入与银行流水回款存在差异',detail:'请结合应收账款、票据结算、跨期回款及非销售流水核对。'}] : [], match: has('fin')&&has('tax')&&!has('bank') ? ['营业收入与纳税申报收入一致'] : has('fin')&&has('bank')&&!has('tax') ? ['销售回款与银行流水核验一致'] : [] },
       finance: { years:['2025年','2024年','2023年','行业参考'], rows:[['销售毛利率','28.6%','26.4%','24.8%','22.1%'],['销售净利率','11.2%','9.6%','8.4%','7.5%'],['流动比率','1.48','1.36','1.22','1.40'],['速动比率','1.12','1.03','0.94','1.00'],['应收账款周转天数','86天','92天','101天','90天'],['应付账款周转天数','74天','78天','82天','80天'],['资产负债率','42.8%','45.1%','48.6%','52.0%'],['存货周转天数','68天','72天','79天','75天'],['短期借款利率大致框算','3.80%','4.05%','4.20%','3.50%—4.50%'],['成本费用率','83.6%','86.2%','88.1%','90.0%']] },
-      funding: { credit:[['北京银行无锡分行','综合授信','5,000','2,600','2027-06-30','保证'],['工商银行无锡分行','流动资金贷款','3,000','1,200','2027-03-15','信用'],['招商银行无锡分行','银行承兑汇票','2,000','800','2026-12-20','保证金']], guarantees:[['鑫巨宏创业投资有限公司','关联方保证','2,000','1,000','2027-06-30'],['核心设备融资租赁公司','设备抵押','1,500','920','2027-03-31']] },
+      funding: { credit:[['北京银行南京分行','综合授信','5,000','2,600','2027-06-30','保证'],['工商银行无锡分行','流动资金贷款','3,000','1,200','2027-03-15','信用'],['招商银行无锡分行','银行承兑汇票','2,000','800','2026-12-20','保证金']], guarantees:[['鑫巨宏创业投资有限公司','关联方保证','2,000','1,000','2027-06-30'],['核心设备融资租赁公司','设备抵押','1,500','920','2027-03-31']] },
       industry, product, contracts, swot,
     };
   }
@@ -3924,6 +4494,9 @@ window.APP = (function () {
     return `<table>${rows}</table>
       <p>${editable(pathPrefix + '.analysis', data.analysis, true)}</p>`;
   }
+
+  /* 供工作台访后报告上传入口调用（files: [{k, n}]，k 为 FILE_CATS 分类键） */
+  window.buildVisitReport = (co, files) => buildVisit(co, files);
 
   VIEWS.visitReport = {
     renderInline(el) {
@@ -3954,7 +4527,7 @@ window.APP = (function () {
           <div class="grid-3" style="gap:10px">${FILE_CATS.map(cat => { const got = F.files.filter(f => f.k === cat.k); return `<div class="up-zone ${got.length ? 'on' : ''}" data-cat="${cat.k}">
             <div class="flex-between"><b class="text-sm">${cat.n}</b><span class="tag ${got.length ? 'tag-green' : 'tag-line'}">${got.length ? got.length + ' 个文件' : '上传'}</span></div>
             ${got.map(f => `<div class="text-xs mt2" style="color:var(--brand-600)">📄 ${esc(f.n)}</div>`).join('')}</div>`; }).join('')}</div>
-          <div class="text-xs text-muted mt2">附件为原型演示材料，选择后用于模拟报告解析。</div>
+          <div class="text-xs text-muted mt2">资料仅用于本次尽调报告生成。</div>
         </div>
         <div class="card card-pad mb4"><div class="text-sm" style="font-weight:600;margin-bottom:8px">历史访后报告</div>${S.visitReports.length ? S.visitReports.map(x=>`<div class="flex-between" style="padding:9px 0;border-bottom:1px solid var(--line)"><span>${esc(x.title)} <small class="text-muted">${esc(x.t)}</small></span><button class="btn btn-ghost btn-sm" data-hist="${esc(x.id)}">预览</button></div>`).join('') : '<span class="text-sm text-muted">暂无历史报告</span>'}</div>
         <div class="flex" style="justify-content:flex-end;gap:8px"><button class="btn btn-ghost" id="vrReset">清空资料</button><button class="btn btn-primary" id="vrGen">⚡ 解析并生成访后报告</button></div>`;
@@ -4000,13 +4573,13 @@ window.APP = (function () {
       const tab = S._vrTab || 'doc';
       const docHtml = `
           <div class="vr-doc" id="vdoc">
-            <h1>北京银行无锡分行公司类客户授信尽职调查及分析报告</h1>
+            <h1>北京银行南京分行公司类客户授信尽职调查及分析报告</h1>
             <div class="doc-sub">调查人：${editable('by', r.by)}　　调查日期：${editable('visit.date', r.visit.date)}　　调查地点：${editable('visit.site', r.visit.site)}</div>
             <h2>一、报审方案</h2><h3>（一）项目报审要素</h3><table><tbody>
               <tr><th>授信申请人</th><td>${editable('profile.name',r.profile.name)}</td><th>客户层级</th><td>${editable('credit.levelChoice',r.credit.levelChoice)}</td></tr>
               <tr><th>业务特色</th><td colspan="3">${editable('credit.featureChoice',r.credit.featureChoice)}</td></tr>
               <tr><th>投放时间</th><td>${editable('credit.timeChoice',r.credit.timeChoice)}</td><th>申请额度（万元）</th><td>${editable('credit.amount',r.credit.amount)}</td></tr>
-              <tr><th>贷款利率</th><td>${editable('credit.rate','1年期央行LPR')}</td><th>报审单位</th><td>${editable('credit.branch','北京银行无锡分行')}</td></tr>
+              <tr><th>贷款利率</th><td>${editable('credit.rate','1年期央行LPR')}</td><th>报审单位</th><td>${editable('credit.branch','北京银行南京分行')}</td></tr>
               <tr><th>调查人（双人）</th><td>${editable('by',r.by)}、${editable('visit.people','李晓')}</td><th>内部评级</th><td>${editable('credit.rating','A-')}</td></tr>
               <tr><th>续授信建议书</th><td>是否取得：${editable('credit.renewalChoice',r.credit.renewalChoice)}</td><th>是否银团</th><td>${editable('credit.syndicateChoice',r.credit.syndicateChoice)}</td></tr>
               <tr><th>所属集团及限额情况</th><td colspan="3">是否集团户：是□　否☑　所属集团：无　剩余可用额度：不适用　限额到期日：不适用</td></tr>
@@ -4079,7 +4652,7 @@ window.APP = (function () {
       const guarantees=tbl(['被担保方/担保对象','担保方式','担保额度（万元）','担保余额（万元）','到期日'],r.funding.guarantees);
       const comp=(d)=>`<table><tr><th>企业数据</th><th>行业参考数据</th></tr>${d.company.map((x,i)=>`<tr><td>${esc(x)}</td><td>${esc(d.benchmark[i]||'')}</td></tr>`).join('')}</table><p>${esc(d.analysis)}</p>`;
       const html=`<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{font-family:SimSun,'Songti SC',serif;line-height:1.8;color:#222}h1{text-align:center;font-size:18pt}h2{font-size:14pt;margin:16pt 0 6pt}h3{font-size:12pt;margin:10pt 0 4pt}table{border-collapse:collapse;width:100%;margin:8px 0}td,th{border:1px solid #333;padding:6px;font-size:10.5pt;text-align:left}th{background:#f2f2f2}p{margin:4pt 0;font-size:11pt}.muted{color:#666;font-size:10pt}</style></head><body>
-        <h1>北京银行无锡分行公司类客户授信尽职调查及分析报告</h1><p style="text-align:center" class="muted">${esc(r.reportType||'省、市国企及城投政信业务-综合授信类（2023年版）')}　调查人：${esc(r.by)}　调查日期：${esc(r.visit.date)}</p>
+        <h1>北京银行南京分行公司类客户授信尽职调查及分析报告</h1><p style="text-align:center" class="muted">${esc(r.reportType||'省、市国企及城投政信业务-综合授信类（2023年版）')}　调查人：${esc(r.by)}　调查日期：${esc(r.visit.date)}</p>
         <h2>一、报审方案</h2><h3>（一）项目报审要素</h3><p>授信申请人：${esc(p.name)}　客户层级：${esc(r.credit.levelChoice)}</p><p>业务特色：${esc(r.credit.featureChoice)}</p><p>投放时间：${esc(r.credit.timeChoice)}　申请额度（万元）：${esc(r.credit.amount)}</p><p>贷款利率：${esc(r.credit.rate)}　报审单位：${esc(r.credit.branch)}　调查人（双人）：${esc(r.by)}、李晓　内部评级：${esc(r.credit.rating)}</p><p>续授信建议书：${esc(r.credit.renewalChoice)}　是否银团：${esc(r.credit.syndicateChoice)}</p><p>所属集团及限额情况：是否集团户：是□　否☑　所属集团：无　剩余可用额度：不适用　限额到期日：不适用</p><p>报审方案：${esc(r.credit.proposal)}</p><p>授信用途：用途是否合规：是☑　否□　具体用途：补充日常经营周转及采购付款。</p><p>还款来源：还款来源是否可靠：是☑　否□　具体还款来源：主营业务回款及经营性现金流。</p>
         <h3>（二）尽职过程描述</h3><p>现场尽调：是☑　否□　时间：${esc(r.visit.date)}　地点：${esc(r.visit.site)}　尽调人员：${esc(r.visit.people)}　对方对接人员：${esc(r.visit.counterpart)}</p>
         <h2>二、申请人基本情况</h2><h3>（一）基础信息</h3><p>申请人全称：${esc(p.name)}　成立日期：${esc(p.est)}　实收资本：${esc(p.cap)}</p><p>统一社会信用代码：${esc(p.uscc)}　注册地址：${esc(p.addr)}</p><p>法定代表人：${esc(p.legal)}　实际控制人：${esc(p.controller)}　挂牌情况：${esc(p.listing)}</p><p>股权结构：${esc(p.shareholders)}</p><h3>（二）经营情况</h3><p>${esc(r.industry.summary)}</p><p>主要产品：${esc(r.product.summary)}</p><h3>（三）财务分析</h3>${ratio}<h3>（四）申请人融资情况</h3>${credits}<p>对外担保情况</p>${guarantees}
@@ -4097,29 +4670,172 @@ window.APP = (function () {
 </script>
   <script>
 /* ============================================================
-   管理驾驶舱 V3：产业视角 / 行内视角 合并为单菜单双视角
+   管理视图 V4：项目储备情况汇总 / 营销进度更新 / 支行综合看板 / 分行结果统计
+               （原产业分析 / 业务分析保留为附加板块）
+   数据：M().manage（项目储备汇总，mock.js 注入） + cockpitBank / funnel.tasks
    ============================================================ */
 (function () {
   const { $, esc, kv, aiPanel, toast, renderTabs, switchTab } = APP;
   const M = () => window.MOCK, CH = window.CH;
   const S = APP.S;
 
-  /* ================= 管理驾驶舱（合并入口） ================= */
+  /* ================= 管理视图（一级导航） ================= */
   VIEWS.cockpit = {
     render(el) {
       el.innerHTML = `
-        <div class="page-head"><div class="page-title">管理驾驶舱</div>
+        <div class="page-head"><div class="page-title">管理视图</div>
           <span class="tag tag-blue" style="height:28px;padding:0 12px">数据时点 2026-09-28</span></div>
         <div id="ckTabs"></div>`;
-      const tabs = [{ id: 'ind', name: '产业分析' }, { id: 'bank', name: '业务分析' }];
-      let act = S.ckTab || 'ind';
+      const tabs = [
+        { id: 'reserve', name: '项目储备情况' },
+        { id: 'progress', name: '进度更新' },
+        { id: 'branch', name: '支行综合看板' },
+        { id: 'stats', name: '分行结果统计' },
+        { id: 'ind', name: '产业分析' },
+        { id: 'bank', name: '业务分析' }];
+      let act = S.ckTab || 'reserve';
       renderTabs($('#ckTabs'), tabs, act, t => { act = t; S.ckTab = t; paint(); });
       const paint = () => {
         const box = switchTab($('#ckTabs'), tabs, act, paint);
-        if (act === 'ind') VIEWS.cockpitInd.paintTab(box);
+        if (act === 'reserve') this.paintReserve(box);
+        else if (act === 'progress') this.paintProgress(box);
+        else if (act === 'branch') this.paintBranchView(box);
+        else if (act === 'stats') this.paintStats(box);
+        else if (act === 'ind') VIEWS.cockpitInd.paintTab(box);
         else VIEWS.cockpitBank.paintTab(box);
       }; paint();
-    }
+    },
+    /* ---------- Tab1：项目储备情况汇总（项目清单 + 客户清单 + 储备漏斗） ---------- */
+    paintReserve(box) {
+      const mg = M().manage || {};
+      const projs = mg.projects || [];
+      const st = APP.S.fn || { tasks: M().funnel.tasksSeed, subs: M().funnel.subsSeed };
+      const cName = id => { const c = M().funnel.cos.find(x => x.id === id); return c ? c.short : ''; };
+      const stage = (lab, n, end) => `<div class="fn-stage ${end ? 'fn-stage-end' : ''}"><div class="fn-s-n fs-num">${n}</div><div class="fn-s-l">${lab}</div></div>${end ? '' : '<span class="fn-arrow">›</span>'}`;
+      const progTag = v => ({ 突破: 'tag-solid-red', 攻坚: 'tag-orange', 培育: 'tag-blue' }[v] || 'tag-gray');
+      const stTag = s => ({ 储备: 'tag-gray', 前期对接: 'tag-blue', 方案阶段: 'tag-orange', 已批复: 'tag-green', 已投放: 'tag-solid-red' }[s] || 'tag-gray');
+      box.innerHTML = `
+        <div class="kpi-grid mb3" style="grid-template-columns:repeat(5,1fr)">
+          ${kv('储备项目', '<b style="font-size:22px">' + projs.length + '</b> 个', '六张网重大项目')}
+          ${kv('覆盖企业', '<b style="font-size:22px">' + new Set(projs.map(p => p.co)).size + '</b> 家', '项目关联客户')}
+          ${kv('客户清单储备', '<b style="font-size:22px">' + M().funnel.cos.length + '</b> 家', '企业总览全库')}
+          ${kv('已下发任务', '<b style="font-size:22px">' + st.tasks.length + '</b> 项', '产品经理下发中')}
+          ${kv('已反馈', '<b style="font-size:22px">' + st.tasks.filter(t => t.status === '已反馈').length + '</b> 项', '客户经理已反馈')}
+        </div>
+        <div class="card card-pad mb3">
+          <div class="flex mb2" style="gap:8px"><b>储备转化漏斗</b><span class="text-xs text-muted">项目清单 + 客户清单 → 已下发 → 已反馈 → 已批复/投放</span></div>
+          <div class="fn-funnel">
+            ${stage('储备项目', projs.length)}${stage('已下发任务', st.tasks.length)}${stage('已反馈', st.tasks.filter(t => t.status === '已反馈').length)}${stage('已批复/投放', projs.filter(p => p.stage === '已批复' || p.stage === '已投放').length, true)}
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">项目储备清单<span class="card-sub">来源：机会漏斗 · 项目清单（产品经理下发）</span></div>
+            <button class="btn btn-ghost btn-sm" onclick="APP.go('funnel',{tab:'proj'})">到机会漏斗管理 ›</button></div>
+          <div class="tbl-wrap"><table class="tbl"><thead><tr>
+            <th style="width:170px">项目名称</th><th style="width:96px">关联客户</th><th style="width:88px">所属网</th><th style="width:88px">投资额</th>
+            <th style="width:80px">阶段</th><th style="width:74px">营销进展</th><th style="width:78px">承接经理</th><th>储备要点</th></tr></thead><tbody>
+          ${projs.map(p => { const rm = M().funnel.rms.find(r => r.id === p.rm) || {}; return `<tr>
+            <td><b class="text-sm">${esc(p.name)}</b></td><td class="text-sm">${esc(cName(p.co))}</td><td class="text-sm">${esc(p.net)}</td>
+            <td class="text-sm fs-num">${esc(p.amt)}</td>
+            <td><span class="tag ${stTag(p.stage)}" style="height:19px;font-size:10px;padding:0 6px">${p.stage}</span></td>
+            <td><span class="tag ${progTag(p.prog)}" style="height:19px;font-size:10px;padding:0 6px">${p.prog}</span></td>
+            <td class="text-sm">${esc(rm.name || '—')}</td>
+            <td class="text-sm text-sub" style="white-space:normal;line-height:1.6">${esc(p.note)}</td></tr>`; }).join('')}
+          </tbody></table></div></div>`;
+    },
+    /* ---------- Tab2：进度更新（任务维度过程跟踪） ---------- */
+    paintProgress(box) {
+      const st = APP.S.fn || { tasks: M().funnel.tasksSeed };
+      const tasks = st.tasks;
+      const cName = id => { const c = M().funnel.cos.find(x => x.id === id); return c ? c.short : ''; };
+      const rName = id => { const r = M().funnel.rms.find(x => x.id === id); return r ? r.name : ''; };
+      const stTag = s => ({ 待接收: 'tag-gray', 跟进中: 'tag-blue', 已反馈: 'tag-green', 已关闭: 'tag-line' }[s] || 'tag-gray');
+      const overdue = t => +t.due.replace('-', '') < 1105 && t.status !== '已反馈' && t.status !== '已关闭';
+      const needReview = t => t.log.some(l => l.t === '访客纪要') && !t.log.some(l => l.t === '协同留言' && l.by.indexOf('产品经理') >= 0);
+      box.innerHTML = `
+        <div class="kpi-grid mb3" style="grid-template-columns:repeat(5,1fr)">
+          ${kv('在途任务', '<b style="font-size:22px">' + tasks.length + '</b> 项', '')}
+          ${kv('待接收', '<b style="font-size:22px">' + tasks.filter(t => t.status === '待接收').length + '</b> 项', '')}
+          ${kv('跟进中', '<b style="font-size:22px">' + tasks.filter(t => t.status === '跟进中').length + '</b> 项', '')}
+          ${kv('超期未反馈', '<b style="font-size:22px;color:var(--danger-500)">' + tasks.filter(overdue).length + '</b> 项', '截止日已过')}
+          ${kv('待复核纪要', '<b style="font-size:22px;color:var(--warn-500)">' + tasks.filter(needReview).length + '</b> 项', '待产品经理协同')}
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">任务进度一览<span class="card-sub">全辖下发任务 · 访客纪要 / 协同留言 / 反馈 全留痕</span></div>
+            <button class="btn btn-ghost btn-sm" onclick="APP.go('funnel',{tab:'task'})">任务下发与跟踪 ›</button></div>
+          <div class="tbl-wrap"><table class="tbl"><thead><tr>
+            <th style="width:140px">企业 / 项目</th><th style="width:78px">类型</th><th style="width:96px">客户经理</th>
+            <th style="width:56px">截止</th><th style="width:70px">状态</th><th style="width:64px">纪要数</th><th>最新进展</th></tr></thead><tbody>
+          ${tasks.map(t => { const last = t.log[0], rm = M().funnel.rms.find(x => x.id === t.rm) || {};
+            const revCnt = t.log.filter(l => l.t === '访客纪要' || l.t === '调研纪要').length;
+            return `<tr class="clickable" data-pg="${t.id}">
+            <td><b class="text-sm">${esc(cName(t.co))}</b></td>
+            <td class="text-sm">${esc(t.type)}</td>
+            <td class="text-sm">${esc(rm.name || '—')}</td>
+            <td class="text-sm">${t.due}</td>
+            <td><span class="tag ${stTag(t.status)}" style="height:19px;font-size:10px;padding:0 6px">${t.status}</span>${overdue(t) ? ' <span class="tag tag-red" style="height:19px;font-size:10px;padding:0 6px">超期</span>' : ''}</td>
+            <td class="text-sm fs-num">${revCnt}</td>
+            <td class="text-sm text-sub" style="white-space:normal;line-height:1.5">${last ? `<b class="text-xs" style="color:var(--t3)">${last.d} ${esc(last.t)}</b>　${esc(last.x).slice(0, 44)}…` : '—'}</td></tr>`; }).join('')}
+          </tbody></table></div></div>`;
+      box.querySelectorAll('[data-pg]').forEach(tr => tr.onclick = () => APP.go('funnel', { tab: 'task' }));
+    },
+    /* ---------- Tab3：支行综合看板（原驾驶舱支行钻取 + 支行排行） ---------- */
+    paintBranchView(box) {
+      const b = M().cockpitBank;
+      const per = S.rankPeriod, data = b.branchRank[per];
+      box.innerHTML = `
+        <div class="kpi-grid mb3" style="grid-template-columns:repeat(4,1fr)">
+          ${kv('参战支行', '<b style="font-size:22px">' + b.branchRank['月'].idx.length + '</b> 家', '')}
+          ${kv('参战客户经理', '<b style="font-size:22px">' + b.drill.branches.reduce((s2, x) => s2 + x.ms.length, 0) + '</b> 人', '')}
+          ${kv('平均任务完成率', '<b style="font-size:22px">' + Math.round(b.drill.branches.reduce((s2, x) => s2 + (x.rate || 0), 0) / b.drill.branches.length) + '%</b>', '')}
+          ${kv('支行贷款余额合计', '<b style="font-size:22px">' + b.branchRank['年'].loan.reduce((s2, x) => s2 + x, 0).toFixed(1) + '</b> 亿', '年口径')}
+        </div>
+        <div class="card card-pad mb4">
+          <div class="flex-between mb3" style="flex-wrap:wrap;gap:10px">
+            <div class="card-title" style="font-size:var(--fs-md)">支行网点业务排行 <span class="card-sub">按贷款余额</span></div>
+            <div class="flex" style="gap:6px">${['周', '月', '季', '年'].map(p => `<button class="chip ${per === p ? 'on' : ''}" data-p="${p}">${p}度</button>`).join('')}</div></div>
+          ${CH.hbars(data.idx.map((n, i) => ({ name: n, v: data.loan[i], pre: `<span class="rank-pill ${i < 3 ? 'rank-' + (i + 1) : ''}" style="${i >= 3 ? 'background:#F0F2F7' : ''};margin-right:6px">${i + 1}</span>`, extra: `${data.cust[i]} 户` })), { unit: '亿' })}
+        </div>
+        <div id="cbOv"></div><div id="cbStruct"></div><div id="cbRank"></div>`;
+      box.querySelectorAll('[data-p]').forEach(c => c.onclick = () => { S.rankPeriod = c.dataset.p; this.paintBranchView(box); });
+      VIEWS.cockpitBank.paintOv(box.querySelector('#cbOv'));
+      VIEWS.cockpitBank.paintStruct(box.querySelector('#cbStruct'));
+      VIEWS.cockpitBank.paintRank(box.querySelector('#cbRank'));
+    },
+    /* ---------- Tab4：分行结果统计（KPI + 覆盖率 + 漏斗结果） ---------- */
+    paintStats(box) {
+      const b = M().cockpitBank;
+      const mg = M().manage || {};
+      box.innerHTML = `
+        <div class="kpi-grid mb4" style="grid-template-columns:repeat(6,1fr)">
+          ${b.kpis.map(x => `<div class="kpi" style="padding:14px"><div class="k-label">${x.k}</div>
+            <div class="k-value" style="font-size:22px">${x.v}<small>${x.unit}</small></div>
+            <div class="k-foot ${x.up ? 'k-up' : ''}" style="${x.up ? '' : 'color:var(--danger-500)'}">${x.foot}</div>
+            <div class="k-ico" style="width:30px;height:30px;right:10px;top:10px;font-size:14px;background:${x.bg};color:${x.c}">${x.ico}</div></div>`).join('')}
+        </div>
+        ${mg.summary ? `<div class="card card-pad mb4"><div class="card-title mb3" style="font-size:var(--fs-md)">储备与投放结果统计</div>
+          <div class="grid-4 mb3" style="grid-template-columns:repeat(4,1fr)">
+            ${kv('项目批复数', mg.summary.approved + ' 个', '累计')}
+            ${kv('已投放金额', mg.summary.invested + ' 亿元', '累计')}
+            ${kv('储备覆盖率', mg.summary.cover + '%', '名单企业覆盖')}
+            ${kv('综合收益（年化）', mg.summary.income + ' 万元', '利息+中收 测算')}
+          </div>
+          ${CH.hbars(mg.summary.byNet.map(x => ({ name: x.n, v: x.v, extra: x.c + ' 户' })), { unit: '亿' })}
+          <div class="text-xs text-muted mt2">按六张网统计投放余额</div></div>` : ''}
+        <div class="grid-2 mb4">
+          <div class="card card-pad"><div class="card-title mb3" style="font-size:var(--fs-md)">贷款余额趋势（亿元）</div>${CH.line({ labels: b.loanTrend.labels, series: [{ name: '贷款余额', data: b.loanTrend.data, color: '#2458F5' }], h: 220 })}</div>
+          <div class="card card-pad"><div class="card-title mb3" style="font-size:var(--fs-md)">月度新增投放（亿元）</div>${CH.bars({ labels: b.putTrend.labels, data: b.putTrend.data, unit: '' })}</div>
+        </div>
+        <div class="card card-pad mb4"><div class="flex-between mb3"><div class="card-title" style="font-size:var(--fs-md)">业务报表（支行 → 客户经理 → 客户 三级钻取）</div></div><div id="cbDrill"></div></div>
+        <div class="grid-2">
+          <div class="card card-pad"><div class="card-title mb3" style="font-size:var(--fs-md)">产品结构</div>${CH.donut({ data: b.productMix, center: '46%', sub: '信贷为主' })}</div>
+          <div class="card card-pad"><div class="card-title mb3" style="font-size:var(--fs-md)">客户分层情况</div>
+            ${CH.hbars(b.layerMix.map(x => ({ name: x.name, v: x.cov, extra: `贡献 ${x.contr}%` })), { unit: '%', max: 100 })}
+            <div class="banner b-warn mt3" style="padding:9px 13px">拟上市与专精特新分层覆盖率仅 42% / 26%，但贡献了 33% 的业务量——投入产出比最高，建议作为下阶段主攻分层。</div></div>
+        </div>`;
+      const drillBox = box.querySelector('#cbDrill');
+      VIEWS.cockpitBank.paintDrillEl(drillBox);
+    },
   };
 
   /* ================= 产业视角 ================= */
@@ -4260,6 +4976,7 @@ window.APP = (function () {
       box.querySelectorAll('[data-p]').forEach(c => c.onclick = () => { S.rankPeriod = c.dataset.p; this.paintRank(box); const db = document.querySelector('#cbDrill'); if (db) this.paintDrillEl(db); });
     }
   };
+  VIEWS.manage = VIEWS.cockpit;   /* 路由别名：#/manage → 管理视图 */
 })();
 
 </script>
@@ -4287,7 +5004,7 @@ window.APP = (function () {
   /* 超期：截止早于 11-05 且未反馈/未关闭 */
   const isOverdue = t => +t.due.replace('-', '') < 1105 && t.status !== '已反馈' && t.status !== '已关闭';
   /* 待复核纪要：有访客纪要但尚无产品经理协同留言 */
-  const needReview = t => t.log.some(l => l.t === '访客纪要') && !t.log.some(l => l.t === '协同留言' && l.by.indexOf('产品经理') >= 0);
+  const needReview = t => t.log.some(l => l.t.indexOf("访客纪要") >= 0) && !t.log.some(l => l.t === '协同留言' && l.by.indexOf('产品经理') >= 0);
   const cName = id => { const c = M().funnel.cos.find(x => x.id === id); return c ? c.short : ''; };
   const rmName = id => { const r = M().funnel.rms.find(x => x.id === id); return r ? r.name : ''; };
 
@@ -4311,18 +5028,19 @@ window.APP = (function () {
   };
 
   window.VIEWS = window.VIEWS || {};
-  /* ================= 综合服务方案（独立页 · 机会漏斗"建议服务方案"进入） ================= */
+  /* ================= 综合服务方案（独立页 · 漏斗"建议服务方案"/作战包/工作台进入） ================= */
   VIEWS.plan = {
     render(el) {
       const c = S.params.co && M().funnel.cos.find(x => x.id === S.params.co);
       if (!c) {
-        el.innerHTML = '<div class="card card-pad"><div class="empty"><div class="e-ico">📄</div><div class="e-title">请从机会漏斗的"建议服务方案"进入</div></div></div>';
+        el.innerHTML = '<div class="card card-pad"><div class="empty"><div class="e-ico">📄</div><div class="e-title">请从机会漏斗的"建议服务方案"、访前作战包或工作台进入</div></div></div>';
         return;
       }
       el.innerHTML = `
-        <div class="page-head"><div class="page-title">综合服务方案</div>
+        <div class="page-head"><div class="page-title">综合服务方案 · ${esc(c.short)}</div>
           <div class="flex" style="gap:8px">
             <button class="btn btn-ghost" onclick="APP.go('funnel',{tab:'co'})">← 返回机会漏斗</button>
+            <button class="btn btn-ghost" onclick="APP.go('pack')">← 返回访前作战包</button>
             <button class="btn btn-primary btn-sm" onclick="APP.toast('综合服务方案已下载（PDF）')">下载服务方案</button></div></div>
         <div id="planBoard">${VIEWS.workbench.planHtml(c)}</div>`;
       const board = el.querySelector('#planBoard');
@@ -4339,7 +5057,7 @@ window.APP = (function () {
       const r = ROLE(), tasks = S.fn ? S.fn.tasks : M().funnel.tasksSeed;
       const rmMap = M().funnel.rms;
       if (r.id === 'rm-drz' || r.key === 'rm') return tasks.filter(t => t.rm === 'rm-drz');
-      if (r.key === 'head') return tasks.filter(t => { const rm = rmMap.find(x => x.id === t.rm); return rm && rm.unit === '无锡分行营业部'; });
+      if (r.key === 'head') return tasks.filter(t => { const rm = rmMap.find(x => x.id === t.rm); return rm && rm.unit === '南京分行营业部'; });
       return tasks;
     },
     /* ---------- 访前一页纸（六张网企业） ---------- */
@@ -4460,7 +5178,7 @@ window.APP = (function () {
               <ul class="text-sm text-sub" style="padding-left:18px;line-height:2">
                 <li>母公司统一授信、子公司按用信场景拆分（保函/供应链/项目贷分别落到业务主体）；</li>
                 <li>${c.cat === '上游供应商' ? '关注其对链主的依赖度：前五大客户集中度需现场核实' : '关注项目公司资本金与并表范围，防止风险向母公司传导'}；</li>
-                <li>对外担保与关联交易须穿透核查（演示口径，正式环境接入工商穿透数据）。</li>
+                <li>对外担保与关联交易须穿透核查（正式环境接入工商穿透数据）。</li>
               </ul>
             </div>
             ${this.secHtml(7, '财务速览（示意）', '正式环境接入财报后自动生成')}
@@ -4470,7 +5188,7 @@ window.APP = (function () {
               <tr><td>杠杆水平</td><td>${c.cat === '建设运营商' ? '重资产高杠杆（项目期）' : '适中'}</td><td class="text-sub">${c.cat === '建设运营商' ? '关注资本金与期限匹配' : '授信空间充足'}</td></tr>
               <tr><td>现金流</td><td>${c.cat === '上游供应商' ? '回款账期是核心变量' : '政府/业主回款稳定'}</td><td class="text-sub">保理/资金监管切入点</td></tr>
             </tbody></table></div>
-            <div class="wp-note">财务数值为演示示意——正式环境接入财报/税务/行内数据后，本节自动生成完整四维分析（盈利·杠杆·现金流·营运）。</div></div>
+            <div class="wp-note">正式环境接入财报/税务/行内数据后，本节自动生成完整四维分析（盈利·杠杆·现金流·营运）。</div></div>
             ${this.secHtml(8, '资本市场表现', c.listed.indexOf('是') === 0 ? '不博弈股价，但须理解波动来源' : '非上市主体')}
             <div class="card card-pad mb3"><ul class="text-sm text-sub" style="padding-left:18px;line-height:2">
               ${c.listed.indexOf('是') === 0
@@ -4488,7 +5206,7 @@ window.APP = (function () {
             ${this.secHtml(10, '风险排查与综合评分', '公开信号交叉验证')}
             <div class="card card-pad mb3">
               <div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:200px">风险维度</th><th style="width:70px">评估</th><th>说明</th></tr></thead><tbody>
-                <tr><td>失信被执行 / 行政处罚</td><td><span class="tag tag-green" style="height:20px">正常</span></td><td class="text-sub">公开信息未见异常（演示口径）</td></tr>
+                <tr><td>失信被执行 / 行政处罚</td><td><span class="tag tag-green" style="height:20px">正常</span></td><td class="text-sub">公开信息未见异常</td></tr>
                 <tr><td>客户/业主集中度</td><td>${c.cat === '上游供应商' ? '<span class="tag tag-orange" style="height:20px">关注</span>' : '<span class="tag tag-green" style="height:20px">正常</span>'}</td><td class="text-sub">${c.cat === '上游供应商' ? '前五大客户集中度需现场核实' : '业主方以政府/国企为主，回款确定性强'}</td></tr>
                 <tr><td>同业竞争</td><td><span class="tag tag-orange" style="height:20px">关注</span></td><td class="text-sub">六张网名单为同业共同关注焦点，比拼方案与服务时效</td></tr>
                 <tr><td>政策依赖</td><td><span class="tag tag-gray" style="height:20px">了解</span></td><td class="text-sub">${esc(c.net)}投资节奏受政策与财政影响，跟踪专项规划落地</td></tr>
@@ -4871,7 +5589,6 @@ window.APP = (function () {
       if (!S.wbTab) S.wbTab = 'task';
       if (S.params.side) { S.wbSide = S.params.side; S.wbTab = 'task'; delete S.params.side; }
       if (S.params.tab && ['task', 'visit', 'ai', 'ledger'].includes(S.params.tab)) { S.wbTab = S.params.tab; delete S.params.tab; }
-      if (!S.wbSide) S.wbSide = 'brief';
       const selId = S.params.task && tasks.some(t => t.id === S.params.task) ? S.params.task : (tasks[0] || {}).id;
       const sel = tasks.find(t => t.id === selId);
       el.innerHTML = `
@@ -4888,7 +5605,7 @@ window.APP = (function () {
         <div id="wbTabs"></div>`;
       const tabs = [
         { id: 'task', name: '任务跟进' },
-        { id: 'visit', name: '访客纪要' },
+        { id: 'visit', name: '访客纪要与协同' },
         { id: 'ai', name: 'AI 问答' },
         { id: 'ledger', name: '跟进台账' }];
       renderTabs($('#wbTabs'), tabs, S.wbTab, t2 => { S.wbTab = t2; paint(); });
@@ -4901,8 +5618,10 @@ window.APP = (function () {
         if (S.wbTab === 'ledger') this.paintLedgerTab(box, tasks);
       }; paint();
     },
-    /* ---------- Tab1：任务跟进（任务列表 + 访前一页纸同页） ---------- */
+    /* ---------- Tab1：任务跟进（任务列表 + 右侧 AI作战包四Tab） ---------- */
     paintTaskTab(box, tasks, selId) {
+      if (!S.wbSide) S.wbSide = 'profile';
+      if (!['profile', 'fin', 'advice', 'plan'].includes(S.wbSide)) S.wbSide = 'profile';
       box.innerHTML = `
         <div style="display:grid;grid-template-columns:1fr 2.05fr;gap:var(--sp-4);align-items:start">
           <div class="card" style="min-width:0">
@@ -4913,20 +5632,179 @@ window.APP = (function () {
             <div id="wbTaskList" style="max-height:860px;overflow-y:auto"></div>
           </div>
           <div class="card" style="min-width:0">
-            <div class="card-head">
-              <div class="flex" style="gap:6px" id="wbSideTabs">
-                <button class="chip ${S.wbSide === 'brief' ? 'on' : ''}" data-side="brief" style="height:26px">访前准备</button>
+            <div class="card-head" style="flex-wrap:wrap;gap:8px">
+              <div class="card-title">AI 作战包<span class="card-sub" id="wbOneTitle"></span></div>
+              <div class="flex" style="gap:6px;flex-wrap:wrap" id="wbSideTabs">
+                <button class="chip ${S.wbSide === 'profile' ? 'on' : ''}" data-side="profile" style="height:26px">客户画像</button>
+                <button class="chip ${S.wbSide === 'fin' ? 'on' : ''}" data-side="fin" style="height:26px">财报与征信</button>
+                <button class="chip ${S.wbSide === 'advice' ? 'on' : ''}" data-side="advice" style="height:26px">拜访建议</button>
                 <button class="chip ${S.wbSide === 'plan' ? 'on' : ''}" data-side="plan" style="height:26px">综合服务方案</button>
               </div>
-              <span class="card-sub" id="wbOneTitle"></span>
+              <div class="flex" style="gap:6px;margin-left:auto">
+                <button class="btn btn-ghost btn-sm" id="wbPkDl" style="height:26px">下载作战包</button>
+              </div>
             </div>
             <div class="card-pad" style="padding-top:8px" id="wbOnePager"></div>
           </div>
         </div>`;
       this.paintTasks(box, tasks, selId);
-      box.querySelectorAll('[data-side]').forEach(b => b.onclick = () => { S.wbSide = b.dataset.side; this.paintTaskTab(box, this.myTasks(), S.params.task); const k2 = box.querySelector('#wbTaskKw'); if (k2 && S.wbKw) { k2.value = S.wbKw; } });
+      box.querySelectorAll('[data-side]').forEach(b => b.onclick = () => { S.wbSide = b.dataset.side; this.paintOnePager(box); });
+      const dlBtn = box.querySelector('#wbPkDl');
+      if (dlBtn) dlBtn.onclick = () => toast(S.wbSide === 'plan' ? '综合服务方案已下载（PDF）' : 'AI 作战包已下载（PDF）');
       const kw = box.querySelector('#wbTaskKw');
       kw.oninput = () => { S.wbKw = kw.value.trim(); this.paintTasks(box, tasks, selId); const k2 = box.querySelector('#wbTaskKw'); k2.focus(); k2.setSelectionRange(k2.value.length, k2.value.length); };
+    },
+    /* 右栏四Tab内容渲染（随 S.wbSide 切换，不重绘任务列表） */
+    paintOnePager(box) {
+      const coParam = S.params.co && (M().funnel.cos.find(x => x.id === S.params.co) || M().companies.find(x => x.id === S.params.co)) ? S.params.co : null;
+      const tasks = this.myTasks();
+      const selId = S.params.task && tasks.some(t => t.id === S.params.task) ? S.params.task : (tasks[0] || {}).id;
+      const sel = tasks.find(t => t.id === selId) || tasks[0];
+      const c = coParam ? M().coById(coParam) : (sel ? M().coById(sel.co) : null);
+      const opBox = box.querySelector('#wbOnePager');
+      const title = box.querySelector('#wbOneTitle');
+      if (!opBox) return;
+      box.querySelectorAll('[data-side]').forEach(b => b.classList.toggle('on', b.dataset.side === S.wbSide));
+      if (!c) {
+        opBox.innerHTML = '<div class="text-sm text-muted" style="padding:16px 4px">暂无任务，选择任务后生成看板</div>';
+        if (title) title.textContent = '';
+        return;
+      }
+      const side = S.wbSide;
+      if (side === 'plan') opBox.innerHTML = this.planSideHtml(c, sel);
+      else if (side === 'fin') opBox.innerHTML = this.finCredHtml(c);
+      else if (side === 'advice') opBox.innerHTML = this.adviceHtml(c);
+      else opBox.innerHTML = this.profileFullHtml(c);
+      if (title) title.textContent = '· ' + c.short;
+      const FX = AIFX();
+      FX.stagger(opBox); FX.countUp(opBox);
+      if (!FX.played.wbScript) { FX.played.wbScript = 1; FX.typewrite(opBox); }
+    },
+    /* ---------- AI作战包 · Tab1 客户画像（画像+股权治理+集团架构+财务速览+资本表现+行业地位+风险排查） ---------- */
+    profileFullHtml(c) {
+      /* 复用访前一页纸看板（其结构即这七节），仅去掉头尾的下载条避免与右栏头部重复 */
+      let html = this.briefHtml(c);
+      html = html.replace(/<div class="flex mt3"[^>]*>\s*<span class="text-xs text-muted">[^<]*<\/span>\s*<button[^>]*>下载访前准备<\/button>\s*<\/div>\s*$/, '');
+      return html;
+    },
+    /* ---------- AI作战包 · Tab2 财报与征信 ---------- */
+    finCredHtml(c) {
+      const o = c.internal || { credit: 0, used: 0, deposit: 0, settle: 0, products: [] };
+      const fin = [
+        ['营业收入', c.pos === '战略' ? '86.2 亿' : c.pos === '腰部' ? '23.5 亿' : '5.8 亿', '同比 +18%'],
+        ['归母净利润', c.pos === '战略' ? '6.4 亿' : c.pos === '腰部' ? '1.6 亿' : '0.32 亿', '同比 +12%'],
+        ['资产负债率', c.cat === '建设运营商' ? '68%' : '54%', c.cat === '建设运营商' ? '重资产项目期' : '行业均值 58%'],
+        ['应收账款周转', c.cat === '上游供应商' ? '127 天' : '86 天', c.cat === '上游供应商' ? '行业均值 98 天 · 偏长' : '行业均值 92 天'],
+        ['经营性现金流', c.cat === '建设运营商' ? '项目期波动' : '净流入', '近 3 年为正'],
+        ['研发投入占比', c.net === '新一代通信网' || c.net === '算力网' ? '11.2%' : '3.8%', 'AI 按行业口径核算'],
+      ];
+      const cred = [
+        ['征信查询授权', '已取得（营销用途授权）'],
+        ['征信记录', '无不良 · 无关注类'],
+        ['对外担保', c.cat === '建设运营商' ? '1 笔 · 项目公司互保' : '未披露'],
+        ['涉诉/失信', '公开信息未见异常'],
+        ['他行授信', o.credit ? `授信 ${o.credit} 亿 · 已用 ${o.used} 亿` : '无授信记录'],
+        ['人行征信区间', c.score >= 80 ? 'AA 级区间' : c.score >= 60 ? 'A 级区间' : 'BBB 区间'],
+      ];
+      return `
+        <div class="wp-kpis">
+          <div class="wp-kpi"><div class="k">综合评分</div><div class="v">${c.score}</div><div class="d">${c.sigLv} 级信号 · ${c.rel}</div></div>
+          <div class="wp-kpi"><div class="k">行内合作</div><div class="v">${o.credit ? o.credit + '亿' : '未合作'}</div><div class="d">${(o.products || []).length ? (o.products || []).slice(0, 2).join('/') : '新客户'}</div></div>
+          <div class="wp-kpi"><div class="k">存款日均</div><div class="v">${o.deposit ? o.deposit + '亿' : '—'}</div><div class="d">${o.settle ? '结算量 ' + o.settle + '亿' : '尚未建立结算'}</div></div>
+        </div>
+        ${this.secHtml(1, '财报速览（AI 解析）', '正式环境接入财报/税务数据后自动生成')}
+        <div class="card card-pad mb3">
+          <div class="grid-3" style="grid-template-columns:repeat(3,1fr);gap:10px">
+            ${fin.map(f2 => `<div class="wp-pcard" style="border-top:3px solid #2458F5"><div class="t">${f2[0]}</div><div class="s"><b style="font-size:15px">${f2[1]}</b><br><span class="text-xs text-muted">${f2[2]}</span></div></div>`).join('')}
+          </div>
+          <div class="wp-note mt2"><b>AI 财报结论：</b>${c.cat === '上游供应商' ? '盈利与成长正常，核心变量是应收账期与客户集中度——建议授信结构以应收盘活类产品为主。' : '项目期杠杆偏高属正常，关注资本金到位与回款现金流——建议期限匹配的项目类融资。'}</div>
+        </div>
+        ${this.secHtml(2, '征信速览', '正式环境接入人行征信后按授权生成')}
+        <div class="card card-pad">
+          <div class="grid-3" style="grid-template-columns:repeat(3,1fr);gap:10px">
+            ${cred.map(x => `<div class="wp-pcard" style="border-top:3px solid #16A34A"><div class="t">${x[0]}</div><div class="s">${x[1]}</div></div>`).join('')}
+          </div>
+          <div class="wp-note mt2"><b>提示：</b>征信信息仅限授信用途，需客户书面授权后查询。</div>
+        </div>`;
+    },
+    /* ---------- AI作战包 · Tab3 拜访建议（对接人+六议题话术+注意事项） ---------- */
+    adviceHtml(c) {
+      const doc = document.createElement('div'); doc.innerHTML = this.briefHtml(c);
+      const pick = sel2 => [...doc.querySelectorAll(sel2)].map(e => e.outerHTML).join('');
+      const persons = pick('.wp-person');
+      const topics = pick('.wp-topic');
+      const attention = (() => { const sec = [...doc.querySelectorAll('.card card-pad')]; return ''; })();
+      /* 注意事项与对接人标题区从 briefHtml 中截取：用 section 标记定位 */
+      const attentionHtml = (() => {
+        const m = doc.innerHTML.match(/拜访注意事项[\s\S]*?<\/div>\s*<\/div>/);
+        return m ? m[0] : '';
+      })();
+      return `
+        <div class="wp-kpis">
+          <div class="wp-kpi"><div class="k">拜访结论</div><div class="v">${c.prog === '突破' ? '重点介入' : c.prog === '攻坚' ? '适度介入' : '培育跟踪'}</div><div class="d">${c.pos}客户 · ${c.prog}档 · 授信评估</div></div>
+          <div class="wp-kpi"><div class="k">方案窗口</div><div class="v" style="font-size:15px;line-height:1.4">${c.prog === '突破' ? '11 月内' : c.prog === '攻坚' ? '年底前' : '建立联系'}</div><div class="d">错过需等下一周期</div></div>
+          <div class="wp-kpi"><div class="k">核心议题</div><div class="v">6</div><div class="d">每议题对应方案模块</div></div>
+        </div>
+        ${this.secHtml(1, '建议对接人', '首次拜访由下至上、二次拜访由内至外')}
+        <div class="grid-3 mb3">${persons || '<div class="text-sm text-muted">对接人信息完善中</div>'}</div>
+        ${this.secHtml(2, '六个核心交流议题（附交流理由 · 话术可照读）', '每个议题对应综合服务方案中的一个模块')}
+        <div class="grid-2 mb3">${topics}</div>
+        ${this.secHtml(3, '拜访注意事项', '时机 · 姿态 · 合规')}
+        <div class="card card-pad">
+          ${this.attentionHtml(c)}
+        </div>`;
+    },
+    /* 拜访注意事项（时机/姿态/合规 三卡，与访前一页纸同源口径） */
+    attentionHtml(c) {
+      return `<div class="grid-3">
+          <div class="card card-pad"><b class="text-sm mb2" style="display:block">时机选择</b><ul class="text-sm text-sub" style="padding-left:18px;line-height:1.9"><li>${c.prog === '突破' ? '<b>方案窗口在 11 月内</b>，错过需等下一周期；' : c.prog === '攻坚' ? '年底前是授信落地窗口；' : '以建立联系为主，不急于报价；'}</li><li>首访锁财务口 → 两周内提交定制方案 → 纳入年度授信盘子。</li></ul></div>
+          <div class="card card-pad"><b class="text-sm mb2" style="display:block">姿态与话术</b><ul class="text-sm text-sub" style="padding-left:18px;line-height:1.9"><li>切忌泛泛推销与低价竞争；</li><li>带具体方案上门：${esc((c.prods || []).slice(0, 2).join('、'))}要点与测算；</li><li>他行合作、股价等话题<b>不主动评论</b>。</li></ul></div>
+          <div class="card card-pad"><b class="text-sm mb2" style="display:block">合规红线</b><ul class="text-sm text-sub" style="padding-left:18px;line-height:1.9"><li>未公开数据按内幕信息管理，不用于营销对比；</li><li>调查数据以审计报告与公告为准，舆情仅作参考；</li><li>不承诺额度、利率、审批时限。</li></ul></div>
+        </div>`;
+    },
+    /* ---------- 综合服务方案（右侧面板版：方案看板 + 迭代记录入口） ---------- */
+    planSideHtml(c, task) {
+      const synCnt = task ? task.log.filter(l => l.t === '协同留言').length : 0;
+      const ver = 'V' + (1 + Math.min(synCnt, 3)) + '.0';
+      return `
+        <div class="flex-between mb2" style="gap:8px;flex-wrap:wrap">
+          <span class="tag tag-solid-red" style="height:24px">综合服务方案 · ${ver}</span>
+          <span class="text-xs text-muted">${synCnt ? '已经 ' + synCnt + ' 轮协同迭代' : '初版（随任务下发）'}</span>
+        </div>
+        ${this.planHtml(c)}
+        <div class="flex mt3" style="justify-content:space-between;align-items:center;gap:10px;border-top:1px dashed var(--line);padding-top:12px">
+          <span class="text-xs text-muted">纪要与协同推进后，方案逐版迭代。</span>
+          <div class="flex" style="gap:8px">
+            <button class="btn btn-ghost btn-sm" id="plIter">📝 迭代记录</button>
+            <button class="btn btn-primary btn-sm" id="plDl">下载服务方案</button>
+          </div>
+        </div>`;
+    },
+    /* 方案迭代记录弹窗：版本历程 + 新增记录 */
+    iterDlg(c, task) {
+      const logs = task ? task.log : [];
+      const synLogs = logs.filter(l => l.t === '协同留言');
+      const versions = [{ v: 'V1.0', d: '初版', x: '任务下发随附：AI 按产品库匹配生成建议服务方案', by: '系统 · AI' }]
+        .concat(synLogs.map((l, i) => ({ v: 'V' + (i + 2) + '.0', d: l.d + ' 迭代', x: l.x, by: l.by })));
+      openModal({ wide: true, title: `方案迭代记录 · ${esc(c.short)}`, body: `
+        <div class="timeline mb3">
+          ${versions.map((x, i) => `<div class="tl-item ${i === versions.length - 1 ? 'tl-ok' : ''}">
+            <div class="tl-time">${x.v} · ${esc(x.by)}</div>
+            <div class="tl-title">${esc(x.d)}</div>
+            <div class="tl-desc" style="white-space:normal">${esc(x.x)}</div></div>`).join('')}
+        </div>
+        <div style="border-top:1px dashed var(--line);padding-top:12px">
+          <div class="text-sm" style="font-weight:600;margin-bottom:8px">新增迭代记录</div>
+          <textarea class="input" id="itTxt" rows="3" placeholder="记录本次方案调整内容与依据（纪要结论 / 协同意见 / 客户反馈）"></textarea>
+        </div>`,
+        foot: `<button class="btn btn-ghost" onclick="APP.closeModal()">关闭</button><button class="btn btn-primary" id="itGo">保存记录</button>`,
+        onOpen: () => { document.querySelector('#itGo').onclick = () => {
+          const txt = document.querySelector('#itTxt').value.trim();
+          if (!txt) return toast('请输入迭代记录内容', 'warn');
+          if (task) task.log.unshift({ d: '11-04', t: '方案迭代', by: APP.curUser().name, x: txt });
+          APP.closeModal(); toast('方案迭代记录已保存');
+          this.render(document.querySelector('#viewRoot'));
+        }; } });
     },
     /* ---------- Tab2：访客纪要 ---------- */
     paintVisitTab(box, sel) {
@@ -4957,7 +5835,7 @@ window.APP = (function () {
         html = k('承接任务', tasks.length) + k('待接收', tasks.filter(t => t.status === '待接收').length)
           + k('跟进中', tasks.filter(t => t.status === '跟进中').length)
           + (od ? k('超期任务', od, '', true) : k('已反馈', tasks.filter(t => t.status === '已反馈').length))
-          + k('本周纪要', tasks.reduce((s2, t) => s2 + t.log.filter(l => l.t === '访客纪要').length, 0));
+          + k('本周纪要', tasks.reduce((s2, t) => s2 + t.log.filter(l => l.t.indexOf("访客纪要") >= 0).length, 0));
       } else if (r.key === 'head') {
         html = k('支行任务', tasks.length) + k('跟进中', tasks.filter(t => t.status === '跟进中').length)
           + k('已反馈', tasks.filter(t => t.status === '已反馈').length)
@@ -4972,54 +5850,9 @@ window.APP = (function () {
         html = k('全辖任务', tasks.length) + k('覆盖企业', new Set(tasks.map(t => t.co)).size)
           + k('参战经理', new Set(tasks.map(t => t.rm)).size)
           + k('整体反馈率', tasks.length ? Math.round(tasks.filter(t => t.status === '已反馈').length / tasks.length * 100) : 0, '%')
-          + (od ? k('超期任务', od, '', true) : k('本周纪要', tasks.reduce((s2, t) => s2 + t.log.filter(l => l.t === '访客纪要').length, 0)));
+          + (od ? k('超期任务', od, '', true) : k('本周纪要', tasks.reduce((s2, t) => s2 + t.log.filter(l => l.t.indexOf("访客纪要") >= 0).length, 0)));
       }
       box.innerHTML = html;
-    },
-    /* ---------- Tab1：任务跟进（任务列表 + 访前一页纸同页） ---------- */
-    paintTaskTab(box, tasks, selId) {
-      box.innerHTML = `
-        <div style="display:grid;grid-template-columns:1fr 2.05fr;gap:var(--sp-4);align-items:start">
-          <div class="card" style="min-width:0">
-            <div class="card-head">
-              <div class="card-title">${ROLE().key === 'pm' ? '我下发的任务' : ROLE().key === 'head' ? '本支行任务' : ROLE().key === 'gm' ? '全辖任务概览' : '我承接的任务'}</div>
-              <input class="input" id="wbTaskKw" placeholder="按企业名称筛选…" value="${esc(S.wbKw || '')}" style="width:170px;height:28px">
-            </div>
-            <div id="wbTaskList" style="max-height:860px;overflow-y:auto"></div>
-          </div>
-          <div class="card" style="min-width:0">
-            <div class="card-head">
-              <div class="flex" style="gap:6px" id="wbSideTabs">
-                <button class="chip ${S.wbSide === 'brief' ? 'on' : ''}" data-side="brief" style="height:26px">访前准备</button>
-                <button class="chip ${S.wbSide === 'plan' ? 'on' : ''}" data-side="plan" style="height:26px">综合服务方案</button>
-              </div>
-              <span class="card-sub" id="wbOneTitle"></span>
-            </div>
-            <div class="card-pad" style="padding-top:8px" id="wbOnePager"></div>
-          </div>
-        </div>`;
-      this.paintTasks(box, tasks, selId);
-      box.querySelectorAll('[data-side]').forEach(b => b.onclick = () => { S.wbSide = b.dataset.side; this.paintTaskTab(box, this.myTasks(), S.params.task); const k2 = box.querySelector('#wbTaskKw'); if (k2 && S.wbKw) { k2.value = S.wbKw; } });
-      const kw = box.querySelector('#wbTaskKw');
-      kw.oninput = () => { S.wbKw = kw.value.trim(); this.paintTasks(box, tasks, selId); const k2 = box.querySelector('#wbTaskKw'); k2.focus(); k2.setSelectionRange(k2.value.length, k2.value.length); };
-    },
-    /* ---------- Tab2：访客纪要 ---------- */
-    paintVisitTab(box, sel) {
-      box.innerHTML = `<div class="card"><div class="card-head"><div class="card-title">访客纪要<span class="card-sub">语音录入 · AI 自动整理 · 前中后台协同留痕</span></div></div>
-        <div class="card-pad" style="padding-top:8px" id="wbVisit"></div></div>`;
-      this.paintVisit(box, sel);
-    },
-    /* ---------- Tab3：AI 问答 ---------- */
-    paintAiTab(box) {
-      box.innerHTML = `<div class="card"><div class="card-head"><div class="card-title">AI 问答<span class="card-sub">产品 · 政策 · 营销建议</span></div></div>
-        <div class="card-pad" style="padding-top:8px" id="wbAi"></div></div>`;
-      this.paintAi(box);
-    },
-    /* ---------- Tab4：跟进台账 ---------- */
-    paintLedgerTab(box, tasks) {
-      box.innerHTML = `<div class="card"><div class="card-head"><div class="card-title">跟进台账<span class="card-sub">访客纪要 / 协同留言 / 反馈 全留痕</span></div></div>
-        <div class="card-pad" style="padding-top:8px" id="wbLedger"></div></div>`;
-      this.paintLedger(box, tasks);
     },
     taskCard(t, selId) {
       const stTag = s2 => ({ 待接收: 'tag-gray', 跟进中: 'tag-blue', 已反馈: 'tag-green', 已关闭: 'tag-line' }[s2] || 'tag-gray');
@@ -5037,12 +5870,19 @@ window.APP = (function () {
       const rk = ROLE().key;
       let listHtml = '';
       if (rk === 'pm') {
-        /* 产品经理：待陪访 / 待复核纪要 / 我下发的任务 三组 */
+        /* 产品经理：待陪访 / 待复核纪要 / 我下发的任务 三组（tab 切换） */
         const accompany = tasks.filter(t => t.status === '跟进中' && +t.due.replace('-', '') <= 1112);
         const review = tasks.filter(needReview);
-        const grp = (title, arr, tip) => `<div class="text-xs" style="font-weight:700;color:var(--brand-600);padding:10px 14px 4px">${title} <span class="text-xs text-muted" style="font-weight:400">（${arr.length}）${tip || ''}</span></div>` +
-          (arr.map(t => this.taskCard(t, selId)).join('') || '<div class="text-xs text-muted" style="padding:2px 14px 6px">暂无</div>');
-        listHtml = grp('待陪访', accompany, '跟进中且 7 天内到期') + grp('待复核纪要', review, '客户经理已归档，待产品经理复核') + grp('我下发的任务', list, '');
+        if (!S.wbPmTab) S.wbPmTab = 'all';
+        const pmTabs = [
+          { id: 'all', name: '我下发的任务', n: list.length },
+          { id: 'accompany', name: '待陪访', n: accompany.length, tip: '跟进中且7天内到期' },
+          { id: 'review', name: '待复核纪要', n: review.length, tip: '待产品经理复核' }];
+        const pmArr = S.wbPmTab === 'accompany' ? accompany : S.wbPmTab === 'review' ? review : list;
+        listHtml = `<div style="display:flex;gap:0;border-bottom:1px solid var(--line);padding:0 10px">
+            ${pmTabs.map(t => `<div data-pmtab="${t.id}" style="padding:10px 10px 8px;cursor:pointer;font-size:12px;font-weight:${S.wbPmTab === t.id ? 700 : 400};color:${S.wbPmTab === t.id ? 'var(--brand-600)' : 'var(--t2)'};border-bottom:2px solid ${S.wbPmTab === t.id ? 'var(--brand-500)' : 'transparent'}">${t.name}（${t.n}）</div>`).join('')}
+          </div>` +
+          (pmArr.map(t => this.taskCard(t, selId)).join('') || '<div class="text-xs text-muted" style="padding:14px">暂无任务</div>');
       } else if (rk === 'gm') {
         /* 总经理：客户经理排行 + 红黑榜 + 全辖任务 */
         const byRm = {};
@@ -5069,17 +5909,28 @@ window.APP = (function () {
           (list.map(t => this.taskCard(t, selId)).join('') || '<div class="empty" style="padding:36px 16px"><div class="e-ico">🔍</div><div class="e-title">无匹配任务</div></div>');
       }
       box.innerHTML = listHtml;
+      /* 产品经理左侧三组 tab 切换 */
+      box.querySelectorAll('[data-pmtab]').forEach(t => t.onclick = () => { S.wbPmTab = t.dataset.pmtab; this.paintTasks(box, tasks, selId); });
       box.querySelectorAll('[data-wt]').forEach(d => d.onclick = () => { S.params.task = d.dataset.wt; delete S.params.co; this.render(document.querySelector('#viewRoot')); });
-      /* 右栏看板：S.params.co 优先（来自机会漏斗"建议服务方案"跳转），否则随选中任务联动 */
-      const coParam = S.params.co && M().funnel.cos.find(x => x.id === S.params.co) ? S.params.co : null;
-      const sel = tasks.find(t => t.id === selId);
-      const c = coParam ? M().funnel.cos.find(x => x.id === coParam) : (sel ? M().funnel.cos.find(x => x.id === sel.co) : null);
+      /* 右栏看板：S.params.co 优先（来自机会漏斗"建议服务方案"跳转），否则随选中任务联动（无明确选中时取第一项） */
+      const coParam = S.params.co && (M().funnel.cos.find(x => x.id === S.params.co) || M().companies.find(x => x.id === S.params.co)) ? S.params.co : null;
+      const sel = tasks.find(t => t.id === selId) || tasks[0];
+      const c = coParam ? M().coById(coParam) : (sel ? M().coById(sel.co) : null);
       const opBox = el.querySelector('#wbOnePager');
       const title = el.querySelector('#wbOneTitle');
       if (opBox) {
         if (c) {
-          opBox.innerHTML = S.wbSide === 'plan' ? this.planHtml(c) : this.briefHtml(c);
-          if (title) title.textContent = (S.wbSide === 'plan' ? '综合服务方案' : '访前准备') + ' · ' + c.short;
+          if (S.wbSide === 'plan') {
+            opBox.innerHTML = this.planSideHtml(c, sel);
+            if (title) title.textContent = '· ' + c.short;
+            const bIter = opBox.querySelector('#plIter'), bDl = opBox.querySelector('#plDl');
+            if (bIter) bIter.onclick = () => this.iterDlg(c, sel);
+            if (bDl) bDl.onclick = () => toast('综合服务方案已下载（PDF）');
+          } else {
+            const side = S.wbSide;
+            opBox.innerHTML = side === 'fin' ? this.finCredHtml(c) : side === 'advice' ? this.adviceHtml(c) : this.profileFullHtml(c);
+            if (title) title.textContent = '· ' + c.short;
+          }
         } else {
           opBox.innerHTML = '<div class="text-sm text-muted" style="padding:16px 4px">暂无任务，选择任务后生成看板</div>';
           if (title) title.textContent = '';
@@ -5090,23 +5941,32 @@ window.APP = (function () {
         if (!FX.played.wbScript) { FX.played.wbScript = 1; FX.typewrite(opBox); }
       }
     },
-    /* ---------- 访客纪要（语音 + AI 整理 + 协同） ---------- */
+    /* ---------- 访客纪要与协同（客户经理录音纪要；中后台角色以本人身份协同留言；跟进记录全员可见） ---------- */
     paintVisit(el, sel) {
       const box = el.querySelector('#wbVisit');
-      if (!sel) { box.innerHTML = '<div class="text-sm text-muted" style="padding:16px 4px">暂无承接任务，无法录入纪要</div>'; return; }
-      const c = M().funnel.cos.find(x => x.id === sel.co);
+      if (!sel) { box.innerHTML = '<div class="text-sm text-muted" style="padding:16px 4px">暂无承接任务</div>'; return; }
+      const c = M().coById(sel.co) || {};
       const editable = ROLE().key === 'rm';
+      const me = APP.curUser();
+      const visitLogs = sel.log.filter(l => /纪要/.test(l.t));
+      const synCnt = sel.log.filter(l => l.t === '协同留言').length;
+      const packVer = 'V' + (1 + Math.min(synCnt, 3)) + '.0';
+      /* 该任务的访后报告 */
+      if (!S.visitReports) S.visitReports = [];
+      const vr = S.visitReports.filter(r => r.co === sel.co);
       box.innerHTML = `
         <div class="flex-between mb3" style="gap:10px;flex-wrap:wrap">
-          <div class="text-sm"><b>${esc(c.short)}</b><span class="text-xs text-muted" style="margin-left:8px">${esc(sel.note)}</span></div>
-          <div class="flex" style="gap:8px">
-            <select class="select" id="wbVTsk" style="width:auto;height:28px;font-size:12px">${this.myTasks().map(t => `<option value="${t.id}" ${t.id === sel.id ? 'selected' : ''}>${esc((M().funnel.cos.find(x => x.id === t.co) || {}).short)}（${t.status}）</option>`).join('')}</select>
+          <div class="text-sm"><b>${esc(c.short || '')}</b><span class="text-xs text-muted" style="margin-left:8px">${esc(sel.note || '')}</span></div>
+          <div class="flex" style="gap:8px;flex-wrap:wrap">
+            <span class="tag tag-blue" style="height:24px">第 ${visitLogs.length + 1} 次拜访待录</span>
+            <span class="tag tag-orange" style="height:24px">协同 ${synCnt} 次 · 方案 ${packVer}</span>
+            <select class="select" id="wbVTsk" style="width:auto;height:28px;font-size:12px">${this.myTasks().map(t => `<option value="${t.id}" ${t.id === sel.id ? 'selected' : ''}>${esc((M().coById(t.co) || {}).short || '')}（${t.status}）</option>`).join('')}</select>
           </div>
         </div>
         ${editable ? `
         <div class="wb-mic-row">
           <button class="wb-mic" id="wbMic">●</button>
-          <div class="wb-mic-tip" id="wbMicTip">点击录音，口述拜访过程（录音直接转文字，自动整理归档）</div>
+          <div class="wb-mic-tip" id="wbMicTip">点击录音，口述拜访过程（录音直接转文字，自动整理归档；支持多次拜访分别记录）</div>
           <span class="tag tag-line" style="height:22px" id="wbMicTime">00:00</span>
         </div>
         <div class="form mt2">
@@ -5120,23 +5980,57 @@ window.APP = (function () {
           <div id="wbAiOut"></div>
           <div class="flex" style="gap:8px;justify-content:flex-end;margin-top:4px">
             <button class="btn btn-ghost" id="wbAiBtn">✦ AI 整理</button>
-            <button class="btn btn-primary" id="wbVSave">保存归档</button>
-          </div>
-        </div>
-        <div class="mt4" style="border-top:1px dashed var(--line);padding-top:12px">
-          <div class="flex mb2" style="gap:8px"><b class="text-sm">协同留言（前中后台协同）</b><span class="text-xs text-muted">产品经理 / 风险经理 / 负责人补充意见，全部留痕</span></div>
-          <div class="flex" style="gap:8px;flex-wrap:wrap">
-            <select class="select" id="wbSyRole" style="width:auto;height:30px;font-size:12px"><option>分行产品经理 · 陈立</option><option>风险经理 · 刘珊</option><option>部门负责人 · 王健</option></select>
-            <input class="input" id="wbSyTxt" placeholder="补充产品方案 / 风险意见…" style="flex:1;min-width:180px;height:30px">
-            <button class="btn btn-ghost" id="wbSyGo">留言</button>
+            <button class="btn btn-primary" id="wbVSave">保存归档（第 ${visitLogs.length + 1} 次拜访）</button>
           </div>
         </div>` : `
-        <div class="text-sm text-muted" style="line-height:1.8">当前角色（${esc(ROLE().name)}）为只读视角：纪要由客户经理录入，您可在任务详情中查看全过程留痕并留言协同。</div>
-        <div class="mt3">${sel.log.map(l => `<div class="flex mb2" style="gap:8px;align-items:flex-start"><span class="tag tag-line" style="height:19px;font-size:10px;flex-shrink:0">${esc(l.d)} ${esc(l.t)}</span><span class="text-sm text-sub" style="line-height:1.7">${esc(l.x)}</span></div>`).join('')}</div>`}
+        <div class="card card-pad mb3" style="box-shadow:none;border-left:3px solid var(--blue-500)">
+          <div class="text-sm" style="line-height:1.8">您当前以 <b>${esc(me.role)} · ${esc(me.name)}</b> 身份查看该客户跟进过程：纪要由客户经理现场录入，您可在下方以本人身份补充协同意见（产品方案 / 风险意见），留言后自动通知客户经理并计入方案迭代。</div>
+        </div>`}
+        <div class="mt4" style="border-top:1px dashed var(--line);padding-top:12px">
+          <div class="flex mb2" style="gap:8px;align-items:center;flex-wrap:wrap">
+            <b class="text-sm">协同留言</b><span class="text-xs text-muted">${editable ? '中后台（产品/风险/负责人）在各自工作台补充意见' : '以本人身份留言（' + esc(me.role) + ' · ' + esc(me.name) + '）'}</span>
+          </div>
+          ${editable
+            ? (synCnt ? sel.log.filter(l => l.t === '协同留言').slice(0, 3).map(l => `<div class="flex mb2" style="gap:8px;align-items:flex-start"><span class="tag tag-orange" style="height:19px;font-size:10px;flex-shrink:0">${esc(l.d)}</span><span class="text-sm text-sub" style="line-height:1.7"><b>${esc(l.by)}</b> — ${esc(l.x)}</span></div>`).join('') : '<div class="text-sm text-muted mb2">暂无协同留言</div>')
+            : `<div class="flex" style="gap:8px;flex-wrap:wrap">
+              <input class="input" id="wbSyTxt" placeholder="以 ${esc(me.name)} 身份补充：产品方案 / 风险意见…" style="flex:1;min-width:220px;height:30px">
+              <button class="btn btn-primary" id="wbSyGo" style="height:30px">留言</button>
+            </div>`}
+        </div>
+        <div class="mt4" style="border-top:1px dashed var(--line);padding-top:12px">
+          <div class="flex-between mb2" style="gap:8px;flex-wrap:wrap">
+            <b class="text-sm">访后尽调报告</b>
+            <span class="text-xs text-muted">拜访完成后上传客户资料，生成尽调报告</span>
+          </div>
+          ${vr.length
+            ? vr.map(r => `<div class="flex-between" style="padding:8px 0;border-bottom:1px dashed var(--line)">
+              <span class="text-sm"><b>${esc(r.title)}</b> <span class="text-xs text-muted">${esc(r.t)} · ${esc(r.by)}</span></span>
+              <span class="flex" style="gap:6px"><button class="btn btn-text btn-sm" data-vr-view="${esc(r.id)}">查看</button><button class="btn btn-text btn-sm" data-vr-dl="${esc(r.id)}">下载尽调报告</button></span>
+            </div>`).join('')
+            : `<div class="flex" style="gap:8px;align-items:center;flex-wrap:wrap">
+              <span class="text-sm text-muted">尚无访后报告</span>
+              ${editable ? '<button class="btn btn-primary btn-sm" id="wbVrNew">＋ 上传资料生成访后报告</button>' : ''}
+            </div>`}
+        </div>
+        <div class="mt4" style="border-top:1px dashed var(--line);padding-top:12px">
+          <div class="flex mb2" style="gap:8px"><b class="text-sm">拜访与协同全流程记录（${sel.log.length} 条）</b><span class="text-xs text-muted">最新在上 · 全员可见</span></div>
+          ${sel.log.map(l => `<div class="flex mb2" style="gap:8px;align-items:flex-start">
+            <span class="tag ${l.t === '协同留言' ? 'tag-orange' : /纪要/.test(l.t) ? 'tag-blue' : l.t === '方案迭代' ? 'tag-violet' : 'tag-line'}" style="height:19px;font-size:10px;flex-shrink:0">${esc(l.d)} ${esc(l.t)}</span>
+            <span class="text-sm text-sub" style="line-height:1.7"><b style="color:var(--t3);font-weight:400">${esc(l.by)}</b> — ${esc(l.x)}</span></div>`).join('') || '<div class="text-sm text-muted">暂无记录</div>'}
+        </div>
       `;
       const tsk = el.querySelector('#wbVTsk');
       if (tsk) tsk.onchange = () => { S.params.task = tsk.value; this.render(document.querySelector('#viewRoot')); };
-      if (!editable) return;
+      /* 访后报告：查看 / 下载 / 生成 */
+      box.querySelectorAll('[data-vr-view]').forEach(b => b.onclick = () => { if (window.VIEWS.visitReport) { S._visitId = b.dataset.vrView; VIEWS.visitReport.open(S._visitId); } });
+      box.querySelectorAll('[data-vr-dl]').forEach(b => b.onclick = () => {
+        const r = S.visitReports.find(x => x.id === b.dataset.vrDl);
+        if (r && window.VIEWS.visitReport) VIEWS.visitReport.downloadWord(r);
+        else toast('报告生成后可下载尽调报告', 'warn');
+      });
+      const vrNew = box.querySelector('#wbVrNew');
+      if (vrNew) vrNew.onclick = () => this.vrUploadDlg(sel, c);
+      if (!editable) { this.bindSyn(el, sel); return; }
       /* 录音（真实按钮 + 演示转写） */
       let rec = null, timer = null, sec = 0;
       const mic = el.querySelector('#wbMic'), tip = el.querySelector('#wbMicTip'), timeEl = el.querySelector('#wbMicTime');
@@ -5144,7 +6038,7 @@ window.APP = (function () {
       mic.onclick = () => {
         if (!rec) {
           rec = { start: Date.now() };
-          mic.classList.add('rec'); tip.textContent = '正在录音（演示：浏览器录音），再次点击结束并转写';
+          mic.classList.add('rec'); tip.textContent = '正在录音，再次点击结束并转写';
           try { navigator.mediaDevices.getUserMedia({ audio: true }).then(st => { recser = st; }).catch(() => { }); } catch (e) { }
           timer = setInterval(() => { sec++; timeEl.textContent = String(Math.floor(sec / 60)).padStart(2, '0') + ':' + String(sec % 60).padStart(2, '0'); }, 1000);
         } else {
@@ -5174,17 +6068,66 @@ window.APP = (function () {
         if (!note) return toast('请先录入交流要点', 'warn');
         const ai = el.querySelector('#wbAiOut').dataset.done === '1';
         const peer = el.querySelector('#wbVPeer').value.trim() || '关键人';
-        sel.log.unshift({ d: '11-04', t: '访客纪要', by: APP.curUser().name, x: `【${el.querySelector('#wbVWay').value} · ${peer}】${note.slice(0, 60)}…（AI 已整理${ai ? '：识别需求与产品服务建议，含非信贷服务' : ''}）` });
+        const visitCnt = sel.log.filter(l => /纪要/.test(l.t)).length + 1;
+        sel.log.unshift({ d: '11-04', t: '访客纪要（第' + visitCnt + '次）', by: APP.curUser().name, x: `【${el.querySelector('#wbVWay').value} · ${peer}】${note.slice(0, 60)}…（AI 已整理${ai ? '：识别需求与产品服务建议，含非信贷服务' : ''}）` });
         S._logNew = true;
         if (sel.status === '待接收') sel.status = '跟进中';
-        toast('纪要已归档，任务状态更新为"跟进中"，过程记录已同步任务跟踪');
+        toast(`第 ${visitCnt} 次拜访纪要已归档，任务状态更新为"跟进中"；待中后台协同后方案包迭代`);
         this.render(document.querySelector('#viewRoot'));
       };
-      el.querySelector('#wbSyGo').onclick = () => {
+      this.bindSyn(el, sel);
+    },
+    /* 中后台协同留言（客户经理页与协同页共用）：多次协同推动方案包迭代 */
+    bindSyn(el, sel) {
+      const go = el.querySelector('#wbSyGo');
+      if (!go) return;
+      go.onclick = () => {
         const txt = el.querySelector('#wbSyTxt').value.trim();
         if (!txt) return toast('请输入留言内容', 'warn');
-        sel.log.unshift({ d: '11-04', t: '协同留言', by: el.querySelector('#wbSyRole').value, x: txt });
-        toast('协同留言已留痕'); this.render(document.querySelector('#viewRoot'));
+        const me = APP.curUser();
+        sel.log.unshift({ d: '11-04', t: '协同留言', by: me.role + ' · ' + me.name, x: txt });
+        const synCnt = sel.log.filter(l => l.t === '协同留言').length;
+        toast(`协同留言已提交（${me.role} · ${me.name}），已通知客户经理，方案迭代至 V${1 + Math.min(synCnt, 3)}.0`);
+        this.render(document.querySelector('#viewRoot'));
+      };
+    },
+    /* 访后报告上传弹窗（客户经理：点击任务 → 上传资料 → 生成尽调报告） */
+    vrUploadDlg(sel, c) {
+      if (!S.visitReports) S.visitReports = [];
+      openModal({ wide: true, title: `上传资料 · 生成访后尽调报告（${esc(c.short || '')}）`, body: `
+        <div class="text-xs text-muted mb3" style="line-height:1.7">拜访完成后上传客户资料，AI 自动勾稽比对生成尽调报告，支持在线编辑与 Word 下载。</div>
+        <div class="grid-3" style="gap:10px" id="vrCats">
+          ${[['财务报表', '2025年度审计报告.pdf'], ['纳税申报表', '2025增值税申报表.pdf'], ['银行流水', '基本户流水_2025.xlsx'], ['上下游合同', '核心客户销售合同.pdf'], ['证照章程', '营业执照.jpg'], ['其他资料', '现场照片.jpg']].map(([n, f]) => `
+          <div class="up-zone" data-vrcat="${n}" style="cursor:pointer"><div class="flex-between"><b class="text-sm">${n}</b><span class="tag tag-line">上传</span></div><div class="text-xs mt2 text-muted">点击上传</div></div>`).join('')}
+        </div>
+        <div id="vrPicked" class="mt2"></div>`,
+        foot: `<button class="btn btn-ghost" onclick="APP.closeModal()">取消</button><button class="btn btn-primary" id="vrGen">⚡ 解析并生成尽调报告</button>` });
+      const picked = [];
+      const paintPicked = () => { document.querySelector('#vrPicked').innerHTML = picked.length ? `<div class="flex wrap" style="gap:6px">${picked.map(f => `<span class="tag tag-green" style="height:24px">📄 ${f}</span>`).join('')}</div>` : ''; };
+      document.querySelectorAll('[data-vrcat]').forEach(z => z.onclick = () => {
+        const n = z.dataset.vrcat;
+        const f = z.querySelector('.text-xs').textContent === '点击上传' ? ({ '财务报表': '2025年度审计报告.pdf', '纳税申报表': '2025增值税申报表.pdf', '银行流水': '基本户流水_2025.xlsx', '上下游合同': '核心客户销售合同.pdf', '证照章程': '营业执照.jpg', '其他资料': '现场照片.jpg' })[n] : n;
+        if (!picked.includes(f)) picked.push(f);
+        z.classList.add('on'); z.querySelector('.tag').className = 'tag tag-green'; z.querySelector('.tag').textContent = '✓ 已上传';
+        z.querySelector('.text-xs').textContent = '📄 ' + f;
+        paintPicked();
+      });
+      document.querySelector('#vrGen').onclick = () => {
+        if (!picked.length) return toast('请至少上传一类资料', 'warn');
+        const CAT_KEY = { '财务报表': 'fin', '纳税申报表': 'tax', '银行流水': 'bank', '上下游合同': 'ct', '证照章程': 'cert', '其他资料': 'other' };
+        openModal({ small: true, title: `正在生成尽调报告 · ${esc(c.short || '')}`, body: `<div style="padding:8px">${['识别上传资料', '执行财务勾稽', '提取合同条款', '生成对比分析'].map((x, i) => `<div class="flex mb3"><span class="rank-pill" id="vsp${i}">${i + 1}</span><span>${x}</span></div>`).join('')}</div>`, foot: '' });
+        [500, 1000, 1500, 2000].forEach((ms, i) => setTimeout(() => { const p = document.querySelector('#vsp' + i); if (p) { p.textContent = '✓'; p.style.color = 'var(--ok-500)'; } }, ms));
+        setTimeout(() => {
+          APP.closeModal();
+          const files = picked.map(n => ({ k: CAT_KEY[n.split('.')[0]] || 'other', n }));
+          const rpt = window.buildVisitReport ? window.buildVisitReport(c, files) : null;
+          if (rpt) {
+            S.visitReports.unshift(rpt);
+            sel.log.unshift({ d: '11-04', t: '访后报告', by: APP.curUser().name, x: `上传 ${picked.length} 项资料，生成访后尽调报告《${rpt.title}》` });
+            toast('访后尽调报告已生成，可在「访后尽调报告」区查看与下载');
+          } else { toast('报告模块加载中，请稍后再试', 'warn'); }
+          this.render(document.querySelector('#viewRoot'));
+        }, 2300);
       };
     },
     aiOrganize(el, c, txt) {
@@ -5208,7 +6151,7 @@ window.APP = (function () {
       const qa = M().aiQA.filter(x => /六张网|管网|算力|风电|物流|通信|海风|电网/.test(x.q) || true).slice(0, 3);
       box.innerHTML = `
         <div id="wbAiChat" style="max-height:300px;overflow:auto;padding:2px 2px 8px">
-          <div class="aip-a" style="margin-bottom:8px">您好，我是工作台 AI 助手，可解答产品、政策与营销策略问题（演示为预置问答）。建议点击下方推荐问题体验完整回答。</div>
+          <div class="aip-a" style="margin-bottom:8px">您好，我是工作台 AI 助手，可解答产品、政策与营销策略问题，建议点击下方推荐问题。</div>
         </div>
         <div class="flex wrap mb2" style="gap:6px" id="wbAiSugs">${qa.map(x => `<span class="chip" data-q="${esc(x.q)}" style="height:24px;font-size:11px;padding:0 10px">${esc(x.q.slice(0, 14))}…</span>`).join('')}</div>
         <div class="flex" style="gap:8px"><input class="input" id="wbAiQ" placeholder="输入问题…" style="height:32px"><button class="btn btn-primary" id="wbAiGo" style="height:32px">提问</button></div>`;
@@ -5218,7 +6161,7 @@ window.APP = (function () {
         chat.insertAdjacentHTML('beforeend', `<div class="aip-q">${esc(q)}</div>`);
         const hit = M().aiQA.find(x => x.q.includes(q.slice(0, 4)) || q.includes(x.q.slice(0, 4)));
         setTimeout(() => {
-          chat.insertAdjacentHTML('beforeend', `<div class="aip-a">${hit ? hit.a + '<span class="src">来源：' + esc(hit.src) + '</span>' : '已收到您的问题，正结合六张网企业库与产品政策生成回答（演示环境为预置问答，建议点击下方推荐问题）。'}</div>`);
+          chat.insertAdjacentHTML('beforeend', `<div class="aip-a">${hit ? hit.a + '<span class="src">来源：' + esc(hit.src) + '</span>' : '已收到您的问题，正结合六张网企业库与产品政策生成回答。'}</div>`);
           chat.scrollTop = chat.scrollHeight;
         }, 600);
         chat.scrollTop = chat.scrollHeight;

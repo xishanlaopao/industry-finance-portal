@@ -858,7 +858,7 @@ window.MOCK = (function () {
         { bank: '国家开发银行', prods: '二期项目银团贷款（牵头）', amt: '银团60亿（牵头）', st: '存续' },
         { bank: '中国银行无锡分行', prods: '项目贷款 + 进口信用证', amt: '项目贷12亿', st: '存续' },
         { bank: '交通银行新吴支行', prods: '代发工资 + 对公理财', amt: '代发8600人', st: '存续' },
-        { bank: '本行（北京银行无锡分行）', prods: '银团参团 + 并购贷款预案', amt: '参团2亿', st: '存续' },
+        { bank: '本行（北京银行南京分行）', prods: '银团参团 + 并购贷款预案', amt: '参团2亿', st: '存续' },
       ],
       coop: [
         { d: '2026-03', t: '二期银团组建完成（国开行牵头60亿）', x: '本行参团2亿元，建立项目合作基础' },
@@ -1894,11 +1894,11 @@ window.MOCK = (function () {
   });
   /* 机会漏斗：客户经理池（下发对象） */
   const funnelRms = [
-    { id: 'rm-drz', name: '邓瑞忠', unit: '无锡分行营业部' },
-    { id: 'rm-wq', name: '王倩', unit: '无锡梁溪支行' },
-    { id: 'rm-zh', name: '周航', unit: '无锡新吴支行' },
-    { id: 'rm-lx', name: '李晓', unit: '无锡江阴支行' },
-    { id: 'rm-wm', name: '吴敏', unit: '无锡宜兴支行' },
+    { id: 'rm-drz', name: '邓瑞忠', unit: '南京分行营业部' },
+    { id: 'rm-wq', name: '王倩', unit: '南京梁溪支行' },
+    { id: 'rm-zh', name: '周航', unit: '南京新吴支行' },
+    { id: 'rm-lx', name: '李晓', unit: '南京江阴支行' },
+    { id: 'rm-wm', name: '吴敏', unit: '南京宜兴支行' },
   ];
   const FID = nm => { const c = funnelCos.find(x => x.name.indexOf(nm) >= 0); return c ? c.id : funnelCos[0].id; };
   /* 机会漏斗：初始订阅（分行产品经理·陈立 订阅） */
@@ -1952,8 +1952,38 @@ window.MOCK = (function () {
   ];
   const funnel = { nets: NETS, cos: funnelCos, rms: funnelRms, subsSeed: funnelSubsSeed, tasksSeed: funnelTasksSeed };
 
+  /* ============================================================
+     管理视图 · 项目储备数据（六张网重大项目 · 关联客户池企业）
+     阶段：储备 → 前期对接 → 方案阶段 → 已批复 → 已投放
+     ============================================================ */
+  const manage = {
+    projects: [
+      { id: 'PR01', name: '如东海上风电场扩建工程（三期）', co: FID('中天科技'), net: '新型电网', amt: '45 亿', stage: '方案阶段', prog: '突破',
+        note: '海缆配套与风场基建双线融资；AI 建议：项目贷+银团组合，同步争取绿色贴息', prods: ['项目贷款', '银团贷款', '绿色贷款'] },
+      { id: 'PR02', name: '无锡智算中心二期（8亿资本开支）', co: FID('数据集团'), net: '算力网', amt: '8 亿', stage: '前期对接', prog: '突破',
+        note: '项目贷+设备租赁组合；闲置资金 1.2 亿现金管理先行', prods: ['项目贷款', '设备更新贷', '对公理财'] },
+      { id: 'PR03', name: '综合管廊二期及生命线工程', co: FID('城市建设投资控股'), net: '城市地下管网', amt: '23 亿', stage: '储备', prog: '攻坚',
+        note: '资金监管招标 11 月启动；专项债配套缺口 2 亿，监管专户先行', prods: ['资金监管', '存款归集', '项目贷'] },
+      { id: 'PR04', name: '大丰海上风电项目银团（参团）', co: FID('国信集团'), net: '新型电网', amt: '30 亿', stage: '前期对接', prog: '攻坚',
+        note: '国开行牵头，我行争取参团份额 3-5 亿；股东增资到位后启动', prods: ['银团贷款', '绿色贷款'] },
+      { id: 'PR05', name: '机场改扩建及航空物流园工程', co: FID('东部机场'), net: '物流网', amt: '36 亿', stage: '方案阶段', prog: '攻坚',
+        note: '他行已报价，比拼放款节奏；结算归集+代发联动打包方案', prods: ['项目贷款', '结算归集', '代发工资'] },
+      { id: 'PR06', name: '调水工程二期（资本金缺口 4.2 亿）', co: FID('南水北调东线江苏水源'), net: '水网', amt: '6 亿', stage: '储备', prog: '培育',
+        note: '资本金到位三成，项目贷+水利专项贷组合；水费归集可谈', prods: ['项目贷款', '水利专项贷', '资金监管'] },
+      { id: 'PR07', name: '800G 光模块产能扩建项目', co: FID('德科立'), net: '新一代通信网', amt: '12 亿', stage: '前期对接', prog: '突破',
+        note: 'AI 算力带动高速光模块/光放大器扩产；设备融资窗口明确、决策链短', prods: ['设备更新贷', '科创贷款', '票据池'] },
+      { id: 'PR08', name: '特高压变电站配套设备智能制造项目', co: FID('国电南瑞'), net: '新型电网', amt: '9.6 亿', stage: '储备', prog: '培育',
+        note: '算电协同科技贷推介；投行培育陪伴（非信贷：结算与资金归集）', prods: ['科技贷', '项目贷款', '投行服务'] },
+    ],
+    summary: { approved: 6, invested: 21.5, cover: 46, income: 8600,
+      byNet: [
+        { n: '新型电网', v: 8.4, c: 12 }, { n: '算力网', v: 4.6, c: 9 }, { n: '城市地下管网', v: 3.2, c: 7 },
+        { n: '物流网', v: 2.8, c: 6 }, { n: '水网', v: 1.5, c: 4 }, { n: '新一代通信网', v: 1.0, c: 5 },
+      ] },
+  };
+
   return { D, companies, coById, jsOverview, news, policies, peerNews, peerFinancing, peerProducts, peerAnalysis, reportTH, reportXJH,
     aiQA, qaFallback, tasks, batchRun, feedback, capitalEvents, report, riskBoard, riskEvents,
     cockpitInd, cockpitBank, chainCustomer, messages, industries, industryById, industryPath,
-    industryKpi, opportunities, rateBoard, loanProducts, chainData, riskFeed, funnel };
+    industryKpi, opportunities, rateBoard, loanProducts, chainData, riskFeed, funnel, manage };
 })();

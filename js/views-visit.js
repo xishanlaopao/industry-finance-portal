@@ -130,10 +130,10 @@
       t: nowStr(), by: '邓瑞忠', files,
       profile: { name: isXJH ? '无锡鑫巨宏智能科技股份有限公司' : co.name, short: co.short, legal: isXJH ? '孙亮亮' : (co.legal || '—'), cap: isXJH ? '6,315万元' : (co.cap || '—'), est: isXJH ? '2013年1月7日' : ((co.est || '—') + ' 年'), uscc: isXJH ? '91320214060193094K' : (co.uscc || '—'), addr: isXJH ? '无锡市新吴区新锦路106号' : (co.addr || ((co.city || '无锡') + (co.zone || ''))), seg: co.seg, layer: co.layer, emp: co.emp || '—', scope: co.scope || '集成电路相关研发、生产与销售', listing: isXJH ? '新三板上市公司' : '—', controller: isXJH ? '孙亮亮' : '—', shareholders: isXJH ? '控股股东：无锡鑫巨宏创业投资有限公司（45.298%）；吴洁（13.5894%）；孙亮亮（11.5061%）；其他股东（29.6065%）' : '—', industryPosition: isXJH ? '国家级专精特新“小巨人”企业，400G及以上中高端光模块芯片基座全球市占率约29%' : '—' },
       visit: { date: '2026-10-18', site: (co.city || '无锡') + (co.zone || ''), people: '邓瑞忠 / 李晓', note: '', counterpart:'孙亮亮及财务负责人' },
-      credit: { amount:'8,000', rate:'1年期央行LPR', branch:'北京银行无锡分行', rating:'A-', proposal:'申请综合授信额度8,000万元，品种包括流动资金贷款、银行承兑汇票及贸易融资，期限不超过一年。', levelChoice:'省级□　市本级☑　区县级□　国家级开发区□　省级园区□　其他□', featureChoice:'省市重大项目□　产业升级☑　技术改造□　行内联动□　绿色业务□　支农业务□　文化业务□', timeChoice:'1个月内□　3个月内☑　半年内□　半年以上□', renewalChoice:'是□　否□　不涉及☑', syndicateChoice:'是□　否☑　牵头行：无' },
+      credit: { amount:'8,000', rate:'1年期央行LPR', branch:'北京银行南京分行', rating:'A-', proposal:'申请综合授信额度8,000万元，品种包括流动资金贷款、银行承兑汇票及贸易融资，期限不超过一年。', levelChoice:'省级□　市本级☑　区县级□　国家级开发区□　省级园区□　其他□', featureChoice:'省市重大项目□　产业升级☑　技术改造□　行内联动□　绿色业务□　支农业务□　文化业务□', timeChoice:'1个月内□　3个月内☑　半年内□　半年以上□', renewalChoice:'是□　否□　不涉及☑', syndicateChoice:'是□　否☑　牵头行：无' },
       stmt: { score, note: stmtNote, hasFin: has('fin'), hasTax: has('tax'), hasBank: has('bank'), mismatch: has('fin')&&has('tax')&&has('bank') ? [{title:'财报收入与纳税申报收入存在差异',detail:'请核对收入确认期间、免税/不征税项目及申报口径。'},{title:'财报收入与银行流水回款存在差异',detail:'请结合应收账款、票据结算、跨期回款及非销售流水核对。'}] : [], match: has('fin')&&has('tax')&&!has('bank') ? ['营业收入与纳税申报收入一致'] : has('fin')&&has('bank')&&!has('tax') ? ['销售回款与银行流水核验一致'] : [] },
       finance: { years:['2025年','2024年','2023年','行业参考'], rows:[['销售毛利率','28.6%','26.4%','24.8%','22.1%'],['销售净利率','11.2%','9.6%','8.4%','7.5%'],['流动比率','1.48','1.36','1.22','1.40'],['速动比率','1.12','1.03','0.94','1.00'],['应收账款周转天数','86天','92天','101天','90天'],['应付账款周转天数','74天','78天','82天','80天'],['资产负债率','42.8%','45.1%','48.6%','52.0%'],['存货周转天数','68天','72天','79天','75天'],['短期借款利率大致框算','3.80%','4.05%','4.20%','3.50%—4.50%'],['成本费用率','83.6%','86.2%','88.1%','90.0%']] },
-      funding: { credit:[['北京银行无锡分行','综合授信','5,000','2,600','2027-06-30','保证'],['工商银行无锡分行','流动资金贷款','3,000','1,200','2027-03-15','信用'],['招商银行无锡分行','银行承兑汇票','2,000','800','2026-12-20','保证金']], guarantees:[['鑫巨宏创业投资有限公司','关联方保证','2,000','1,000','2027-06-30'],['核心设备融资租赁公司','设备抵押','1,500','920','2027-03-31']] },
+      funding: { credit:[['北京银行南京分行','综合授信','5,000','2,600','2027-06-30','保证'],['工商银行无锡分行','流动资金贷款','3,000','1,200','2027-03-15','信用'],['招商银行无锡分行','银行承兑汇票','2,000','800','2026-12-20','保证金']], guarantees:[['鑫巨宏创业投资有限公司','关联方保证','2,000','1,000','2027-06-30'],['核心设备融资租赁公司','设备抵押','1,500','920','2027-03-31']] },
       industry, product, contracts, swot,
     };
   }
@@ -155,6 +155,9 @@
     return `<table>${rows}</table>
       <p>${editable(pathPrefix + '.analysis', data.analysis, true)}</p>`;
   }
+
+  /* 供工作台访后报告上传入口调用（files: [{k, n}]，k 为 FILE_CATS 分类键） */
+  window.buildVisitReport = (co, files) => buildVisit(co, files);
 
   VIEWS.visitReport = {
     renderInline(el) {
@@ -185,7 +188,7 @@
           <div class="grid-3" style="gap:10px">${FILE_CATS.map(cat => { const got = F.files.filter(f => f.k === cat.k); return `<div class="up-zone ${got.length ? 'on' : ''}" data-cat="${cat.k}">
             <div class="flex-between"><b class="text-sm">${cat.n}</b><span class="tag ${got.length ? 'tag-green' : 'tag-line'}">${got.length ? got.length + ' 个文件' : '上传'}</span></div>
             ${got.map(f => `<div class="text-xs mt2" style="color:var(--brand-600)">📄 ${esc(f.n)}</div>`).join('')}</div>`; }).join('')}</div>
-          <div class="text-xs text-muted mt2">附件为原型演示材料，选择后用于模拟报告解析。</div>
+          <div class="text-xs text-muted mt2">资料仅用于本次尽调报告生成。</div>
         </div>
         <div class="card card-pad mb4"><div class="text-sm" style="font-weight:600;margin-bottom:8px">历史访后报告</div>${S.visitReports.length ? S.visitReports.map(x=>`<div class="flex-between" style="padding:9px 0;border-bottom:1px solid var(--line)"><span>${esc(x.title)} <small class="text-muted">${esc(x.t)}</small></span><button class="btn btn-ghost btn-sm" data-hist="${esc(x.id)}">预览</button></div>`).join('') : '<span class="text-sm text-muted">暂无历史报告</span>'}</div>
         <div class="flex" style="justify-content:flex-end;gap:8px"><button class="btn btn-ghost" id="vrReset">清空资料</button><button class="btn btn-primary" id="vrGen">⚡ 解析并生成访后报告</button></div>`;
@@ -231,13 +234,13 @@
       const tab = S._vrTab || 'doc';
       const docHtml = `
           <div class="vr-doc" id="vdoc">
-            <h1>北京银行无锡分行公司类客户授信尽职调查及分析报告</h1>
+            <h1>北京银行南京分行公司类客户授信尽职调查及分析报告</h1>
             <div class="doc-sub">调查人：${editable('by', r.by)}　　调查日期：${editable('visit.date', r.visit.date)}　　调查地点：${editable('visit.site', r.visit.site)}</div>
             <h2>一、报审方案</h2><h3>（一）项目报审要素</h3><table><tbody>
               <tr><th>授信申请人</th><td>${editable('profile.name',r.profile.name)}</td><th>客户层级</th><td>${editable('credit.levelChoice',r.credit.levelChoice)}</td></tr>
               <tr><th>业务特色</th><td colspan="3">${editable('credit.featureChoice',r.credit.featureChoice)}</td></tr>
               <tr><th>投放时间</th><td>${editable('credit.timeChoice',r.credit.timeChoice)}</td><th>申请额度（万元）</th><td>${editable('credit.amount',r.credit.amount)}</td></tr>
-              <tr><th>贷款利率</th><td>${editable('credit.rate','1年期央行LPR')}</td><th>报审单位</th><td>${editable('credit.branch','北京银行无锡分行')}</td></tr>
+              <tr><th>贷款利率</th><td>${editable('credit.rate','1年期央行LPR')}</td><th>报审单位</th><td>${editable('credit.branch','北京银行南京分行')}</td></tr>
               <tr><th>调查人（双人）</th><td>${editable('by',r.by)}、${editable('visit.people','李晓')}</td><th>内部评级</th><td>${editable('credit.rating','A-')}</td></tr>
               <tr><th>续授信建议书</th><td>是否取得：${editable('credit.renewalChoice',r.credit.renewalChoice)}</td><th>是否银团</th><td>${editable('credit.syndicateChoice',r.credit.syndicateChoice)}</td></tr>
               <tr><th>所属集团及限额情况</th><td colspan="3">是否集团户：是□　否☑　所属集团：无　剩余可用额度：不适用　限额到期日：不适用</td></tr>
@@ -310,7 +313,7 @@
       const guarantees=tbl(['被担保方/担保对象','担保方式','担保额度（万元）','担保余额（万元）','到期日'],r.funding.guarantees);
       const comp=(d)=>`<table><tr><th>企业数据</th><th>行业参考数据</th></tr>${d.company.map((x,i)=>`<tr><td>${esc(x)}</td><td>${esc(d.benchmark[i]||'')}</td></tr>`).join('')}</table><p>${esc(d.analysis)}</p>`;
       const html=`<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{font-family:SimSun,'Songti SC',serif;line-height:1.8;color:#222}h1{text-align:center;font-size:18pt}h2{font-size:14pt;margin:16pt 0 6pt}h3{font-size:12pt;margin:10pt 0 4pt}table{border-collapse:collapse;width:100%;margin:8px 0}td,th{border:1px solid #333;padding:6px;font-size:10.5pt;text-align:left}th{background:#f2f2f2}p{margin:4pt 0;font-size:11pt}.muted{color:#666;font-size:10pt}</style></head><body>
-        <h1>北京银行无锡分行公司类客户授信尽职调查及分析报告</h1><p style="text-align:center" class="muted">${esc(r.reportType||'省、市国企及城投政信业务-综合授信类（2023年版）')}　调查人：${esc(r.by)}　调查日期：${esc(r.visit.date)}</p>
+        <h1>北京银行南京分行公司类客户授信尽职调查及分析报告</h1><p style="text-align:center" class="muted">${esc(r.reportType||'省、市国企及城投政信业务-综合授信类（2023年版）')}　调查人：${esc(r.by)}　调查日期：${esc(r.visit.date)}</p>
         <h2>一、报审方案</h2><h3>（一）项目报审要素</h3><p>授信申请人：${esc(p.name)}　客户层级：${esc(r.credit.levelChoice)}</p><p>业务特色：${esc(r.credit.featureChoice)}</p><p>投放时间：${esc(r.credit.timeChoice)}　申请额度（万元）：${esc(r.credit.amount)}</p><p>贷款利率：${esc(r.credit.rate)}　报审单位：${esc(r.credit.branch)}　调查人（双人）：${esc(r.by)}、李晓　内部评级：${esc(r.credit.rating)}</p><p>续授信建议书：${esc(r.credit.renewalChoice)}　是否银团：${esc(r.credit.syndicateChoice)}</p><p>所属集团及限额情况：是否集团户：是□　否☑　所属集团：无　剩余可用额度：不适用　限额到期日：不适用</p><p>报审方案：${esc(r.credit.proposal)}</p><p>授信用途：用途是否合规：是☑　否□　具体用途：补充日常经营周转及采购付款。</p><p>还款来源：还款来源是否可靠：是☑　否□　具体还款来源：主营业务回款及经营性现金流。</p>
         <h3>（二）尽职过程描述</h3><p>现场尽调：是☑　否□　时间：${esc(r.visit.date)}　地点：${esc(r.visit.site)}　尽调人员：${esc(r.visit.people)}　对方对接人员：${esc(r.visit.counterpart)}</p>
         <h2>二、申请人基本情况</h2><h3>（一）基础信息</h3><p>申请人全称：${esc(p.name)}　成立日期：${esc(p.est)}　实收资本：${esc(p.cap)}</p><p>统一社会信用代码：${esc(p.uscc)}　注册地址：${esc(p.addr)}</p><p>法定代表人：${esc(p.legal)}　实际控制人：${esc(p.controller)}　挂牌情况：${esc(p.listing)}</p><p>股权结构：${esc(p.shareholders)}</p><h3>（二）经营情况</h3><p>${esc(r.industry.summary)}</p><p>主要产品：${esc(r.product.summary)}</p><h3>（三）财务分析</h3>${ratio}<h3>（四）申请人融资情况</h3>${credits}<p>对外担保情况</p>${guarantees}

@@ -40,7 +40,7 @@
           <div class="hero2-main">
             <div class="hero2-brand">
               <div class="hero2-title">北斗·产融智航系统</div>
-              <div class="hero2-en">BOB WUXI · INDUSTRIAL FINANCE INTELLIGENCE</div>
+              <div class="hero2-en">BOB NANJING · INDUSTRIAL FINANCE INTELLIGENCE</div>
               <div class="hero2-sub">洞察产业 · 链动金融</div>
             </div>
             <div class="hero2-search">
@@ -71,12 +71,17 @@
           </div>
         </div>
 
-        <!-- ===== 第一行：任务待办 · 订阅推送并排 ===== -->
-        <div class="home-row">
-          <div class="card" style="display:flex;flex-direction:column">
-            <div class="sec-head" style="padding:14px 16px 4px"><div class="sec-title"><span class="tbar"></span>任务待办</div>
-              <span class="sec-more" onclick="APP.go('workbench')">进入工作台 ›</span></div>
-            <div id="todoArea" style="flex:1;display:flex;flex-direction:column;min-height:0">${this.todoArea(m)}</div>
+        <!-- ===== 第一行：近期政策 · 同业动态 · 订阅监控（原管理驾驶舱看板集合内容） ===== -->
+        <div class="home-row" style="grid-template-columns:minmax(0,1.05fr) minmax(0,1.05fr) 336px">
+          <div class="card" style="display:flex;flex-direction:column;min-width:0;overflow:hidden">
+            <div class="sec-head" style="padding:14px 16px 4px"><div class="sec-title"><span class="tbar"></span>近期政策<span class="text-xs text-muted" style="font-weight:400;margin-left:8px">政策库 · 申报窗口提醒</span></div>
+              <span class="sec-more" onclick="APP.go('news',{cat:'政策资讯'})">全部政策 ›</span></div>
+            <div id="insPolicy" style="flex:1;min-height:0;overflow-y:auto"></div>
+          </div>
+          <div class="card" style="display:flex;flex-direction:column;min-width:0;overflow:hidden">
+            <div class="sec-head" style="padding:14px 16px 4px"><div class="sec-title"><span class="tbar"></span>同业动态<span class="text-xs text-muted" style="font-weight:400;margin-left:8px">他行新产品 / 战略合作 / 授信动作</span></div>
+              <span class="sec-more" onclick="APP.go('news',{cat:'同行资讯'})">全部同业 ›</span></div>
+            <div id="insPeer" style="flex:1;min-height:0;overflow-y:auto"></div>
           </div>
           <div class="card rail-sub">
             <div class="rs-head"><b>异常数据监控<span class="text-xs text-muted" style="font-weight:400;margin-left:8px">T+1跑批 · 10-19 06:00</span></b><span class="rs-manage" id="rkMore">更多 ›</span></div>
@@ -90,7 +95,7 @@
           </div>
         </div>
 
-        <!-- ===== 第二行：重点机会挖掘 · 关键指标 ===== -->
+        <!-- ===== 第二行：重点机会挖掘 · 贷款产品 ===== -->
         <div class="home-grid">
           <div class="card">
             <div class="sec-head" style="padding:14px 16px 4px"><div class="sec-title">重点机会挖掘</div>
@@ -103,7 +108,8 @@
             <div id="lpList" style="flex:1;min-height:0;display:flex;flex-direction:column"></div>
           </div>
         </div>`;
-      this.bindTodo(el);
+      this.renderInsPolicy(el, m);
+      this.renderInsPeer(el, m);
       this.renderLp(el, m);
       this.renderRisk(el, m);
       this.renderSub(el, m);
@@ -168,6 +174,25 @@
           ${this.pinGroup(pinned)}
           <div class="fk-feed">${this.homeFeed(m, cat)}</div>
         </div>`;
+    },
+    /* 近期政策（政策库前6条 · 点击进政策详情） */
+    renderInsPolicy(el, m) {
+      const box = el.querySelector('#insPolicy'); if (!box) return;
+      const pols = m.policies.slice(0, 6);
+      const lvTag = l => l === '国家' ? 'tag-red' : l === '江苏省' ? 'tag-blue' : 'tag-cyan';
+      box.innerHTML = pols.map(p => `<div class="nl-row" onclick="APP.openPolicy('${p.id}')">
+        <div class="nl-l1" style="min-width:0"><span class="tag ${lvTag(p.level)}" style="height:19px;font-size:10px;padding:0 6px;flex-shrink:0">${esc(p.level)}</span><span class="tag tag-violet" style="height:19px;font-size:10px;padding:0 6px;flex-shrink:0">${esc(p.type)}</span><span class="nl-t">${esc(p.title)}</span><span class="nl-d">${p.date.slice(5)}</span></div>
+        <div class="nl-l2" style="min-width:0"><span style="flex-shrink:0">${p.date} · ${esc(p.dept)}</span><span class="nl-ai" style="min-width:0"><span class="ai-badge" style="font-size:9px;height:15px;padding:0 4px;flex-shrink:0">AI</span><span class="t" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(p.ai)}</span></span><span class="nl-more" style="flex-shrink:0">详情 ›</span></div>
+      </div>`).join('') || '<div class="text-sm text-muted" style="padding:14px 2px">暂无政策</div>';
+    },
+    /* 同业动态（peerNews 前6条 · 单行省略不换行） */
+    renderInsPeer(el, m) {
+      const box = el.querySelector('#insPeer'); if (!box) return;
+      const rows = m.peerNews.slice(0, 6);
+      box.innerHTML = rows.map(p => `<div class="nl-row" style="cursor:default">
+        <div class="nl-l1" style="min-width:0"><span class="tag tag-orange" style="height:19px;font-size:10px;padding:0 6px;flex-shrink:0">同行资讯</span><span class="tag tag-red" style="height:19px;font-size:10px;padding:0 6px;flex-shrink:0">${esc(p.bank)}</span><span class="nl-t">${esc(p.title)}</span><span class="nl-d">${p.date.slice(5)}</span></div>
+        <div class="nl-l2" style="min-width:0"><span style="flex-shrink:0">${p.date} · ${esc(p.type)}</span><span class="nl-ai" style="min-width:0"><span class="t" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(p.detail)}</span></span></div>
+      </div>`).join('') || '<div class="text-sm text-muted" style="padding:14px 2px">暂无同业动态</div>';
     },
     renderLp(el, m) {
       const box = el.querySelector('#lpList'), q = el.querySelector('#lpQ');
@@ -325,7 +350,7 @@
       const F = APP.S.fn || { tasks: m.funnel.tasksSeed, subs: m.funnel.subsSeed };
       let tasks = F.tasks;
       if (rk === 'rm') tasks = tasks.filter(t => t.rm === 'rm-drz');
-      else if (rk === 'head') tasks = tasks.filter(t => (m.funnel.rms.find(r => r.id === t.rm) || {}).unit === '无锡分行营业部');
+      else if (rk === 'head') tasks = tasks.filter(t => (m.funnel.rms.find(r => r.id === t.rm) || {}).unit === '南京分行营业部');
       const cName = id => { const c = m.funnel.cos.find(x => x.id === id); return c ? c.short : ''; };
       const rName = id => { const r = m.funnel.rms.find(x => x.id === id); return r ? r.name : ''; };
       const stTag = s2 => ({ 待接收: 'tag-gray', 跟进中: 'tag-blue', 已反馈: 'tag-green', 已关闭: 'tag-line' }[s2] || 'tag-gray');
@@ -489,4 +514,7 @@
       kw.oninput = () => { P.kw = kw.value.trim(); P.pg = 1; this.paintMain(box); const k2 = box.querySelector('#nsKw'); k2.focus(); k2.setSelectionRange(k2.value.length, k2.value.length); };
     },
   };
+
+  /* 市场洞察 = 原门户首页（去掉任务待办，上浮近期政策/同业动态） */
+  VIEWS.insight = VIEWS.dashboard;
 })();

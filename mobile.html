@@ -268,10 +268,10 @@ var D = {
       internal:{credit:0,used:0,deposit:0,settle:0,products:[]} },
   ],
   rms: [
-    { id:'rm-drz', name:'邓瑞忠', unit:'无锡分行营业部' },
-    { id:'rm-wq', name:'王倩', unit:'无锡梁溪支行' },
-    { id:'rm-zh', name:'周航', unit:'无锡新吴支行' },
-    { id:'rm-lx', name:'李晓', unit:'无锡江阴支行' },
+    { id:'rm-drz', name:'邓瑞忠', unit:'南京分行营业部' },
+    { id:'rm-wq', name:'王倩', unit:'南京梁溪支行' },
+    { id:'rm-zh', name:'周航', unit:'南京新吴支行' },
+    { id:'rm-lx', name:'李晓', unit:'南京江阴支行' },
   ],
   tasks: [
     { id:'FT1', co:'F001', rm:'rm-drz', type:'营销跟进', due:'11-08', status:'跟进中', d:'10-26',
@@ -308,8 +308,8 @@ var D = {
       log:[ { d:'11-03', t:'任务下发', by:'分行产品经理 · 陈立', x:'下发客户维护清单：央企子公司组合服务。' } ] },
   ],
   users: [
-    { id:'rm', av:'邓', name:'邓瑞忠', role:'客户经理', dept:'无锡分行营业部', tip:'我承接的下发任务' },
-    { id:'head', av:'陆', name:'陆青', role:'支行长', dept:'无锡分行营业部', tip:'本支行任务与人员' },
+    { id:'rm', av:'邓', name:'邓瑞忠', role:'客户经理', dept:'南京分行营业部', tip:'我承接的下发任务' },
+    { id:'head', av:'陆', name:'陆青', role:'支行长', dept:'南京分行营业部', tip:'本支行任务与人员' },
     { id:'pm', av:'陈', name:'陈立', role:'分行产品经理', dept:'公司银行部', tip:'机会漏斗 · 订阅 · 下发' },
     { id:'gm', av:'王', name:'王健', role:'部门负责人', dept:'公司银行部', tip:'全辖营销过程总览' },
   ],
@@ -346,11 +346,11 @@ function rm(id){ for (var i=0;i<D.rms.length;i++) if (D.rms[i].id===id) return D
 function user(){ for (var i=0;i<D.users.length;i++) if (D.users[i].id===S.role) return D.users[i]; return D.users[0]; }
 function myTasks(){
   if (S.role==='rm') return D.tasks.filter(function(t){ return t.rm==='rm-drz'; });
-  if (S.role==='head') return D.tasks.filter(function(t){ return rm(t.rm).unit==='无锡分行营业部'; });
+  if (S.role==='head') return D.tasks.filter(function(t){ return rm(t.rm).unit==='南京分行营业部'; });
   return D.tasks;
 }
 function isOverdueM(t){ return +t.due.replace('-','')<1105 && t.status!=='已反馈' && t.status!=='已关闭'; }
-function needReviewM(t){ return t.log.some(function(l){return l.t==='访客纪要';}) && !t.log.some(function(l){return l.t==='协同留言'&&l.by.indexOf('产品经理')>=0;}); }
+function needReviewM(t){ return t.log.some(function(l){return l.t.indexOf('访客纪要')>=0;}) && !t.log.some(function(l){return l.t==='协同留言'&&l.by.indexOf('产品经理')>=0;}); }
 function needAccM(t){ return t.status==='跟进中' && +t.due.replace('-','')<=1112; }
 function urgeTask(id){
   var t=null; D.tasks.forEach(function(x){ if(x.id===id) t=x; });
@@ -378,7 +378,7 @@ function renderHead(){
   var ts=myTasks();
   var ks=[];
   var od=ts.filter(function(t){return +t.due.replace('-','')<1105 && t.status!=='已反馈' && t.status!=='已关闭';}).length;
-  var rv=ts.filter(function(t){ return t.log.some(function(l){return l.t==='访客纪要';}) && !t.log.some(function(l){return l.t==='协同留言'&&l.by.indexOf('产品经理')>=0;}); }).length;
+  var rv=ts.filter(function(t){ return t.log.some(function(l){return l.t.indexOf('访客纪要')>=0;}) && !t.log.some(function(l){return l.t==='协同留言'&&l.by.indexOf('产品经理')>=0;}); }).length;
   if (S.role==='rm') ks=[['承接任务',ts.length],['待接收',ts.filter(function(t){return t.status==='待接收';}).length],['跟进中',ts.filter(function(t){return t.status==='跟进中';}).length],od?['超期',od]:['已反馈',ts.filter(function(t){return t.status==='已反馈';}).length]];
   else if (S.role==='head') ks=[['支行任务',ts.length],['跟进中',ts.filter(function(t){return t.status==='跟进中';}).length],od?['超期',od]:['已反馈',ts.filter(function(t){return t.status==='已反馈';}).length],['反馈率',ts.length?Math.round(ts.filter(function(t){return t.status==='已反馈';}).length/ts.length*100)+'%':'—']];
   else if (S.role==='pm') ks=[['已下发',ts.length],['待接收',ts.filter(function(t){return t.status==='待接收';}).length],['待陪访',ts.filter(function(t){return t.status==='跟进中'&&+t.due.replace('-','')<=1112;}).length],rv?['待复核',rv]:['订阅企业',10]];
@@ -394,7 +394,7 @@ function renderHead(){
 function renderKpis(){
   var ts=myTasks();
   var od=ts.filter(function(t){return +t.due.replace('-','')<1105 && t.status!=='已反馈' && t.status!=='已关闭';}).length;
-  var rv=ts.filter(function(t){ return t.log.some(function(l){return l.t==='访客纪要';}) && !t.log.some(function(l){return l.t==='协同留言'&&l.by.indexOf('产品经理')>=0;}); }).length;
+  var rv=ts.filter(function(t){ return t.log.some(function(l){return l.t.indexOf('访客纪要')>=0;}) && !t.log.some(function(l){return l.t==='协同留言'&&l.by.indexOf('产品经理')>=0;}); }).length;
   var ks=[];
   if (S.role==='rm') ks=[['承接任务',ts.length],['待接收',ts.filter(function(t){return t.status==='待接收';}).length],['跟进中',ts.filter(function(t){return t.status==='跟进中';}).length],od?['超期任务',od,1]:['已反馈',ts.filter(function(t){return t.status==='已反馈';}).length]];
   else if (S.role==='head') ks=[['支行任务',ts.length],['跟进中',ts.filter(function(t){return t.status==='跟进中';}).length],od?['超期任务',od,1]:['已反馈',ts.filter(function(t){return t.status==='已反馈';}).length],['反馈率',ts.length?Math.round(ts.filter(function(t){return t.status==='已反馈';}).length/ts.length*100)+'%':'—']];
@@ -431,7 +431,7 @@ function pageTask(){
     '<div style="margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);font-size:11.5px;line-height:1.9"><span class="tag tag-green">红榜</span>'+esc(best.n)+' 反馈率最高（'+best.rate+'%）　<span class="tag tag-red">黑榜</span>'+esc(worst.n)+' 反馈率最低（'+worst.rate+'%）</div></div>';
   }
   h+='<div class="card" style="padding:10px 14px"><div class="flex-between" style="gap:8px"><b style="font-size:14px">'+(S.role==='rm'?'我承接的任务':S.role==='head'?'本支行任务':S.role==='pm'?'我下发的任务':'全辖任务')+'</b><span class="muted">'+(kw?'命中 '+ts.length+' / '+ts0.length:'共 '+ts.length+' 项')+'</span></div>'+
-    (S.role==='pm' ? '<div style="display:flex;gap:6px;margin-top:8px"><span style="flex:1;background:#FFF6F0;border:1px solid #F2D9C4;border-radius:8px;padding:6px 8px;font-size:11px;color:#8B3D1D"><b>'+ts0.filter(function(t){return t.status==='跟进中'&&+t.due.replace('-','')<=1112;}).length+'</b> 项待陪访（7天内到期）</span><span style="flex:1;background:#FDF3F3;border:1px solid #F2D5D6;border-radius:8px;padding:6px 8px;font-size:11px;color:#8E0A20"><b>'+ts0.filter(function(t){ return t.log.some(function(l){return l.t==='访客纪要';}) && !t.log.some(function(l){return l.t==='协同留言'&&l.by.indexOf('产品经理')>=0;}); }).length+'</b> 篇纪要待复核</span></div>' : '')+
+    (S.role==='pm' ? '<div style="display:flex;gap:6px;margin-top:8px"><span style="flex:1;background:#FFF6F0;border:1px solid #F2D9C4;border-radius:8px;padding:6px 8px;font-size:11px;color:#8B3D1D"><b>'+ts0.filter(function(t){return t.status==='跟进中'&&+t.due.replace('-','')<=1112;}).length+'</b> 项待陪访（7天内到期）</span><span style="flex:1;background:#FDF3F3;border:1px solid #F2D5D6;border-radius:8px;padding:6px 8px;font-size:11px;color:#8E0A20"><b>'+ts0.filter(function(t){ return t.log.some(function(l){return l.t.indexOf('访客纪要')>=0;}) && !t.log.some(function(l){return l.t==='协同留言'&&l.by.indexOf('产品经理')>=0;}); }).length+'</b> 篇纪要待复核</span></div>' : '')+
     '<input id="tKw" placeholder="按企业名称筛选…" value="'+esc(S.kw||'')+'" style="width:100%;margin-top:8px;border:1px solid var(--line-strong);border-radius:9px;padding:7px 10px;font-size:12.5px;outline:none;font-family:inherit"></div>';
   if (!ts.length) h+='<div class="card"><div class="empty"><div class="e">📭</div>暂无任务</div></div>';
   ts.forEach(function(t){
@@ -534,7 +534,7 @@ function pageOp(){
     '<div class="kvrow"><span class="k">盈利能力</span><span class="v">'+(c.prog==='突破'?'强':'改善中')+' · 四线得分 '+c.score+'</span></div>'+
     '<div class="kvrow"><span class="k">杠杆水平</span><span class="v">'+(c.cat==='建设运营商'?'重资产高杠杆（项目期）':'适中')+'</span></div>'+
     '<div class="kvrow"><span class="k">现金流</span><span class="v">'+(c.cat==='上游供应商'?'回款账期是核心变量':'政府/业主回款稳定')+'</span></div>'+
-    '<div class="opb-note">财务数值为演示示意——正式环境接入财报后自动生成完整四维分析。</div></div>'+
+    '<div class="opb-note">正式环境接入财报后自动生成完整四维分析。</div></div>'+
   '<div class="opb-sec"><span class="no">8</span><b>资本市场表现</b></div>'+
   '<div class="card mb2">'+(c.listed.indexOf('是')===0?
     '<ul style="padding-left:18px;font-size:12px;color:var(--t2);line-height:2"><li>板块/代码：'+esc(c.listed.slice(2))+'；估值以 PB/PS 为参考；</li><li>股价波动传导：市值缩水 → 质押压力 → 授信与股价脱敏、与现金流绑定；</li><li>贷后按月监测质押率与减持公告。</li></ul>':
@@ -552,23 +552,30 @@ function pageOp(){
 /* ---------- 纪要页 ---------- */
 function goVisit(taskId){ S.selTask=taskId; switchTab('visit'); }
 var REC={on:false,sec:0,timer:null,stream:null};
+function synCntOf(t){ return t.log.filter(function(l){return l.t==='协同留言';}).length; }
 function pageVisit(){
   var ts=myTasks(); var t=task(S.selTask)||ts[0];
   if (!t) return '<div class="card"><div class="empty"><div class="e">🎙</div>暂无承接任务</div></div>';
   var c=co(t.co);
+  var visitCnt=t.log.filter(function(l){return l.t.indexOf('访客纪要')>=0;}).length;
+  var synCnt=synCntOf(t);
+  var packVer='V'+(1+Math.min(synCnt,3))+'.0';
+  /* 该客户的访后报告 */
+  if (!S.visitReports) S.visitReports=[];
+  var vr=S.visitReports.filter(function(r){ return r.co===t.co; });
   var h='<div class="picker">'+ts.map(function(x){ return '<div class="pitem '+(x.id===t.id?'on':'')+'" onclick="goVisit(\''+x.id+'\')">'+esc(co(x.co).short)+'（'+x.status+'）</div>'; }).join('')+'</div>';
   if (S.role!=='rm') {
     var rvBtn = (S.role==='pm' && needReviewM(t))
       ? '<button class="mbtn pri" style="width:100%;height:38px" onclick="reviewTask(\''+t.id+'\')">✓ 复核确认该纪要（产品经理）</button>' : '';
-    h+='<div class="card"><div class="sub">当前角色（'+esc(user().role)+'）为只读视角，纪要由客户经理语音录入后自动归档。</div>'+rvBtn+'</div>';
-    h+='<div class="card">'+t.log.map(function(l){ return '<div class="logitem"><div class="l1"><span class="tag tag-line">'+esc(l.d)+'</span><span class="lt">'+esc(l.t)+'</span><span class="ld" style="margin-left:auto">'+esc(l.by)+'</span></div><div class="lx">'+esc(l.x)+'</div></div>'; }).join('')+'</div>';
-    return h;
-  }
+    var u=user();
+    h+='<div class="card"><div class="sub">您以 <b>'+esc(u.role)+' · '+esc(u.name)+'</b> 身份查看跟进过程；纪要由客户经理现场录入，您可在下方以本人身份补充协同意见。</div>'+rvBtn+
+      '<div style="display:flex;gap:8px;margin-top:10px"><input id="syTxt" placeholder="以 '+esc(u.name)+' 身份补充：产品方案 / 风险意见…" style="flex:1;border:1px solid var(--line-strong);border-radius:9px;padding:8px 10px;font-size:12.5px;outline:none;font-family:inherit"><button class="mbtn pri" onclick="saveSyn()">留言</button></div></div>';
+  } else {
   h+='<div class="reccard">'+
     '<button class="mic" id="micBtn" onclick="toggleMic()">●</button>'+
     '<div class="rwave" id="rWave">'+'<i></i>'.repeat(14)+'</div>'+
     '<div class="rt" id="rTime">00:00</div>'+
-    '<div class="rtip" id="rTip">点击录音：口述拜访过程，停止后自动转文字并整理归档<br>（录音仅在浏览器内演示，不上传）</div>'+
+    '<div class="rtip" id="rTip">点击录音：口述拜访过程，停止后自动转文字并整理归档<br>（录音不上传）</div>'+
   '</div>'+
   '<div class="card">'+
     '<div class="fgrid">'+
@@ -581,13 +588,80 @@ function pageVisit(){
     '<div id="aiOut"></div>'+
     '<div style="display:flex;gap:8px;margin-top:10px">'+
       '<button class="mbtn" onclick="aiDo()">✦ AI 整理</button>'+
-      '<button class="mbtn pri" onclick="saveVisit()">保存归档</button>'+
+      '<button class="mbtn pri" onclick="saveVisit()">保存归档（第 '+(visitCnt+1)+' 次拜访）</button>'+
     '</div>'+
-  '</div>'+
-  '<div class="card"><div class="sec-t">历史纪要与协同留痕<small>'+esc(c.short)+' · '+t.log.length+' 条</small></div>'+
+  '</div>';
+  }
+  /* 访后尽调报告（与 PC 端同步） */
+  h+='<div class="card"><div class="sec-t">访后尽调报告<small>拜访后上传资料生成</small></div>'+
+    (vr.length ? vr.map(function(r){ return '<div class="logitem"><div class="l1"><span class="lt" style="font-weight:600">'+esc(r.title)+'</span><span class="ld" style="margin-left:auto">'+esc(r.t.slice(5,10))+'</span></div>'+
+      '<div style="display:flex;gap:8px;margin-top:6px"><button class="mbtn" style="flex:1;height:32px" onclick="toastMsg(\'报告已在 PC 端工作台打开查看\')">查看</button><button class="mbtn pri" style="flex:1;height:32px" onclick="dlVr(\''+r.id+'\')">下载尽调报告</button></div></div>'; }).join('')
+    : (S.role==='rm' ? '<button class="mbtn pri" style="width:100%;height:38px" onclick="vrUploadM()">＋ 上传资料生成访后报告</button>' : '<div class="sub">客户经理拜访后可上传资料生成尽调报告。</div>'))+
+  '</div>';
+  /* 协同留言（客户经理只读展示最新3条） */
+  if (S.role==='rm') {
+    var syn=t.log.filter(function(l){return l.t==='协同留言';}).slice(0,3);
+    h+='<div class="card"><div class="sec-t">协同留言<small>中后台在各自身份下留言 · 方案已迭代至 '+packVer+'</small></div>'+
+      (syn.length ? syn.map(function(l){ return '<div class="logitem"><div class="l1"><span class="tag tag-orange">'+esc(l.d)+'</span><span class="ld" style="margin-left:auto">'+esc(l.by)+'</span></div><div class="lx">'+esc(l.x)+'</div></div>'; }).join('') : '<div class="sub">暂无协同留言</div>')+
+    '</div>';
+  }
+  h+='<div class="card"><div class="sec-t">拜访与协同全流程记录<small>'+esc(c.short)+' · '+t.log.length+' 条 · 全员可见</small></div>'+
     t.log.map(function(l){ return '<div class="logitem"><div class="l1"><span class="tag tag-line">'+esc(l.d)+'</span><span class="lt">'+esc(l.t)+'</span><span class="ld" style="margin-left:auto">'+esc(l.by)+'</span></div><div class="lx">'+esc(l.x)+'</div></div>'; }).join('')+
   '</div>';
   return h;
+}
+/* 非客户经理：以本人身份留言 */
+function saveSyn(){
+  var t=task(S.selTask); if(!t) return;
+  var txt=($('#syTxt')||{}).value||''; txt=txt.trim();
+  if (!txt) { toastMsg('请输入留言内容'); return; }
+  var u=user();
+  t.log.unshift({ d:'11-04', t:'协同留言', by:u.role+' · '+u.name, x:txt });
+  var n=synCntOf(t);
+  toastMsg('留言已提交（'+u.role+' · '+u.name+'），方案迭代至 V'+(1+Math.min(n,3))+'.0');
+  renderBody(); renderKpis();
+}
+/* 访后报告：下载（移动端演示提示）与上传生成 */
+function dlVr(id){
+  var r=(S.visitReports||[]).filter(function(x){return x.id===id;})[0];
+  if (r && window.VIEWS && VIEWS.visitReport) { try { VIEWS.visitReport.downloadWord(r); return; } catch(e){} }
+  toastMsg('尽调报告已开始下载（Word）');
+}
+function vrUploadM(){
+  var t=task(S.selTask), c=co(t.co);
+  var CATS=[['财务报表','2025年度审计报告.pdf'],['纳税申报表','2025增值税申报表.pdf'],['银行流水','基本户流水_2025.xlsx'],['上下游合同','核心客户销售合同.pdf'],['证照章程','营业执照.jpg'],['其他资料','现场照片.jpg']];
+  var picked=[];
+  openSheet('上传资料 · 生成访后尽调报告（'+esc(c.short)+'）',
+    '<div class="sub" style="margin-bottom:8px">勾选本次尽调已收集的资料，AI 自动勾稽比对生成报告。</div>'+
+    CATS.map(function(x,i){ return '<div class="roleitem" data-vrc="'+i+'" onclick="this.classList.toggle(\'on\');vrPick('+i+')"><div class="rn">'+x[0]+'</div><span class="tag tag-line" style="margin-left:auto">点击选择</span></div>'; }).join('')+
+    '<div id="vrPicked" class="sub" style="margin-top:6px"></div>',
+    '<button class="mbtn" style="width:100%" onclick="closeSheet()">取消</button><button class="mbtn pri" style="width:100%;margin-top:6px" onclick="vrGenM()">⚡ 解析并生成尽调报告</button>');
+  window._vrCats=CATS; window._vrPicked=picked;
+}
+function vrPick(i){
+  var x=window._vrCats[i], arr=window._vrPicked;
+  if (arr.indexOf(x[1])<0) arr.push(x[1]);
+  var box=document.querySelector('#vrPicked');
+  if (box) box.textContent='已选 '+arr.length+' 项：'+arr.join('、');
+}
+function vrGenM(){
+  var arr=window._vrPicked||[];
+  if (!arr.length) { toastMsg('请至少选择一类资料'); return; }
+  closeSheet();
+  var t=task(S.selTask), c=co(t.co);
+  toastMsg('AI 正在解析资料并生成尽调报告…');
+  setTimeout(function(){
+    if (!S.visitReports) S.visitReports=[];
+    var CAT_KEY={'财务报表':'fin','纳税申报表':'tax','银行流水':'bank','上下游合同':'ct','证照章程':'cert','其他资料':'other'};
+    var files=arr.map(function(n){ var k='other'; Object.keys(CAT_KEY).forEach(function(cn){ if(n.indexOf(cn.slice(0,2))>=0) k=CAT_KEY[cn]; }); return {k:k,n:n}; });
+    var rpt=window.buildVisitReport ? window.buildVisitReport(c, files) : null;
+    if (rpt) {
+      S.visitReports.unshift(rpt);
+      t.log.unshift({ d:'11-04', t:'访后报告', by:user().name, x:'上传 '+arr.length+' 项资料，生成访后尽调报告《'+rpt.title+'》' });
+      toastMsg('访后尽调报告已生成，可下载 Word 版');
+    } else toastMsg('报告模块加载中，请在 PC 端生成', 2600);
+    renderBody(); renderKpis();
+  }, 1600);
 }
 function toggleMic(){
   var btn=$('#micBtn'), tip=$('#rTip'), tm=$('#rTime'), wave=$('#rWave');
@@ -633,10 +707,10 @@ function saveVisit(){
   if (!note) { toastMsg('请先录入交流要点'); return; }
   var aiOK=$('#aiOut').dataset.done==='1';
   var peer=$('#vPeer').value.trim()||'关键人';
-  t.log.unshift({ d:'11-04', t:'访客纪要', by:user().name, x:'【'+$('#vWay').value+' · '+peer+'】'+note.slice(0,56)+'…（AI 已整理'+(aiOK?'：需求识别+综合方案（含非信贷服务）':'')+'）' });
+  t.log.unshift({ d:'11-04', t:'访客纪要（第'+(t.log.filter(function(l){return l.t.indexOf('访客纪要')>=0;}).length+1)+'次）', by:user().name, x:'【'+$('#vWay').value+' · '+peer+'】'+note.slice(0,56)+'…（AI 已整理'+(aiOK?'：需求识别+综合方案（含非信贷服务）':'')+'）' });
   S._justSaved=true;
   if (t.status==='待接收') t.status='跟进中';
-  toastMsg('纪要已归档 · 任务更新为「跟进中」，已同步任务跟踪与产品经理');
+  toastMsg('第 '+(t.log.filter(function(l){return l.t.indexOf('访客纪要')>=0;}).length)+' 次拜访纪要已归档 · 任务更新为「跟进中」，待中后台协同后方案迭代');
   renderHead(); renderBody();
   renderKpis();
   var nl=document.querySelector('.logitem'); if(nl&&S._justSaved){ nl.style.animation='mLogIn .7s both'; S._justSaved=false; }
@@ -658,7 +732,7 @@ function askAI(i){
 function askFree(){
   var q=$('#aiQ').value.trim(); if(!q) return;
   var hit=null; D.qa.forEach(function(x){ if (!hit && (x.q.indexOf(q.slice(0,4))>=0||q.indexOf(x.q.slice(0,4))>=0)) hit=x; });
-  S.chat.push({q:q,a:hit?hit.a:'已收到您的问题。演示环境为预置问答，建议点击下方推荐问题体验完整回答。',src:hit?hit.src:''});
+  S.chat.push({q:q,a:hit?hit.a:'已收到您的问题，建议点击下方推荐问题。',src:hit?hit.src:''});
   renderBody();
 }
 
@@ -668,14 +742,14 @@ function pageMy(){
   return '<div class="card"><div class="sec-t">关于</div><div class="kvrow"><span class="k">平台</span><span class="v">北斗·产融智航系统 · 移动工作台</span></div>'+
   '<div class="kvrow"><span class="k">数据时点</span><span class="v">2026-11-04</span></div>'+
   '<div class="kvrow"><span class="k">功能</span><span class="v">任务列表 · 访前一页纸 · 访客纪要（语音转写+AI整理）· AI问答</span></div>'+
-  '<div class="kvrow"><span class="k">说明</span><span class="v">录音转写为演示模拟（约1.5秒生成），正式环境接入语音识别服务</span></div></div>';
+  '<div class="kvrow"><span class="k">说明</span><span class="v">停止录音后自动转写并整理归档</span></div></div>';
 }
 function toggleRoleSheet(){
   var mask=document.querySelector('#roleMask'), sheet=document.querySelector('#roleSheet');
   var show=sheet.style.display==='none';
   sheet.style.display=show?'block':'none'; mask.style.display=show?'block':'none';
   if(!show) return;
-  sheet.innerHTML='<div style="text-align:center;font-size:11px;color:var(--t3);padding:8px 0 4px">切换角色（演示）· 工作台内容随角色变化</div>'+
+  sheet.innerHTML='<div style="text-align:center;font-size:11px;color:var(--t3);padding:8px 0 4px">切换角色 · 工作台内容随角色变化</div>'+
     D.users.map(function(x){
       return '<div class="roleitem '+(x.id===S.role?'on':'')+'" onclick="pickRole(\''+x.id+'\')"><div class="uav2" style="width:36px;height:36px;font-size:14px;border-radius:10px">'+esc(x.av)+'</div><div><div class="rn">'+esc(x.name)+'</div><div class="rd">'+esc(x.role)+' · '+esc(x.dept)+'</div></div>'+(x.id===S.role?'<span class="tag tag-green" style="margin-left:auto">当前</span>':'')+'</div>';
     }).join('')+
@@ -683,6 +757,20 @@ function toggleRoleSheet(){
 }
 function pickRole(r){ toggleRoleSheet(); setRole(r); }
 function setRole(r){ S.role=r; var ts=myTasks(); S.selTask=ts[0]?ts[0].id:null; S.opCo=null; renderHead(); renderTab(); renderBody(); toastMsg('已切换：'+user().name+'（'+user().role+'）'); }
+/* 通用底部弹层（访后报告上传等复用角色切换的遮罩与容器） */
+function openSheet(title, bodyHtml, footHtml){
+  var mask=document.querySelector('#roleMask'), sheet=document.querySelector('#roleSheet');
+  sheet.style.display='block'; mask.style.display='block';
+  mask.onclick=closeSheet;
+  sheet.innerHTML='<div style="font-size:14px;font-weight:700;padding:6px 4px 8px;border-bottom:1px solid var(--line)">'+title+'</div>'+
+    '<div style="max-height:52vh;overflow-y:auto;padding:8px 2px">'+bodyHtml+'</div>'+
+    '<div style="padding:4px 0 2px">'+footHtml+'</div>';
+}
+function closeSheet(){
+  var mask=document.querySelector('#roleMask'), sheet=document.querySelector('#roleSheet');
+  sheet.style.display='none'; mask.style.display='none';
+  mask.onclick=toggleRoleSheet;
+}
 
 /* ---------- 总渲染 ---------- */
 function renderBody(){

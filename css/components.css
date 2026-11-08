@@ -468,9 +468,9 @@ select.rf-ctl { width:190px; cursor:pointer; }
 .graph-node { cursor:pointer; }
 .graph-node:hover { filter:brightness(1.12); }
 /* AI问述 */
-.ai-fab { position:fixed; right:26px; bottom:86px; z-index:80; height:52px; padding:0 22px; border:none; border-radius:26px; background:linear-gradient(135deg,#6D3BF5,#0090FF); color:#fff; font-size:var(--fs-md); font-weight:700; box-shadow:0 8px 24px rgba(47,70,220,.4); display:flex; align-items:center; gap:8px; transition:.15s; }
+.ai-fab { position:fixed; right:26px; bottom:24px; z-index:80; height:52px; padding:0 22px; border:none; border-radius:26px; background:linear-gradient(135deg,#6D3BF5,#0090FF); color:#fff; font-size:var(--fs-md); font-weight:700; box-shadow:0 8px 24px rgba(47,70,220,.4); display:flex; align-items:center; gap:8px; transition:.15s; }
 .ai-fab:hover { transform:translateY(-2px); box-shadow:0 12px 28px rgba(47,70,220,.5); }
-.ai-panel-box { position:fixed; right:20px; bottom:84px; width:440px; max-width:94vw; height:560px; max-height:78vh; background:#fff; border-radius:16px; box-shadow:var(--sh-lg); z-index:85; display:none; flex-direction:column; overflow:hidden; border:1px solid var(--line); }
+.ai-panel-box { position:fixed; right:20px; bottom:88px; width:440px; max-width:94vw; height:560px; max-height:78vh; background:#fff; border-radius:16px; box-shadow:var(--sh-lg); z-index:85; display:none; flex-direction:column; overflow:hidden; border:1px solid var(--line); }
 .ai-panel-box.show { display:flex; animation:pop .18s ease; }
 .aip-head { background:linear-gradient(120deg,#5B2BD9,#0072E0); color:#fff; padding:14px 18px; display:flex; justify-content:space-between; align-items:center; }
 .aip-head .t { font-weight:700; font-size:var(--fs-md); display:flex; gap:8px; align-items:center; }

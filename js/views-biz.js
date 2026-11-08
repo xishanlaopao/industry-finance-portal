@@ -33,34 +33,244 @@
   const srcTip = key => { const a = RPT_SRC[key]; if (!a || !a.length) return '';
     return `<span class="src-tip text-xs text-muted" style="margin-left:auto;font-weight:400">来源<span class="src-pop"><span class="sp-t text-sm">数据来源</span>${a.map(([title, time, publisher]) => `<span class="sp-l text-xs text-sub" style="display:block;line-height:1.7;padding:5px 0;border-bottom:1px solid var(--line)"><b>发布方/平台：</b>${esc(publisher)}<br><b>原文章标题：</b>${esc(title)}<br><b>时间：</b>${esc(time)}</span>`).join('')}</span></span>`; };
 
-  /* ================= AI智能分析（企业报告 + 产业链分析 + 我的报告） ================= */
-  VIEWS.report = {
+  /* ================= 访前作战包（一级导航） =================
+     首屏：承接任务列表 + 企业模糊搜索；点击任务/搜索 → 进入该企业四Tab作战包
+     Tab1 客户画像：企业全部信息（工商/标签/股权/上下游/合作历史）
+     Tab2 行业分析：所属行业景气看板
+     Tab3 访前话术：建议对接人 · 六大议题 · 话术示范 · 拜访注意事项
+     Tab4 推荐服务方案：综合服务方案看板 */
+  VIEWS.pack = {
+    /* 企业字段兜底：mock.companies 企业补齐六张网字段 */
+    normCo(c) {
+      if (!c || c.id[0] === 'F') return c;
+      c.listed = c.listed || (c.ipo ? '是·' + c.ipo : '否');
+      c.prog = c.prog || c.status || '培育';
+      c.pos = c.pos || (c.layer === '龙头' ? '战略' : c.layer === '拟上市' ? '腰部' : '基础');
+      c.wt = c.wt || (c.status === '攻坚' ? '主攻' : '择优');
+      c.rel = c.rel || '较高相关';
+      c.cat = c.cat || '上游供应商';
+      c.net = c.net || c.industry || '集成电路与电子材料';
+      c.sigLv = c.sigLv || (c.score >= 80 ? 'A' : 'B');
+      c.nat = c.nat || '民营企业';
+      c.zone = c.zone || (c.city || '无锡');
+      c.track = c.track || c.seg || c.net;
+      c.sig = c.sig || ['客户资料完善中（' + (c.seg || '') + '）'];
+      c.opp = c.opp || '';
+      return c;
+    },
     render(el) {
+      const m = M();
+      if (S.params.co && m.coById(S.params.co)) { S.packCo = S.params.co; delete S.params.co; }
+      if (!S.packTab) S.packTab = 'profile';
+      if (S.packKw == null) S.packKw = '';
+      /* 未选企业：任务列表首屏 */
+      if (!S.packCo || !m.coById(S.packCo)) { this.paintList(el); return; }
+      const c = this.normCo(m.coById(S.packCo));
+      const wb = window.VIEWS.workbench;
       el.innerHTML = `
-        <div class="card card-pad mb4" style="background:linear-gradient(120deg,#7E0E19 0%,#A61521 55%,#C0202C 130%);border:none;color:#fff;box-shadow:0 6px 20px rgba(142,16,25,.25)">
-          <div style="font-size:var(--fs-xl);font-weight:700">AI 智能分析</div>
-        </div>
-        <div id="rptTabs"></div>`;
-      if (!S.rptMy) S.rptMy = [
-        { co: 'JH', kind: '企业报告', t: '2026-09-28 10:32', by: '李晓' },
-        { co: 'TH', kind: '企业报告', t: '2026-09-26 16:05', by: '陈斌' },
-        { co: 'SX', kind: '企业报告', t: '2026-09-25 09:40', by: '王倩' },
-        { co: 'ic', kind: '产业链报告', title: '集成电路产业分析报告', t: '2026-09-22 14:10', by: '李晓' },
-        { co: 'HN', kind: '企业报告', t: '2026-09-18 14:21', by: '李晓' }];
-      if (S.visitReports && S.visitReports.length) {
-        S.visitReports.forEach(v => { if (!S.rptMy.some(x => x.id === v.id)) S.rptMy.unshift({ id: v.id, co: v.co, kind: '访后报告', title: v.title, t: v.t, by: v.by }); });
-      }
-      const tabs = [{ id: 'detail', name: '企业分析报告' }, { id: 'visit', name: '访后报告' }, { id: 'chain', name: '产业链报告' }, { id: 'mine', name: '我的报告', count: S.rptMy.length }];
-      let act = ['mine','chain','visit'].includes(S.params.tab) ? S.params.tab : 'detail';
-      renderTabs($('#rptTabs'), tabs, act, t => { act = t; S.params.tab = t; paint(); });
+        <div class="page-head"><div class="page-title">访前作战包 · ${esc(c.short)}</div>
+          <div class="flex" style="gap:8px">
+            <button class="btn btn-ghost" id="pkBack">← 返回任务列表</button>
+            <button class="btn btn-primary btn-sm" id="pkDl">下载作战包</button></div></div>
+        <div id="pkTabs"></div>`;
+      el.querySelector('#pkBack').onclick = () => { S.packCo = null; this.render(el); };
+      el.querySelector('#pkDl').onclick = () => toast('访前作战包已下载（PDF）');
+      const tabs = [
+        { id: 'profile', name: '客户画像' },
+        { id: 'industry', name: '行业分析' },
+        { id: 'script', name: '访前话术' },
+        { id: 'plan', name: '推荐服务方案' }];
+      let act = ['profile', 'industry', 'script', 'plan'].includes(S.packTab) ? S.packTab : 'profile';
+      renderTabs(el.querySelector('#pkTabs'), tabs, act, t => { act = t; S.packTab = t; paint(); });
       const paint = () => {
-        const box = switchTab($('#rptTabs'), tabs, act, paint);
-        if (act === 'detail') this.paintDetail(box);
-        if (act === 'visit') VIEWS.visitReport.renderInline(box);
-        if (act === 'chain') { this.paintChain(box); }
-        if (act === 'mine') this.paintMine(box);
+        const box = switchTab(el.querySelector('#pkTabs'), tabs, act, paint);
+        if (act === 'profile') box.innerHTML = this.profileTab(c);
+        if (act === 'industry') box.innerHTML = this.industryTab(c);
+        if (act === 'script') box.innerHTML = wb.briefHtml(c);
+        if (act === 'plan') box.innerHTML = wb.planHtml(c);
+        const FX = APP.AIFX;
+        FX.stagger(box); FX.countUp(box);
+        if (!FX.played.pkScript) { FX.played.pkScript = 1; FX.typewrite(box); }
       }; paint();
     },
+    /* ---------- 首屏：承接的任务列表 + 企业搜索 ---------- */
+    paintList(el) {
+      const m = M();
+      const wb = window.VIEWS.workbench;
+      const tasks = wb ? wb.myTasks() : (S.fn ? S.fn.tasks : m.funnel.tasksSeed);
+      const kw = S.packKw || '';
+      const list = kw ? tasks.filter(t => { const c = m.coById(t.co); return c && (c.name + c.short).includes(kw); }) : tasks;
+      const stTag = s => ({ 待接收: 'tag-gray', 跟进中: 'tag-blue', 已反馈: 'tag-green', 已关闭: 'tag-line' }[s] || 'tag-gray');
+      const card = t => { const c = m.coById(t.co); if (!c) return ''; const rm = (m.funnel.rms.find(r => r.id === t.rm) || {}).name || '';
+        return `<div class="wb-task" data-pk="${t.co}" style="cursor:pointer">
+          <div class="flex-between" style="gap:8px"><b class="text-sm">${esc(c.short)}</b>
+            <span class="flex" style="gap:6px"><span class="tag tag-line" style="height:19px;font-size:10px">${esc(t.type)}</span><span class="tag ${stTag(t.status)}" style="height:19px;font-size:10px">${t.status}</span></span></div>
+          <div class="text-xs text-muted mt1" style="line-height:1.6">截止 ${t.due} · ${esc(rm)} · 重点：${esc((t.prods || []).slice(0, 3).join(' / '))}</div>
+          <div class="wb-task-last">${t.log && t.log[0] ? '最新：' + esc(t.log[0].d) + ' ' + esc(t.log[0].t) : '尚未跟进'}</div>
+        </div>`; };
+      el.innerHTML = `
+        <div class="page-head"><div class="page-title">访前作战包</div></div>
+        <!-- 大搜索框：输入企业名 → AI 准备作战包 -->
+        <div class="card card-pad mb4" style="background:linear-gradient(115deg,#7E0E19 0%,#A61521 55%,#C0202C 130%);border:none;color:#fff;text-align:center;padding:30px 24px">
+          <div style="font-size:var(--fs-xl);font-weight:700">输入客户名称，AI 为您准备访前作战包</div>
+          <div class="mt1" style="font-size:12px;opacity:.85">客户画像 · 行业分析 · 访前话术 · 推荐服务方案，一键备齐</div>
+          <div style="position:relative;max-width:620px;margin:16px auto 0">
+            <span style="position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:18px">🔍</span>
+            <input id="pkQ" placeholder="输入企业名称，如：晶汇封测 / 中天科技…" autocomplete="off"
+              style="width:100%;height:48px;border:none;border-radius:24px;padding:0 130px 0 44px;font-size:var(--fs-md);outline:none">
+            <button id="pkGo" style="position:absolute;right:5px;top:5px;height:38px;padding:0 22px;border:none;border-radius:19px;background:#8E1019;color:#fff;font-weight:700;cursor:pointer">AI 准备</button>
+            <div id="pkSug" style="display:none;position:absolute;top:52px;left:0;width:100%;background:#fff;border-radius:12px;box-shadow:0 14px 36px rgba(0,0,0,.22);padding:6px;z-index:40;text-align:left"></div>
+          </div>
+          <div class="flex mt3" style="gap:6px;justify-content:center;flex-wrap:wrap">
+            <span class="text-xs" style="opacity:.8">试试：</span>
+            ${(m.companies.slice(0, 4)).map(c => `<span class="tag" data-pksug="${c.id}" style="height:22px;background:rgba(255,255,255,.18);color:#fff;cursor:pointer;font-size:10px">${esc(c.short)}</span>`).join('')}
+          </div>
+        </div>
+        <!-- 承接任务快选 -->
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">${APP.role().key === 'rm' ? '我承接的任务' : APP.role().key === 'head' ? '本支行任务' : APP.role().key === 'pm' ? '我下发的任务' : '全辖任务'}（${list.length}）<span class="card-sub">点击任务直接进入该企业作战包</span></div>
+            <input class="input" id="pkKw" placeholder="筛选任务…" value="${esc(kw)}" style="width:170px;height:28px">
+          </div>
+          <div style="padding:6px 0 10px;max-height:520px;overflow-y:auto">
+            ${list.map(card).join('') || `<div class="empty" style="padding:44px 16px"><div class="e-ico">🔍</div><div class="e-title">${kw ? '未找到匹配企业' : '暂无承接任务'}</div><div class="e-sub text-sm text-muted">${kw ? '换个关键词试试' : '任务由产品经理在机会漏斗下发'}</div></div>`}
+          </div>
+        </div>`;
+      /* 大搜索框：模糊联想 → 选中后 AI 五步准备特效 → 进四Tab */
+      const q = el.querySelector('#pkQ'), sug = el.querySelector('#pkSug');
+      const fuzzy = (c, k) => { const hay = c.name + c.short + (c.seg || '') + (c.track || ''); return hay.includes(k) || [...k].every(ch => hay.includes(ch)); };
+      const showSug = () => {
+        const k = q.value.trim();
+        if (!k) { sug.style.display = 'none'; return; }
+        const hits = m.companies.filter(c => fuzzy(c, k)).slice(0, 6);
+        const hitsF = m.funnel.cos.filter(c => !m.companies.some(y => y.id === c.id) && fuzzy(c, k)).slice(0, 4);
+        const all = hits.concat(hitsF);
+        sug.innerHTML = all.length ? all.map(c => `<div data-pkco="${c.id}" style="padding:8px 10px;border-radius:8px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:8px">
+          <b class="text-sm">${esc(c.short)}</b><span class="text-xs text-muted">${esc(c.seg || c.net || '')}</span></div>`).join('')
+          : '<div style="padding:10px;font-size:12px;color:var(--t3)">未找到匹配企业</div>';
+        sug.style.display = 'block';
+        sug.querySelectorAll('[data-pkco]').forEach(it => it.onmousedown = () => { sug.style.display = 'none'; q.value = m.coById(it.dataset.pkco).short; this.aiPrepare(el, it.dataset.pkco); });
+      };
+      q.oninput = showSug; q.onfocus = showSug;
+      q.onblur = () => setTimeout(() => { sug.style.display = 'none'; }, 180);
+      q.addEventListener('keydown', e => { if (e.key === 'Enter') { const k = q.value.trim(); if (!k) return; const hit = m.companies.find(c => fuzzy(c, k)) || m.funnel.cos.find(c => fuzzy(c, k)); hit ? this.aiPrepare(el, hit.id) : toast('未找到匹配企业', 'warn'); } });
+      el.querySelector('#pkGo').onclick = () => { const k = q.value.trim(); if (!k) return toast('请输入企业名称', 'warn'); const hit = m.companies.find(c => fuzzy(c, k)) || m.funnel.cos.find(c => fuzzy(c, k)); hit ? this.aiPrepare(el, hit.id) : toast('未找到匹配企业', 'warn'); };
+      el.querySelectorAll('[data-pksug]').forEach(sg => sg.onclick = () => this.aiPrepare(el, sg.dataset.pksug));
+      /* 任务快选 */
+      const inp = el.querySelector('#pkKw');
+      inp.oninput = () => { S.packKw = inp.value.trim(); this.paintList(el); const k2 = el.querySelector('#pkKw'); k2.focus(); k2.setSelectionRange(k2.value.length, k2.value.length); };
+      el.querySelectorAll('[data-pk]').forEach(d => d.onclick = () => { S.packCo = d.dataset.pk; S.packTab = 'profile'; this.render(el); });
+    },
+    /* AI 准备作战包：五步特效 → 四Tab */
+    aiPrepare(el, coId) {
+      const c = M().coById(coId);
+      if (!c) return;
+      const steps = ['检索企业公开信息（工商 / 股权 / 舆情）', '匹配行内数据与历史合作记录', '分析所属行业景气与产业链位置', '生成客户画像与行业分析', '匹配产品库，输出访前话术与服务方案'];
+      openModal({ small: true, title: `AI 正在准备访前作战包 · ${esc(c.short)}`, body: `
+        <div style="padding:10px 4px">
+          ${steps.map((s, i) => `<div class="flex mb3" style="gap:10px"><span class="rank-pill" style="background:#F0F2F7;color:var(--t3)" id="pkstep${i}">${i + 1}</span>
+          <span class="text-sm" style="line-height:24px">${s}</span></div>`).join('')}
+          <div class="mt2" style="height:5px;background:#F0F2F7;border-radius:3px;overflow:hidden"><i id="pkbar" style="display:block;height:100%;width:0;background:linear-gradient(90deg,#8E1019,#C0202C);transition:width .5s"></i></div>
+        </div>`, foot: '' });
+      steps.forEach((_, i) => setTimeout(() => {
+        const p = document.querySelector('#pkstep' + i);
+        if (p) { p.textContent = '✓'; p.style.background = 'var(--ok-50)'; p.style.color = 'var(--ok-500)'; }
+        const bar = document.querySelector('#pkbar');
+        if (bar) bar.style.width = ((i + 1) / steps.length * 100) + '%';
+      }, 500 + i * 520));
+      setTimeout(() => {
+        APP.closeModal();
+        S.packCo = coId; S.packTab = 'profile'; S.packKw = '';
+        this.render(el);
+        toast(`「${c.short}」访前作战包已备齐`);
+      }, 500 + steps.length * 520 + 300);
+    },
+    /* ---------- Tab1 客户画像：企业全部信息 ---------- */
+    profileTab(c) {
+      const m = M();
+      const fn = fnDemoFill(c);
+      if (fn) { c.legal = fn.legal; c.cap = fn.cap; c.est = fn.est; c.emp = fn.emp; c.uscc = fn.uscc; c.addr = fn.addr; c.scope = fn.scope; c.qual = fn.qual; c.holders = fn.holders; c.ctrl = fn.ctrl; c.ud = fn.ud; }
+      const o = c.internal || { credit: 0, used: 0, deposit: 0, settle: 0, products: [] };
+      const kpi = (k, v, d) => `<div class="wp-kpi"><div class="k">${k}</div><div class="v">${v}</div><div class="d">${d || ''}</div></div>`;
+      const cl = (x, cls) => `<span class="wp-cl ${cls}">${esc(x)}</span>`;
+      const chain = (c.ctrl || '').split('→').map(s => s.trim()).filter(Boolean);
+      return `
+        <div class="wp-hero">
+          <div><div class="eyebrow">客户画像 · 企业全景信息</div><h2>${esc(c.name)}</h2>
+            <div class="sub">${c.listed.indexOf('是') === 0 ? esc(c.listed.slice(2)) + ' ｜ ' : ''}${esc(c.city)}·${esc(c.zone)} ｜ ${esc(c.net)}·${esc(c.track)} ｜ 数据时点 2026-11-04</div></div>
+          <div class="wp-verdict"><div class="lv">${c.prog === '突破' ? '重点介入' : c.prog === '攻坚' ? '适度介入' : '培育跟踪'}</div><div class="sm">${c.pos}客户 · ${c.prog}档</div></div>
+        </div>
+        <div class="wp-kpis">
+          ${kpi('综合评分', c.score, c.sigLv + ' 级信号 · ' + c.rel)}
+          ${kpi('客户大类', c.cat === '建设运营商' ? '运营商' : '供应商', esc(c.nat))}
+          ${kpi('营销进展', c.prog, '地位 ' + c.pos + ' · 权重 ' + c.wt)}
+          ${kpi('上市情况', c.listed.indexOf('是') === 0 ? '是' : '否', c.listed.indexOf('是') === 0 ? c.listed.slice(2, 16) : '非上市主体')}
+          ${kpi('行内合作', o.credit ? o.credit + '亿' : '未合作', (o.products || []).slice(0, 2).join('/') || '新客户')}
+          ${kpi('建议服务方案', (c.prods || []).length + ' 项', (c.prods || []).slice(0, 2).join(' / '))}
+        </div>
+        <div class="card card-pad mb3">
+          <div class="wp-cloud mb2">
+            ${cl(c.listed.indexOf('是') === 0 ? c.listed.slice(2) : '非上市主体', c.listed.indexOf('是') === 0 ? 'wp-cl-a' : 'wp-cl-e')}
+            ${cl(c.net + ' · ' + c.track, 'wp-cl-b')}${cl(c.cat, 'wp-cl-a')}${cl(c.nat, 'wp-cl-c')}${cl(c.pos + '客户', 'wp-cl-a')}
+            ${cl('营销进展：' + c.prog, 'wp-cl-b')}${cl('权重：' + c.wt, 'wp-cl-c')}${cl(c.rel, 'wp-cl-a')}
+            ${cl('四线得分 ' + c.score, 'wp-cl-b')}${cl(c.city + '属地', 'wp-cl-c')}
+          </div>
+          <div class="wp-note"><b>AI 信号：</b>${esc((c.sig || []).join('；'))}</div>
+        </div>
+        <div class="card card-pad mb3"><div class="flex-between mb3"><b>基本信息</b><span class="text-xs text-muted">工商公示数据</span></div>
+          <div class="kv-grid">${[['法定代表人', c.legal || '—'], ['注册资本', c.cap || '—'], ['成立时间', (c.est || '—') + (String(c.est || '').indexOf('年') < 0 && c.est !== '—' ? ' 年' : '')], ['统一社会信用代码', c.uscc || '—'], ['企业性质', c.nat], ['员工规模', c.emp || '—'], ['注册地址', c.addr || '—'], ['经营范围', (c.scope || '—').slice(0, 40) + ((c.scope || '').length > 40 ? '…' : '')], ['资质认证', (c.qual || []).join('、') || '—']].map(([k, v]) => kv(k, esc(String(v)))).join('')}</div></div>
+        <div class="card card-pad mb3"><div class="flex-between mb3"><b>股权与控制链</b><span class="text-xs text-muted">穿透至实际控制人</span></div>
+          ${(c.holders || []).length ? `<div class="tbl-wrap"><table class="tbl"><thead><tr><th>股东名称</th><th>类型</th><th style="width:200px">持股比例</th></tr></thead><tbody>
+            ${(c.holders || []).map(h => `<tr><td><b class="text-sm">${esc(h.n)}</b></td><td><span class="tag tag-line">${esc(h.t)}</span></td>
+              <td><div class="mini-bar-wrap"><div class="mb" style="flex:1"><i style="width:${h.pct}%;background:var(--brand-500)"></i></div><b class="fs-num text-sm">${h.pct}%</b></div></td></tr>`).join('')}</tbody></table></div>` : '<div class="text-sm text-muted">暂无公示数据</div>'}
+          ${chain.length ? `<div class="mt2 text-sm">实际控制人路径：${chain.map(x => `<span class="tag tag-line" style="height:20px">${esc(x)}</span>`).join('<span style="color:var(--t3)"> → </span>')}</div>` : ''}
+        </div>
+        <div class="card card-pad mb3"><div class="flex-between mb3"><b>上下游与机会</b><span class="text-xs text-muted">公开信息聚合</span></div>
+          ${(c.ud && c.ud.up) ? `<div class="grid-2">
+            <div><div class="text-sm" style="font-weight:600;margin-bottom:6px">上游供应商</div>${c.ud.up.map(u => `<div class="flex-between" style="padding:4px 0"><span class="text-sm"><b>${esc(u.n)}</b> <span class="text-xs text-muted">· ${esc(u.w)}</span></span>${u.ours ? '<span class="tag tag-green" style="height:18px;font-size:10px">本行客户</span>' : ''}</div>`).join('')}</div>
+            <div><div class="text-sm" style="font-weight:600;margin-bottom:6px">下游客户</div>${c.ud.down.map(u => `<div class="flex-between" style="padding:4px 0"><span class="text-sm"><b>${esc(u.n)}</b> <span class="text-xs text-muted">· ${esc(u.w)}</span></span>${u.ours ? '<span class="tag tag-green" style="height:18px;font-size:10px">本行客户</span>' : ''}</div>`).join('')}</div></div>`
+          : '<div class="text-sm text-muted mb2">暂无公开披露的上下游数据</div>'}
+          ${c.opp ? `<div class="wp-note mt2"><b>机会地：</b>${esc(c.opp)}</div>` : ''}
+        </div>
+        <div class="card card-pad">
+          <div class="flex-between mb2"><b class="text-sm">最新动态</b><span class="text-xs text-muted">${c.ipo ? '资本进程' : 'AI 数据引擎'}</span></div>
+          <div class="text-sm text-sub">${c.ipo ? `<span class="tag tag-cyan mb2" style="display:inline-flex">${esc(c.ipo)}</span><br>` : ''}${esc(c.recent || '—')}</div>
+        </div>`;
+    },
+    /* ---------- Tab2 行业分析：所属行业景气看板 ---------- */
+    industryTab(c) {
+      const m = M();
+      const ci = m.cockpitInd.ciInds;
+      const keyByNet = { '新一代通信网': 'ic', '算力网': 'ai', '新型电网': 'ev', '物流网': 'low', '水网': 'low', '城市地下管网': 'low' };
+      const key = (c.industry && Object.keys(ci).find(k => ci[k].name.indexOf(String(c.industry).slice(0, 2)) >= 0)) || keyByNet[c.net] || 'ic';
+      const ind = ci[key];
+      const CH = window.CH;
+      return `
+        <div class="card card-pad mb4">
+          <div class="flex-between wrap" style="gap:10px">
+            <div><div class="card-title" style="font-size:var(--fs-lg)">${esc(ind.name)} · 行业分析</div>
+              <div class="text-xs text-muted mt1">${esc(c.short)} 所属行业 ｜ 与「管理视图 · 产业分析」同口径</div></div>
+            <button class="btn btn-ghost btn-sm" onclick="APP.go('manage')">完整产业分析 ›</button>
+          </div>
+          <div class="kpi-grid mt3 mb0" style="grid-template-columns:repeat(4,1fr)">
+            ${ind.kpi.map(([k, v]) => kv(k, '<b style="font-size:20px">' + v + '</b>')).join('')}
+          </div>
+        </div>
+        <div class="card card-pad mb4"><div class="card-title mb3" style="font-size:var(--fs-md)">细分环节景气度（指数 &gt;100 为景气扩张）</div>
+          <div class="flex wrap" style="gap:18px;justify-content:space-around">${ind.boom.map(b => CH.gauge({ val: b.idx, label: `${b.name}（环比${b.mom}）` })).join('')}</div></div>
+        <div class="grid-2 mb4">
+          <div class="card card-pad"><div class="card-title mb3" style="font-size:var(--fs-md)">行业市场规模走势</div>${CH.line({ labels: ind.size.labels, series: ind.size.series, h: 220 })}</div>
+          <div class="card card-pad"><div class="card-title mb3" style="font-size:var(--fs-md)">行业投融资热度（季度事件数）</div>${CH.line({ labels: ind.invest.labels, series: ind.invest.series, h: 220 })}</div>
+        </div>
+        <div class="grid-3 mb4">${ind.metrics.map(([k, v]) => `<div class="card card-pad" style="padding:14px 16px"><div class="text-xs text-muted">${k}</div><div class="text-md mt2" style="font-weight:700">${esc(v)}</div></div>`).join('')}</div>
+        ${aiPanel(ind.name + ' · 行业AI解读', esc(ind.ai))}`;
+    },
+  };
+
+  /* ================= AI智能分析（企业报告 + 产业链分析 + 我的报告） =================
+     注：render 由文件末尾的别名实现（访前作战包·深度分析），此处保留对象与其它方法 */
+  VIEWS.report = {
+    render(el) { /* 由文件末尾 VIEWS.report.render 别名覆盖 */ },
     gen(coId, req, mat) {
       const c = M().coById(coId); if (!c) return;
       openModal({ small: true, title: `正在生成报告 · ${esc(c.short)}`, body: `
@@ -195,6 +405,8 @@
     paintDetail(box) {
       const m = M(), F = S._rptForm = S._rptForm || { kw: '', req: '', mat: '' };
       const selCo = m.coById(S.reportCo);
+      /* 作战包/抽屉带入企业：搜索框预填当前企业，免二次选择 */
+      if (selCo && S._rptCoId !== selCo.id && !F.kw) { F.kw = selCo.short; S._rptCoId = selCo.id; }
       const r = (selCo && selCo.id === 'TH' && m.reportTH) ? m.reportTH : (selCo && selCo.id === 'XJH' && m.reportXJH) ? m.reportXJH : m.report;
       if (!S.rptHist) S.rptHist = ['XJH', 'JH', 'TH'];
       if (!Array.isArray(F.files)) F.files = [];
@@ -577,6 +789,37 @@
     },
   };
 
+  /* ================= 旧 AI智能分析 路由别名（隐藏路由 → 访前作战包） =================
+     深度分析已并入作战包四Tab（客户画像/行业分析/访前话术/推荐服务方案）；企业AI报告仅保留"我的报告"入口直达 */
+  VIEWS.report.render = function (el) {
+    const S = APP.S;
+    const cur = S.packCo && M().coById(S.packCo);
+    el.innerHTML = `
+        <div class="card card-pad mb4" style="background:linear-gradient(120deg,#7E0E19 0%,#A61521 55%,#C0202C 130%);border:none;color:#fff;box-shadow:0 6px 20px rgba(142,16,25,.25)">
+          <div style="font-size:var(--fs-xl);font-weight:700">我的报告</div>
+          <div class="text-xs mt1" style="opacity:.85">企业分析报告 / 产业链报告 历史存档</div>
+        </div>
+        <div id="rptTabs"></div>`;
+    if (!S.rptMy) S.rptMy = [
+      { co: 'JH', kind: '企业报告', t: '2026-09-28 10:32', by: '李晓' },
+      { co: 'TH', kind: '企业报告', t: '2026-09-26 16:05', by: '陈斌' },
+      { co: 'SX', kind: '企业报告', t: '2026-09-25 09:40', by: '王倩' },
+      { co: 'ic', kind: '产业链报告', title: '集成电路产业分析报告', t: '2026-09-22 14:10', by: '李晓' },
+      { co: 'HN', kind: '企业报告', t: '2026-09-18 14:21', by: '李晓' }];
+    if (S.visitReports && S.visitReports.length) {
+      S.visitReports.forEach(v => { if (!S.rptMy.some(x => x.id === v.id)) S.rptMy.unshift({ id: v.id, co: v.co, kind: '访后报告', title: v.title, t: v.t, by: v.by }); });
+    }
+    const tabs = [{ id: 'detail', name: '企业分析报告' }, { id: 'chain', name: '产业链报告' }, { id: 'mine', name: '我的报告', count: S.rptMy.length }];
+    let act = ['mine', 'chain'].includes(S.params.tab) ? S.params.tab : 'detail';
+    renderTabs($('#rptTabs'), tabs, act, t => { act = t; S.params.tab = t; paint(); });
+    const paint = () => {
+      const box = switchTab($('#rptTabs'), tabs, act, paint);
+      if (act === 'detail') this.paintDetail(box);
+      if (act === 'chain') { this.paintChain(box); }
+      if (act === 'mine') this.paintMine(box);
+    }; paint();
+  };
+
   /* ---------- V4 六张网企业演示数据填充（工商/股东/上下游，按四维标签确定性生成） ---------- */
   const FN_LEGAL = ['徐建国', '陈志强', '王明华', '李文斌', '赵国栋', '周建平', '吴志远', '郑海涛'];
   const FN_ROAD = ['金融大道 88 号', '科技产业园 6 号', '高新区研发一路', '经开区长山路 9 号', '新城工业区纬二路', '港城大道 168 号'];
@@ -599,7 +842,7 @@
     const emp = c.cat === '建设运营商' ? (800 + h % 4000) + ' 人' : (150 + h % 1800) + ' 人';
     const uscc = '9132' + String(10000 + h % 90000).slice(0, 5) + 'MA1' + String(1000000 + h % 9000000).slice(0, 7) + 'X';
     const addr = (c.city || '南京') + '市' + (c.zone || '') + (c.zone.indexOf('区') < 0 && c.zone.indexOf('县') < 0 ? '区' : '') + FN_ROAD[h % FN_ROAD.length];
-    const scope = c.net + '领域内的' + c.track.split('·')[0] + '相关业务：投资建设、装备制造、系统集成、技术服务与运营维护（演示口径，正式环境以工商登记为准）';
+    const scope = c.net + '领域内的' + c.track.split('·')[0] + '相关业务：投资建设、装备制造、系统集成、技术服务与运营维护（以工商登记为准）';
     const qual = ['高新技术企业'];
     if (c.score >= 85) qual.push('国家级专精特新"小巨人"');
     else if (c.score >= 70) qual.push('省级专精特新中小企业');

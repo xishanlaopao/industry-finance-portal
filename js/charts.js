@@ -41,7 +41,7 @@ window.CH = (function () {
       paths += `<polyline points="${pts}" fill="none" stroke="${s.color}" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>`;
       if (dots) s.data.forEach((v, i) => { paths += `<circle cx="${X(i)}" cy="${Y(v)}" r="3" fill="#fff" stroke="${s.color}" stroke-width="2"/>`; });
       const li = s.data.length - 1;
-      paths += `<text x="${X(li) + 6}" y="${Y(s.data[li]) + 3}" font-size="10" fill="${s.color}" font-weight="600">${yFmt(s.data[li])}</text>`;
+      paths += `<text x="${W - 4}" y="${Y(s.data[li]) + 3}" text-anchor="end" font-size="10" fill="${s.color}" font-weight="600">${yFmt(s.data[li])}</text>`;
     });
     return `<div class="chart-box"><svg viewBox="0 0 ${W} ${H}">${g}${xl}${paths}</svg></div>`;
   }

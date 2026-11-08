@@ -32,7 +32,9 @@
   const sigTag = v => `<span class="tag ${v === 'A' ? 'tag-red' : v === 'B' ? 'tag-blue' : 'tag-gray'}" style="height:19px;font-size:10px;padding:0 6px;font-weight:700">${v}</span>`;
   const srcTag = c => c.src === 'AI'
     ? `<span class="tag tag-cyan" style="height:19px;font-size:10px;padding:0 6px">✦ AI筛选</span>`
-    : `<span class="tag tag-violet" style="height:19px;font-size:10px;padding:0 6px" title="导入人：${esc(c.imp.by)} · ${c.imp.d}${c.imp.note ? ' · ' + esc(c.imp.note) : ''}">📥 导入</span>`;
+    : (c.src === 'MANUAL' || c.src === 'CLAIM')
+      ? `<span class="tag tag-blue" style="height:19px;font-size:10px;padding:0 6px" title="${c.src === 'MANUAL' ? '客户经理手工录入' : '客户经理/支行主动认领'}">🙋 ${c.src === 'MANUAL' ? '手工录入' : '自认领'}</span>`
+      : `<span class="tag tag-violet" style="height:19px;font-size:10px;padding:0 6px" title="导入人：${esc(c.imp.by)} · ${c.imp.d}${c.imp.note ? ' · ' + esc(c.imp.note) : ''}">📥 导入</span>`;
   const pmTag = id => (F().tags[id] || []).map(t => `<span class="tag tag-violet" style="height:17px;font-size:10px;padding:0 5px" title="${esc(t.by)} · ${t.d}"># ${esc(t.t)}</span>`).join(' ');
   const scoreBar = s => `<div class="fn-score"><b class="fs-num">${s}</b><div class="fn-score-bd"><i style="width:${s}%;background:${s >= 80 ? 'var(--brand-500)' : s >= 60 ? '#2458F5' : '#93A4C8'}"></i></div></div>`;
 
@@ -42,19 +44,41 @@
       subs: [...M().funnel.subsSeed],
       tasks: M().funnel.tasksSeed.map(t => Object.assign({}, t, { log: t.log.map(x => Object.assign({}, x)) })),
       tags: {},                /* coId -> [{t, by, d}] 产品经理备注标签 */
-      f: { nets: [], track: '全部', prog: '全部', pos: '全部', wt: '全部', src: '全部', score: '全部', cat: '全部', sig: '全部', lst: '全部', rel: '全部', kw: '' },
+      f: { nets: [], track: '全部', prog: '全部', pos: '全部', wt: '全部', src: '全部', score: '全部', cat: '全部', sig: '全部', lst: '全部', rel: '全部', kw: '', acc: '全部', plist: '全部' },
       conds: [],               /* 自然语言解析出的筛选条件 chips */
+      accChips: [],            /* 已选准入标准 chips（多选） */
+      claims: [],              /* 客户经理/支行自认领的企业 id（留痕） */
+      projSel: [],             /* 项目清单勾选 */
     };
     return S.fn;
   }
+  /* 准入标准（总行/长三角两类） */
+  const ACC = {
+    '总行战略客户准入': { lv: '总行', cond: c => c.pos === '战略' && c.score >= 80, tip: '战略地位 + 四线得分≥80' },
+    '总行科技金融白名单': { lv: '总行', cond: c => /专精特新|高新技术|小巨人/.test((c.qual || []).join('') + c.tags.join('') + c.name) || c.score >= 85, tip: '资质/高评分科技企业' },
+    '长三角区域准入': { lv: '长三角', cond: c => true, tip: '苏/浙/沪/皖属地企业默认符合' },
+    '长三角基建项目库': { lv: '长三角', cond: c => c.cat === '建设运营商' || /项目|基建|工程/.test(c.track), tip: '建设运营商或项目类赛道' },
+  };
+  /* 正负面清单 */
+  const LISTS = {
+    '正面清单·重大项目配套': { kind: 'pos', cond: c => (c.sig || []).join('').indexOf('重大项目') >= 0 || c.cat === '建设运营商' || c.score >= 82 },
+    '正面清单·专精特新': { kind: 'pos', cond: c => /专精特新|小巨人|高新技术/.test((c.qual || []).join('') + c.tags.join('') + c.name) },
+    '正面清单·上市/拟上市': { kind: 'pos', cond: c => c.listed.indexOf('是') === 0 || (c.ipo && c.ipo.length) },
+    '负面清单·两高过剩产能': { kind: 'neg', cond: c => /化工|冶炼|铸造|电镀|印染/.test(c.track + c.name) },
+    '负面清单·失信/涉诉预警': { kind: 'neg', cond: c => false },
+  };
   const coById = id => M().funnel.cos.find(c => c.id === id);
   const rmById = id => M().funnel.rms.find(r => r.id === id);
   const taskOf = coId => F().tasks.find(t => t.co === coId);
   const tagListOf = coId => F().tags[coId] || [];
+  const ROLE_KEY = () => APP.role().key;   /* rm 客户经理 / head 支行长 / pm 产品经理 / gm 负责人 */
+  /* 预打标：给企业库补准入/清单命中口径（演示：命中=正面绿标，未命中负面=通过） */
+  function accHit(c) { return Object.entries(ACC).filter(([k, a]) => a.cond(c)).map(([k]) => k); }
+  function listHit(c) { const pos = Object.entries(LISTS).filter(([k, l]) => l.kind === 'pos' && l.cond(c)).map(([k]) => k); const neg = Object.entries(LISTS).filter(([k, l]) => l.kind === 'neg' && l.cond(c)).map(([k]) => k); return { pos, neg }; }
 
   /* ---------- 筛选 ---------- */
   function filteredCos() {
-    const f = F().f, conds = F().conds, subs = F().subs;
+    const f = F().f, conds = F().conds, subs = F().subs, st = F();
     const minScore = f.score === '全部' ? 0 : +f.score.replace('+', '');
     const cv = k => { const arr = conds.filter(c => c.k === k).map(c => c.v); return arr.length ? arr : null; };
     const nlNet = cv('net'), nlCity = cv('city'), nlProg = cv('prog'), nlPos = cv('pos'), nlWt = cv('wt');
@@ -63,19 +87,35 @@
     const nlSrc = (conds.find(c => c.k === 'src') || {}).v;
     const nlSub = (conds.find(c => c.k === 'sub') || {}).v;
     const nlLst = (conds.find(c => c.k === 'lst') || {}).v;
+    const nlAcc = cv('acc');      /* 自然语言：准入标准（命中其一） */
+    const nlPlist = (conds.find(c => c.k === 'plist') || {}).v;  /* 自然语言：正面/负面清单 */
+    /* 准入标准：多选 chips 命中其一即通过；负面清单命中任一即剔除；正面清单要求命中其一 */
+    const accOk = c => (!st.accChips.length || st.accChips.some(k => ACC[k] && ACC[k].cond(c))) && (!nlAcc || nlAcc.some(k => ACC[k] && ACC[k].cond(c)));
+    const lh = c => listHit(c);
+    const plistOk = (v, c) => {
+      if (!v || v === '正面') return !v || lh(c).pos.length > 0;
+      if (v === '负面剔除') return lh(c).neg.length === 0;
+      if (v === '正面·重大项目') return lh(c).pos.some(k => k.indexOf('重大项目') >= 0);
+      if (v === '正面·专精特新') return lh(c).pos.some(k => k.indexOf('专精特新') >= 0);
+      if (v === '正面·上市/拟上市') return lh(c).pos.some(k => k.indexOf('上市') >= 0);
+      return true;
+    };
+    const listOk = c => plistOk(f.plist, c) && plistOk(nlPlist, c);
     return M().funnel.cos.filter(c =>
       (f.nets.length === 0 || f.nets.includes(c.net)) &&
       (f.track === '全部' || c.track === f.track) &&
       (f.prog === '全部' || c.prog === f.prog) &&
       (f.pos === '全部' || c.pos === f.pos) &&
       (f.wt === '全部' || c.wt === f.wt) &&
-      (f.src === '全部' || f.src === c.src) &&
+      (f.src === '全部' || f.src === c.src ||
+        (f.src === 'CLAIM' && st.claims.includes(c.id))) &&
       (f.cat === '全部' || c.cat === f.cat) &&
       (f.sig === '全部' || c.sigLv === f.sig) &&
       (f.rel === '全部' || c.rel === f.rel) &&
       (f.lst === '全部' || (f.lst === '上市' ? c.listed.indexOf('是') === 0 : c.listed.indexOf('是') !== 0)) &&
       (c.score >= minScore) &&
       (!f.kw || (c.name + c.short + c.track).includes(f.kw)) &&
+      accOk(c) && listOk(c) &&
       (!nlNet || nlNet.includes(c.net)) &&
       (!nlCity || nlCity.includes(c.city)) &&
       (!nlProg || nlProg.includes(c.prog)) &&
@@ -106,6 +146,8 @@
     const conds = [];
     const eat = re => { q = q.replace(re, ' '); };
     NET_KW.forEach(([n, re]) => { if (re.test(q)) { conds.push({ k: 'net', v: n }); eat(re); } });
+    /* "六张网"泛指全部六张网企业（不限定单一网），仅从语句中移除 */
+    eat(/六张网/g);
     CITIES.forEach(ct => { if (q.includes(ct)) { conds.push({ k: 'city', v: ct }); eat(new RegExp(ct, 'g')); } });
     PROGS.forEach(p => { if (q.includes(p) || (p === '培育' && /培养/.test(q))) { conds.push({ k: 'prog', v: p }); eat(p === '培育' ? /培育|培养/g : new RegExp(p, 'g')); } });
     POSS.forEach(p => { if (q.includes(p)) { conds.push({ k: 'pos', v: p }); eat(new RegExp(p, 'g')); } });
@@ -120,6 +162,17 @@
     if (/AI筛选|网上筛选|网络筛选|AI发现/.test(q)) { conds.push({ k: 'src', v: 'AI' }); eat(/AI筛选|网上筛选|网络筛选|AI发现/g); }
     if (/订阅/.test(q)) { conds.push({ k: 'sub', v: 1 }); eat(/订阅/g); }
     RELS.forEach(r2 => { if (q.includes(r2)) { conds.push({ k: 'rel', v: r2 }); eat(new RegExp(r2, 'g')); } });
+    /* 准入标准与正负面清单（支持"总行正面清单/长三角准入/负面剔除"等口语） */
+    Object.keys(ACC).forEach(a => {
+      const kw = a.replace(/^总行|^长三角/, '');
+      const lv = a.slice(0, 2);
+      if (q.includes(a) || (q.includes(kw) && q.includes(lv))) { conds.push({ k: 'acc', v: a }); eat(new RegExp((lv + '|' + kw).replace(/[()]/g, '\\$&'), 'g')); }
+    });
+    if (/正面清单|正清单|正面/.test(q)) { conds.push({ k: 'plist', v: '正面' }); eat(/正面清单|正清单|正面/g); }
+    if (/负面清单|负清单|负面剔除|剔除/.test(q)) { conds.push({ k: 'plist', v: '负面剔除' }); eat(/负面清单|负清单|负面剔除|剔除/g); }
+    if (/重大项目|重大工程/.test(q) && !conds.some(c => c.k === 'plist' && c.v === '正面')) { conds.push({ k: 'plist', v: '正面·重大项目' }); eat(/重大项目|重大工程/g); }
+    if (/专精特新/.test(q) && !conds.some(c => c.k === 'plist')) { conds.push({ k: 'plist', v: '正面·专精特新' }); }
+    if (/项目/.test(q)) { conds.push({ k: 'proj', v: 1 }); eat(/项目清单|项目/g); }
     /* 剩余语义片段：命中细分赛道则作赛道条件，否则聚合成产品经理自定义标签 */
     const STOP = ['企业', '公司', '客户', '筛选', '适合', '需要', '要求', '优先', '重点', '推', '主推', '切入', '关注', '以上', '并且', '同时', '具有', '业务', '拓展', '营销', '评分'];
     const segs = q.split(/[，,。、；;：:\s的和或与及把里中在]/).map(x => x.trim()).filter(x => x.length >= 2 && !STOP.includes(x));
@@ -136,7 +189,7 @@
     if (tagSegs.length) conds.push({ k: 'tag', v: tagSegs.slice(0, 2).join('·').slice(0, 16) });
     return conds;
   }
-  const condLabel = c => ({ net: '六张网', city: '地区', prog: '营销进展', pos: '地位', wt: '权重', score: '评分', src: '来源', sub: '订阅', cat: '客户大类', nat: '性质', lst: '上市', track: '赛道', rel: '相关度', tag: '生成标签' }[c.k] || c.k);
+  const condLabel = c => ({ net: '六张网', city: '地区', prog: '营销进展', pos: '地位', wt: '权重', score: '评分', src: '来源', sub: '订阅', cat: '客户大类', nat: '性质', lst: '上市', track: '赛道', rel: '相关度', acc: '准入标准', plist: '清单', proj: '范围', tag: '生成标签' }[c.k] || c.k);
 
   /* ============================================================
      视图
@@ -145,22 +198,29 @@
   VIEWS.funnel = {
     render(el) {
       F();
+      const rk = ROLE_KEY();
       el.innerHTML = `
         <div class="page-head"><div class="page-title">机会漏斗</div>
           <div class="flex" style="gap:8px">
+            ${rk === 'rm' ? `<button class="btn btn-ghost" id="fnManual">＋ 手工录入客户</button><button class="btn btn-ghost" id="fnClaimPool">🙋 客户池认领</button>` : ''}
             <button class="btn btn-primary" id="fnImport">导入企业</button></div></div>
         <div id="fnTabs"></div>`;
-      $('#fnImport').onclick = () => this.importDlg();
+      const imp = el.querySelector('#fnImport'); if (imp) imp.onclick = () => this.importDlg();
+      const man = el.querySelector('#fnManual'); if (man) man.onclick = () => this.manualDlg();
+      const clm = el.querySelector('#fnClaimPool'); if (clm) clm.onclick = () => { S.params.tab = 'co'; this.render(el); toast('请在客户总览中点「主动认领」，认领即时生效并留痕'); };
       const tabs = [
-        { id: 'co', name: '企业总览', count: M().funnel.cos.length },
+        { id: 'co', name: '客户清单', count: M().funnel.cos.length },
+        { id: 'proj', name: '项目清单', count: (M().manage || { projects: [] }).projects.length },
         { id: 'sub', name: '订阅的企业', count: F().subs.length },
         { id: 'task', name: '任务下发与跟踪', count: F().tasks.length }];
       let act = S.params.tab;
-      if (!['co', 'sub', 'task'].includes(act)) act = 'co';
+      if (!['co', 'sub', 'task', 'proj'].includes(act)) act = 'co';
+      delete S.params.tab;   /* 一次性消费，避免角色切换后残留 */
       renderTabs($('#fnTabs'), tabs, act, t => { act = t; S.params.tab = t; paint(); });
       const paint = () => {
         const box = switchTab($('#fnTabs'), tabs, act, paint);
         if (act === 'co') this.paintCo(box);
+        if (act === 'proj') this.paintProj(box);
         if (act === 'sub') this.paintSub(box);
         if (act === 'task') this.paintTask(box);
       }; paint();
@@ -204,6 +264,19 @@
           <div class="card-pad" style="padding-top:8px">${this.insightHtml(list)}</div>
         </div>` : ''}
         <div class="fn-filter-card">
+          <div class="fn-frow" style="align-items:center">
+            <span class="fn-flabel">智能筛选</span>
+            <div class="fn-fgroup" style="flex:1;align-items:center">
+              <span class="ai-badge" style="flex-shrink:0">AI</span>
+              <input class="input" id="fnNlQ" placeholder="一句话筛选：如 六张网 总行正面清单 / 无锡 算力网 评分85以上 / 长三角 重大项目" value="${esc(st.nlQ || '')}" style="flex:1;min-width:240px;height:28px">
+              <button class="btn btn-primary btn-sm" id="fnNlGo" style="height:28px">解析筛选</button>
+              ${st.conds.length ? `<button class="btn btn-text btn-sm" id="fnNlClr" style="height:24px;font-size:11px">清空条件</button>` : ''}
+            </div>
+          </div>
+          ${st.conds.length ? `<div class="fn-frow"><span class="fn-flabel">命中条件</span><div class="fn-fgroup" style="flex-wrap:wrap;gap:5px">
+            ${st.conds.map((c, i) => `<span class="tag tag-violet" style="height:22px;cursor:pointer" data-nlcond="${i}" title="点击移除该条件">${condLabel(c)}：${esc(String(c.v))} ✕</span>`).join('')}
+            <span class="text-xs text-muted">当前命中 ${filteredCos().length} 家企业${st.conds.some(c => c.k === 'proj') ? ' · 含"项目"关键词时项目清单同步按所属网/要点筛选' : ''}</span>
+          </div></div>` : ''}
           <div class="fn-frow">
             <span class="fn-flabel">六张网</span>
             <div class="fn-fgroup">${netChip('全部')}${NETS().map(netChip).join('')}
@@ -227,30 +300,41 @@
               <span class="f-label">客户大类</span>${dimChip('cat', CATS)}
               <span class="fn-sep"></span><span class="f-label">上市</span>${['全部', '上市', '未上市'].map(x => `<button class="chip ${f.lst === x ? 'on' : ''}" data-dim="lst" data-v="${x}" style="height:24px;font-size:11px;padding:0 10px">${x}</button>`).join('')}
               <span class="fn-sep"></span><span class="f-label">相关度</span>${dimChip('rel', RELS)}
-              <span class="fn-sep"></span><span class="f-label">来源</span>${['全部', 'AI', 'IMP'].map(x => `<button class="chip ${f.src === x ? 'on' : ''}" data-dim="src" data-v="${x}" style="height:24px;font-size:11px;padding:0 10px">${x === 'AI' ? 'AI筛选' : x === 'IMP' ? '导入' : '全部'}</button>`).join('')}
+              <span class="fn-sep"></span><span class="f-label">来源</span>${['全部', 'AI', 'IMP', 'CLAIM'].map(x => `<button class="chip ${f.src === x ? 'on' : ''}" data-dim="src" data-v="${x}" style="height:24px;font-size:11px;padding:0 10px">${x === 'AI' ? 'AI筛选' : x === 'IMP' ? '导入' : x === 'CLAIM' ? '自认领' : '全部'}</button>`).join('')}
+            </div>
+          </div>
+          <div class="fn-frow">
+            <span class="fn-flabel">准入与清单</span>
+            <div class="fn-fgroup">
+              <span class="f-label">准入标准</span>${Object.keys(ACC).map(a => `<button class="chip ${st.accChips.includes(a) ? 'on' : ''}" data-acc="${esc(a)}" style="height:24px;font-size:11px;padding:0 10px" title="${esc(ACC[a].lv)} · ${esc(ACC[a].tip)}">${ACC[a].lv}·${a.replace(ACC[a].lv, '')}</button>`).join('')}
+              <span class="fn-sep"></span><span class="f-label">清单</span>${['全部', '正面·重大项目', '正面·专精特新', '正面·上市/拟上市', '负面剔除'].map(x => `<button class="chip ${f.plist === x ? 'on' : ''}" data-dim="plist" data-v="${x}" style="height:24px;font-size:11px;padding:0 10px">${x}</button>`).join('')}
+              ${st.accChips.length ? `<button class="btn btn-text btn-sm" id="accClr" style="height:22px;font-size:11px">清空准入</button>` : ''}
             </div>
           </div>
         </div>
-        <div class="card"><div class="tbl-wrap"><table class="tbl fn-tbl" style="min-width:1589px"><thead><tr>
-          <th style="width:176px">企业名称</th><th style="width:90px">客户大类</th><th style="width:196px">上市情况</th><th style="width:108px">六张网</th>
-          <th style="width:148px">细分赛道</th><th style="width:88px">企业性质</th><th style="width:112px">地区</th>
-          <th style="width:76px">营销进展</th><th style="width:74px">地位</th><th style="width:74px">权重</th>
-          <th style="width:100px">综合评分</th><th style="width:200px">✦ 建议服务方案</th><th style="width:147px">操作</th></tr></thead><tbody>
-        ${list.sort((a, b) => b.score - a.score).map(c => `<tr data-co="${c.id}">
-          <td title="${esc(c.name)}"><b class="text-sm">${esc(c.short)}</b>${c.src === 'IMP' ? ' <span class="tag tag-violet" style="height:17px;font-size:10px;padding:0 5px">📥 导入</span>' : ''}${pmTag(c.id) ? `<div style="margin-top:2px">${pmTag(c.id)}</div>` : ''}</td>
-          <td>${catTag(c.cat)}</td>
-          <td title="${esc(c.listed)}">${c.listed.indexOf('是') === 0 ? '是·' + esc(c.listed.slice(2)) : '<span class="text-muted">否</span>'}</td>
-          <td title="${esc(c.track)}${c.opp ? ' ｜ 机会地：' + esc(c.opp) : ''}">${esc(c.net)}</td>
-          <td title="${esc(c.track)}${c.opp ? ' ｜ 机会地：' + esc(c.opp) : ''}">${esc(c.track)}</td>
-          <td>${esc(c.nat)}</td>
-          <td title="${esc(c.city)}·${esc(c.zone)}${c.opp ? ' ｜ 机会地：' + esc(c.opp) : ''}">${esc(c.city)}·${esc(c.zone)}</td>
+        <div class="card"><div class="tbl-wrap"><table class="tbl fn-tbl" style="min-width:1080px"><thead><tr>
+          <th style="width:220px">企业</th><th style="width:96px">六张网</th><th style="width:130px">细分赛道</th><th style="width:84px">地区</th>
+          <th style="width:80px">营销进展</th><th style="width:70px">地位</th><th style="width:70px">权重</th>
+          <th style="width:88px">综合评分</th><th style="min-width:190px">✦ 建议服务方案</th><th style="width:150px">操作</th></tr></thead><tbody>
+        ${list.sort((a, b) => b.score - a.score).map(c => { const rk = ROLE_KEY();
+          const isClaimed = st.claims.includes(c.id) || taskOf(c.id);
+          const opHtml = rk === 'rm'
+            ? `<button class="btn btn-text btn-sm" data-claim="${c.id}" ${isClaimed ? 'disabled style="color:var(--t3)"' : ''}>${st.claims.includes(c.id) ? '✓ 已认领' : taskOf(c.id) ? '已承接' : '认领'}</button><button class="btn btn-text btn-sm" data-det="${c.id}">详情</button>`
+            : `<button class="btn btn-text btn-sm" data-one-disp="${c.id}" ${taskOf(c.id) ? 'disabled style="color:var(--t3)"' : ''}>${taskOf(c.id) ? '已下发' : '下发'}</button><button class="btn btn-text btn-sm" data-det="${c.id}">详情</button>`;
+          return `<tr data-co="${c.id}">
+          <td title="${esc(c.name)}">
+            <b class="text-sm">${esc(c.short)}</b>${c.src && c.src !== 'AI' ? ' ' + srcTag(c) : ''}${c.listed.indexOf('是') === 0 ? ' <span class="tag tag-cyan" style="height:17px;font-size:10px;padding:0 5px" title="' + esc(c.listed.slice(2)) + '">' + esc(c.listed.slice(2).replace(/\(/, ' ').replace(/\)/, '')) + '</span>' : ''}
+            <div class="text-xs text-muted" style="margin-top:2px">${esc(c.cat)} · ${esc(c.nat)}${pmTag(c.id) ? ' ' + pmTag(c.id) : ''}</div></td>
+          <td title="${esc(c.net)}${c.opp ? ' ｜ 机会地：' + esc(c.opp) : ''}"><span class="text-sm">${esc(c.net)}</span></td>
+          <td title="${esc(c.track)}${c.opp ? ' ｜ 机会地：' + esc(c.opp) : ''}"><span class="text-sm text-sub">${esc(c.track)}</span></td>
+          <td title="${esc(c.city)}·${esc(c.zone)}${c.opp ? ' ｜ 机会地：' + esc(c.opp) : ''}">${esc(c.city)}<div class="text-xs text-muted" style="margin-top:2px">${esc(c.zone)}</div></td>
           <td><span class="tag ${progTag(c.prog)}" style="height:19px;font-size:10px;padding:0 6px">${c.prog}</span></td>
           <td><span class="tag ${posTag(c.pos)}" style="height:19px;font-size:10px;padding:0 6px">${c.pos}</span></td>
           <td><span class="tag ${wtTag(c.wt)}" style="height:19px;font-size:10px;padding:0 6px">${c.wt}</span></td>
           <td>${scoreBar(c.score)}</td>
           <td class="fn-prod-td"><span class="fn-prod-link" data-why="${c.id}" title="点击查看 AI 推荐理由">${esc((c.prods || []).join(' / '))}</span></td>
-          <td onclick="event.stopPropagation()" style="text-align:center"><button class="btn btn-text btn-sm" data-sub="${c.id}">${F().subs.includes(c.id) ? '取消订阅' : '订阅'}</button><button class="btn btn-text btn-sm" data-det="${c.id}">详情</button></td></tr>`).join('') ||
-        `<tr><td colspan="13"><div class="empty"><div class="e-ico">🏢</div><div class="e-title">当前条件下暂无企业</div></div></td></tr>`}</tbody></table></div>
+          <td onclick="event.stopPropagation()" style="text-align:center;white-space:nowrap">${opHtml}</td></tr>`; }).join('') ||
+        `<tr><td colspan="9"><div class="empty"><div class="e-ico">🏢</div><div class="e-title">当前条件下暂无企业</div></div></td></tr>`}</tbody></table></div>
         <div class="pager flex-between" style="padding:12px 16px;gap:10px">
           <span>共 ${list.length} 家 · 其中已订阅 ${list.filter(c => F().subs.includes(c.id)).length} 家 · 按综合评分降序 ｜ 建议服务方案由 AI 按金融机构产品库匹配生成，点击查看推荐理由</span>
           <span class="fn-ai-check" title="渠道抓取时间：工商公示 11-04 04:02 · 舆情监测 11-04 04:05 · 招投标 11-04 04:07 · 融资事件 11-04 04:09">✦ AI 已核验 ${stat.all}/${stat.all}</span>
@@ -264,6 +348,29 @@
         f.track = '全部'; this.paintCo(box);
       });
       box.querySelectorAll('[data-dim]').forEach(b => b.onclick = () => { const k = b.dataset.dim; f[k] = f[k] === b.dataset.v ? '全部' : b.dataset.v; this.paintCo(box); });
+      box.querySelectorAll('[data-acc]').forEach(b => b.onclick = () => {
+        const a = b.dataset.acc, i = st.accChips.indexOf(a);
+        if (i >= 0) st.accChips.splice(i, 1); else st.accChips.push(a);
+        this.paintCo(box);
+      });
+      const accClr = box.querySelector('#accClr'); if (accClr) accClr.onclick = () => { st.accChips = []; this.paintCo(box); };
+      box.querySelectorAll('[data-claim]').forEach(b => b.onclick = e => {
+        e.stopPropagation();
+        const id = b.dataset.claim, c = coById(id);
+        if (st.claims.includes(id) || taskOf(id)) return;
+        confirmDlg(`主动认领「${esc(c.short)}」？<br><span class="text-xs text-muted">认领即时生效：自动生成客户经理跟进任务（来源标记"自认领"），全程留痕，产品经理可在任务跟踪中查看。</span>`, () => {
+          st.claims.push(id);
+          const u = APP.curUser();
+          st.tasks.unshift({
+            id: 'FTC' + Date.now().toString(36), co: id, rm: 'rm-drz', type: '营销跟进', due: '11-18', status: '待接收', d: '2026-11-04',
+            note: `${u.name} 主动认领（自认领）：结合AI作战包出方案后拜访；同步摸排非信贷综合服务机会`,
+            prods: (c.prods || []).slice(0, 3),
+            log: [{ d: '11-04', t: '自认领', by: `${u.name} · ${u.dept}`, x: `客户经理主动认领「${c.short}」（来源：客户池认领），进入跟进流程；产品经理可见` }],
+          });
+          toast(`已认领「${c.short}」，任务已生成（来源：自认领）`);
+          this.paintCo(box);
+        });
+      });
       const trk = box.querySelector('#fnTrack'); trk.onchange = () => { f.track = trk.value; this.paintCo(box); };
       const kw = box.querySelector('#fnKw'); kw.oninput = () => { f.kw = kw.value.trim(); this.paintCo(box); const k2 = box.querySelector('#fnKw'); k2.focus(); k2.setSelectionRange(k2.value.length, k2.value.length); };
       box.querySelectorAll('[data-why]').forEach(el => el.onclick = e => { e.stopPropagation(); APP.go('plan', { co: el.dataset.why }); });
@@ -276,6 +383,21 @@
         else { F().subs.push(id); toast(`已订阅「${c.short}」，请在"订阅的企业"中统一下发跟进`); }
         this.paintCo(box);
       });
+      /* 产品经理：客户清单行内直接下发 */
+      box.querySelectorAll('[data-one-disp]').forEach(b => b.onclick = e => {
+        e.stopPropagation();
+        if (b.disabled) return;
+        const id = b.dataset.oneDisp;
+        this.dispatchDlg([id]);
+      });
+      /* 智能筛选（自然语言） */
+      const nlGo = box.querySelector('#fnNlGo');
+      if (nlGo) nlGo.onclick = () => this.runNL();
+      const nlClr = box.querySelector('#fnNlClr');
+      if (nlClr) nlClr.onclick = () => this.clearCond();
+      box.querySelectorAll('[data-nlcond]').forEach(t => t.onclick = () => this.rmCond(+t.dataset.nlcond));
+      const nlQ = box.querySelector('#fnNlQ');
+      if (nlQ) nlQ.addEventListener('keydown', e => { if (e.key === 'Enter') this.runNL(); });
       /* B3+B4：AI 匹配动效——仅本会话首次进入企业总览播放 */
       if (!st.prodLit) {
         st.prodLit = true;
@@ -343,25 +465,36 @@
           </div>
         </div>`;
     },
-    setQ(q) { $('#fnNlQ').value = q; this.runNL(); },
+    setQ(q) { const st = F(); st.nlQ = q; this.runNL(); },
     runNL() {
       const q = ($('#fnNlQ') || {}).value;
       if (!q || !q.trim()) return toast('请输入一句话筛选要求', 'warn');
       const st = F();
+      st.nlQ = q.trim();
       st.conds = parseNL(q);
-      if (!st.conds.length) return toast('未能解析出有效条件，请换个说法（如：无锡，算力网，评分85以上）', 'warn');
+      if (!st.conds.length) return toast('未能解析出有效条件，请换个说法（如：六张网 总行正面清单 / 无锡 算力网 评分85以上）', 'warn');
+      /* "项目"关键词：项目清单按所属网/要点关键词同步筛选 */
+      if (st.conds.some(c => c.k === 'proj')) {
+        st.pjF = st.pjF || { net: '全部', stage: '全部', prog: '全部', kw: '' };
+        const netCond = st.conds.find(c => c.k === 'net');
+        st.pjF.net = netCond ? netCond.v : '全部';
+        st.pjF.kw = st.nlQ.replace(/六张网|总行|长三角|正面清单|负面清单|正面|负面|准入|清单|项目/g, '').trim().slice(0, 12);
+      }
       const tagCond = st.conds.find(c => c.k === 'tag');
-      this.paintCo(document.querySelector('#fnTabs .tab-panel'));
+      /* 自然语言筛选作用于客户清单；当前不在该 Tab 时自动切回 */
+      const panel = document.querySelector('#fnTabs .tab-panel');
+      if (S.params.tab && S.params.tab !== 'co') { S.params.tab = 'co'; this.render(document.querySelector('#viewRoot')); return; }
+      this.paintCo(panel);
       if (tagCond) {
         const hits = filteredCos();
         hits.forEach(c => {
           st.tags[c.id] = st.tags[c.id] || [];
-          if (!st.tags[c.id].some(t => t.t === tagCond.v)) st.tags[c.id].push({ t: tagCond.v, by: '分行产品经理 · 陈立', d: '11-04' });
+          if (!st.tags[c.id].some(t => t.t === tagCond.v)) st.tags[c.id].push({ t: tagCond.v, by: APP.curUser().role + ' · ' + APP.curUser().name, d: '11-04' });
         });
         toast(`AI 已解析 ${st.conds.length} 个条件，命中 ${hits.length} 家，并生成备注标签「${tagCond.v}」`);
         this.paintCo(document.querySelector('#fnTabs .tab-panel'));
       } else {
-        toast(`AI 已解析 ${st.conds.length} 个筛选条件`);
+        toast(`AI 已解析 ${st.conds.length} 个筛选条件，命中 ${filteredCos().length} 家`);
       }
     },
     rmCond(i) {
@@ -373,7 +506,7 @@
     clearCond() {
       const st = F();
       st.conds.forEach(c => { if (c.k === 'tag') Object.keys(st.tags).forEach(id => { st.tags[id] = st.tags[id].filter(t => t.t !== c.v); }); });
-      st.conds = [];
+      st.conds = []; st.nlQ = '';
       this.paintCo(document.querySelector('#fnTabs .tab-panel'));
     },
 
@@ -389,7 +522,7 @@
         <div class="flex mb2" style="gap:8px"><b>Excel 名单导入</b><span class="text-xs text-muted">支持 xlsx / csv · 导入后来源标记为"导入"</span></div>
         <div class="drop" id="fnDrop"><b>拖拽文件到此处，或点击选择</b>示例：六张网补充名单.xlsx（4 行）<div class="mt2"><button class="btn btn-ghost btn-sm" id="fnParse">解析示例文件</button><button class="btn btn-text btn-sm" id="fnTpl">下载导入模板</button></div></div>
         <div id="fnParseOut" class="mt3"></div>`,        foot: `<button class="btn btn-ghost" onclick="APP.closeModal()">关闭</button>` });
-      $('#fnTpl').onclick = () => toast('模板已开始下载：六张网企业导入模板.xlsx（演示）');
+      $('#fnTpl').onclick = () => toast('模板已开始下载：六张网企业导入模板.xlsx');
       const drop = $('#fnDrop');
       drop.onclick = () => $('#fnParse').click();
       $('#fnParse').onclick = e => {
@@ -553,6 +686,170 @@
       };
     },
 
+    /* ---------- 手工录入客户（客户经理：任意客户 → 入客户池 → AI分析/方案闭环） ---------- */
+    manualDlg() {
+      openModal({ small: true, title: '手工录入客户', body: `
+        <div class="text-xs text-muted mb3" style="line-height:1.7">客户经理可录入任意客户（不限于AI筛选名单）。录入后自动入客户池，可配合生成客户画像 / 深度分析 / 拜访要点与综合服务方案。</div>
+        <div class="form">
+          <div class="form-item"><label class="form-label">企业名称 *</label><input class="input" id="mnName" placeholder="如：无锡某某精密制造有限公司"></div>
+          <div class="grid-2">
+            <div class="form-item"><label class="form-label">所在地区</label><input class="input" id="mnCity" placeholder="如：无锡·锡山区"></div>
+            <div class="form-item"><label class="form-label">所属方向</label>
+              <select class="select" id="mnNet">${NETS().map(n => `<option>${n}</option>`).join('')}</select></div>
+          </div>
+          <div class="form-item"><label class="form-label">主营 / 线索情况（AI 将据此出画像与方案）</label>
+            <textarea class="input" id="mnNote" rows="3" placeholder="如：为本地头部车企供应精密结构件，年营收约1.2亿，账期90天，近期计划扩产"></textarea></div>
+        </div>`,
+        foot: `<button class="btn btn-ghost" onclick="APP.closeModal()">取消</button><button class="btn btn-primary" id="mnGo">录入并生成AI作战包</button>` });
+      $('#mnGo').onclick = () => {
+        const name = $('#mnName').value.trim();
+        if (!name) return toast('请输入企业名称', 'warn');
+        const net = $('#mnNet').value, note = $('#mnNote').value.trim();
+        const loc = ($('#mnCity').value.trim() || '无锡').split(/[·\-]/);
+        const id = 'FM' + Date.now().toString(36);
+        const u = APP.curUser();
+        M().funnel.cos.unshift({
+          id, name, short: name.replace(/(股份有限公司|有限责任公司|有限公司|集团|（.*?）)/g, '').slice(0, 8) || name.slice(0, 8),
+          net, track: note ? note.slice(0, 12) : net + '相关', city: loc[0], zone: loc[1] || '—', opp: '',
+          listed: '否', nat: '民营企业', prog: '培育', pos: '基础', wt: '承接',
+          layer: '储备', status: '潜在', cap: '—', score: 60, sigLv: 'B', rel: '一般相关',
+          prods: NET_PROD[net] || ['流动资金贷款'], src: 'MANUAL',
+          sig: ['客户经理手工录入（' + u.name + '）', note || '待补充企业情况'],
+          recent: note || '客户经理录入，待补充公开信息', tags: ['手工录入'],
+          industry: net, seg: note ? note.slice(0, 12) : '—', est: '—', emp: '—', legal: '—', uscc: '—', type: '民营企业', park: '—', addr: '—', scope: '—', qual: [],
+          grade: 'C', ipo: '',
+          internal: { credit: 0, used: 0, deposit: 0, settle: 0, products: [] },
+          imp: { by: u.name + ' · ' + u.dept, d: '2026-11-04', note: '手工录入客户' },
+        });
+        /* 同步生成自认领任务，进工作台闭环 */
+        F().claims.push(id);
+        F().tasks.unshift({
+          id: 'FTM' + Date.now().toString(36), co: id, rm: 'rm-drz', type: '营销跟进', due: '11-20', status: '待接收', d: '2026-11-04',
+          note: note || `跟进手工录入客户「${name}」`,
+          prods: NET_PROD[net] || ['流动资金贷款'],
+          log: [{ d: '11-04', t: '手工录入', by: u.name + ' · ' + u.dept, x: `手工录入客户「${name}」并自认领跟进；${note || '待补充企业情况'}` }],
+        });
+        APP.closeModal();
+        toast(`已录入「${name}」并生成跟进任务，可在「访前作战包」中选择该客户生成三目标内容`);
+        S.packCo = id; S.packGoal = 'profile';
+        APP.go('pack');
+      };
+    },
+
+    /* ---------------- Tab 2.5：项目清单（与企业客户清单并行 · 产品经理下发） ---------------- */
+    paintProj(box) {
+      const st = F();
+      if (!st.pjF) st.pjF = { net: '全部', stage: '全部', prog: '全部', kw: '' };
+      const pf = st.pjF;
+      const allProjs = (M().manage || { projects: [] }).projects;
+      const projs = allProjs.filter(p =>
+        (pf.net === '全部' || p.net === pf.net) &&
+        (pf.stage === '全部' || p.stage === pf.stage) &&
+        (pf.prog === '全部' || p.prog === pf.prog) &&
+        (!pf.kw || (p.name + p.note).includes(pf.kw)));
+      if (!st.projSel) st.projSel = [];
+      const sel = st.projSel.filter(id => projs.some(p => p.id === id));
+      const taskOfProj = p => st.tasks.find(t => t.proj === p.id);
+      const cName = id => { const c = M().funnel.cos.find(x => x.id === id); return c ? c.short : '—'; };
+      const stTag = s => ({ 储备: 'tag-gray', 前期对接: 'tag-blue', 方案阶段: 'tag-orange', 已批复: 'tag-green', 已投放: 'tag-solid-red' }[s] || 'tag-gray');
+      const pjChip = (k, v) => `<button class="chip ${pf[k] === v ? 'on' : ''}" data-pjf="${k}" data-pjv="${esc(v)}" style="height:24px;font-size:11px;padding:0 10px">${v}</button>`;
+      box.innerHTML = `
+        <div class="card card-pad mb3">
+          <div class="flex mb2" style="gap:8px"><b>项目储备漏斗</b><span class="text-xs text-muted">六张网重大项目 · 与客户清单并行，由产品经理下发跟进</span></div>
+          <div class="fn-funnel">
+            <div class="fn-stage"><div class="fn-s-n fs-num">${allProjs.length}</div><div class="fn-s-l">项目清单</div></div><span class="fn-arrow">›</span>
+            <div class="fn-stage"><div class="fn-s-n fs-num">${allProjs.filter(p => taskOfProj(p)).length}</div><div class="fn-s-l">已下发</div></div><span class="fn-arrow">›</span>
+            <div class="fn-stage fn-stage-end"><div class="fn-s-n fs-num">${allProjs.filter(p => p.stage === '已批复' || p.stage === '已投放').length}</div><div class="fn-s-l">已批复/投放</div></div>
+          </div>
+        </div>
+        <div class="fn-filter-card mb3">
+          <div class="fn-frow">
+            <span class="fn-flabel">项目筛选</span>
+            <div class="fn-fgroup">
+              <span class="f-label">所属网</span>${['全部', ...NETS()].map(v => pjChip('net', v)).join('')}
+              <span class="fn-sep"></span><span class="f-label">阶段</span>${['全部', '储备', '前期对接', '方案阶段', '已批复', '已投放'].map(v => pjChip('stage', v)).join('')}
+              <span class="fn-sep"></span><span class="f-label">营销进展</span>${['全部', '突破', '攻坚', '培育', '储备'].map(v => pjChip('prog', v)).join('')}
+              <input class="input" id="pjKw" placeholder="搜索项目…" value="${esc(pf.kw)}" style="width:150px;height:26px;margin-left:auto">
+            </div>
+          </div>
+        </div>
+        <div class="filter-bar">
+          <b style="margin-right:6px">项目清单（${projs.length} 个）</b>
+          <span class="text-xs text-muted">勾选后下发客户经理，项目关联企业同步生成跟进任务；随项目深入，纪要/协同/方案同闭环</span>
+          <span style="flex:1"></span>
+          <button class="btn btn-ghost btn-sm" id="pjAll">${sel.length === projs.length && projs.length ? '取消全选' : '全选'}</button>
+          <button class="btn btn-primary btn-sm" id="pjDsp">下发选中（${sel.length}）</button>
+        </div>
+        <div class="card"><div class="tbl-wrap"><table class="tbl"><thead><tr>
+          <th style="width:40px"></th><th style="min-width:190px">项目名称</th><th style="width:96px">关联客户</th><th style="width:96px">所属网</th>
+          <th style="width:88px">投资额</th><th style="width:80px">阶段</th><th style="width:74px">营销进展</th><th style="min-width:200px">项目要点 / 金融服务切入</th><th style="width:96px">操作</th></tr></thead><tbody>
+        ${projs.map(p => { const t = taskOfProj(p), rm = t ? rmById(t.rm) : null; return `<tr>
+          <td>${t ? '<span class="tag tag-green" style="height:19px;font-size:10px;padding:0 5px">已下发</span>' : `<input type="checkbox" data-pjsel="${p.id}" ${sel.includes(p.id) ? 'checked' : ''} style="accent-color:var(--brand-500)">`}</td>
+          <td><b class="text-sm">${esc(p.name)}</b></td>
+          <td class="text-sm">${esc(cName(p.co))}</td>
+          <td class="text-sm">${esc(p.net)}</td>
+          <td class="text-sm fs-num">${esc(p.amt)}</td>
+          <td><span class="tag ${stTag(p.stage)}" style="height:19px;font-size:10px;padding:0 6px">${p.stage}</span></td>
+          <td><span class="tag ${progTag(p.prog)}" style="height:19px;font-size:10px;padding:0 6px">${p.prog}</span></td>
+          <td class="text-sm text-sub" style="white-space:normal;line-height:1.6">${esc(p.note)}</td>
+          <td onclick="event.stopPropagation()" style="white-space:nowrap">${t ? `<span class="text-xs text-muted">${esc(rm ? rm.name : '')} 承接</span>` : `<button class="btn btn-text btn-sm" data-pjone="${p.id}">下发</button>`}</td></tr>`; }).join('') ||
+        '<tr><td colspan="9"><div class="empty"><div class="e-ico">🏗</div><div class="e-title">当前条件下暂无项目</div></div></td></tr>'}</tbody></table></div></div>`;
+      box.querySelectorAll('[data-pjf]').forEach(b => b.onclick = () => { pf[b.dataset.pjf] = b.dataset.pjv; this.paintProj(box); });
+      const pjKw = box.querySelector('#pjKw');
+      if (pjKw) pjKw.oninput = () => { pf.kw = pjKw.value.trim(); this.paintProj(box); const k2 = box.querySelector('#pjKw'); k2.focus(); k2.setSelectionRange(k2.value.length, k2.value.length); };
+      box.querySelectorAll('[data-pjsel]').forEach(ck => ck.onchange = () => {
+        const id = ck.dataset.pjsel, i = sel.indexOf(id);
+        if (ck.checked && i < 0) sel.push(id); if (!ck.checked && i >= 0) sel.splice(i, 1);
+        this.paintProj(box);
+      });
+      const all = box.querySelector('#pjAll');
+      if (all) all.onclick = () => { st.projSel = (sel.length === projs.length && projs.length) ? [] : projs.filter(p => !taskOfProj(p)).map(p => p.id); this.paintProj(box); };
+      const dsp = box.querySelector('#pjDsp');
+      if (dsp) dsp.onclick = () => {
+        const ids = sel.filter(id => projs.some(p => p.id === id) && !taskOfProj(projs.find(p => p.id === id)));
+        if (!ids.length) return toast('请先勾选未下发项目', 'warn');
+        this.projDispatchDlg(ids);
+      };
+      box.querySelectorAll('[data-pjone]').forEach(b => b.onclick = () => this.projDispatchDlg([b.dataset.pjone]));
+    },
+    /* 项目清单下发弹窗（项目任务与企业任务同闭环） */
+    projDispatchDlg(ids) {
+      const projs = (M().manage || { projects: [] }).projects.filter(p => ids.includes(p.id));
+      openModal({ wide: true, title: `下发项目跟进清单（${projs.length} 个）`, body: `
+        <div class="mb3" style="padding:10px 14px;background:var(--blue-50);border-radius:10px">
+          <div class="text-sm" style="font-weight:600;margin-bottom:4px">下发项目</div>
+          <div class="flex wrap" style="gap:6px">${projs.map(p => `<span class="tag tag-line" style="height:22px">${esc(p.name)}（${esc(p.net)} · ${esc(p.amt)}）</span>`).join('')}</div>
+        </div>
+        <div class="form">
+          <div class="grid-2">
+            <div class="form-item"><label class="form-label">承接客户经理</label>
+              <select class="select" id="pjRm">${M().funnel.rms.map(r => `<option value="${r.id}">${esc(r.name)} · ${esc(r.unit)}</option>`).join('')}</select></div>
+            <div class="form-item"><label class="form-label">完成时限</label><select class="select" id="pjDue"><option>11-12</option><option selected>11-18</option><option>11-25</option></select></div>
+          </div>
+          <div class="form-item"><label class="form-label">跟进要点（AI 预填，可修改）</label><textarea class="input" id="pjNote" rows="3"></textarea></div>
+        </div>`,
+        foot: `<button class="btn btn-ghost" onclick="APP.closeModal()">取消</button><button class="btn btn-primary" id="pjGo">确认下发</button>`,
+        onOpen: () => {
+          $('#pjNote').value = projs.map(p => `${p.name}（${p.net}·${p.amt}）：${p.note}`).join('\n');
+        } });
+      $('#pjGo').onclick = () => {
+        const rmId = $('#pjRm').value, due = $('#pjDue').value, note = $('#pjNote').value.trim();
+        const st = F();
+        projs.forEach(p => {
+          if (st.tasks.find(t => t.proj === p.id)) return;
+          st.tasks.unshift({
+            id: 'FTP' + Date.now().toString(36) + p.id, co: p.co, proj: p.id, rm: rmId, type: '项目跟进', due, status: '待接收', d: '2026-11-04',
+            note: note || `跟进项目「${p.name}」`, prods: p.prods || ['项目贷款'],
+            log: [{ d: '11-04', t: '任务下发', by: '分行产品经理 · 陈立', x: `下发项目跟进清单：${p.name}（${p.net} · ${p.amt}）` }],
+          });
+        });
+        APP.closeModal();
+        toast(`已下发 ${projs.length} 个项目至「${rmById(rmId).name} · ${rmById(rmId).unit}」`);
+        st.projSel = [];
+        S.params.tab = 'task'; this.render(document.querySelector('#viewRoot'));
+      };
+    },
+
     /* ---------------- Tab 3：任务下发与跟踪（仅已下发） ---------------- */
     paintTask(box) {
       const st = F();
@@ -621,7 +918,7 @@
           <div class="flex-between mb3"><b class="text-sm">跟进全过程（前中后台协同留痕）</b>
             <span class="text-xs" style="color:var(--brand-500);cursor:pointer" id="tkWb">去工作台记录访客纪要 ›</span></div>
           <div class="timeline">
-            ${t.log.map(l => `<div class="tl-item ${l.t === '访客纪要' ? '' : l.t === '协同留言' ? 'tl-warn' : l.t === '反馈' ? 'tl-ok' : ''}">
+            ${t.log.map(l => `<div class="tl-item ${l.t.indexOf("访客纪要") >= 0 ? '' : l.t === '协同留言' ? 'tl-warn' : l.t === '反馈' ? 'tl-ok' : ''}">
               <div class="tl-time">${l.d} · ${esc(l.by)}</div>
               <div class="tl-title">${esc(l.t)}</div>
               <div class="tl-desc" style="white-space:normal">${esc(l.x)}</div></div>`).join('') || '<div class="text-sm text-muted">暂无跟进记录</div>'}

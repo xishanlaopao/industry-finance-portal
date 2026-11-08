@@ -21,7 +21,7 @@
   /* 超期：截止早于 11-05 且未反馈/未关闭 */
   const isOverdue = t => +t.due.replace('-', '') < 1105 && t.status !== '已反馈' && t.status !== '已关闭';
   /* 待复核纪要：有访客纪要但尚无产品经理协同留言 */
-  const needReview = t => t.log.some(l => l.t === '访客纪要') && !t.log.some(l => l.t === '协同留言' && l.by.indexOf('产品经理') >= 0);
+  const needReview = t => t.log.some(l => l.t.indexOf("访客纪要") >= 0) && !t.log.some(l => l.t === '协同留言' && l.by.indexOf('产品经理') >= 0);
   const cName = id => { const c = M().funnel.cos.find(x => x.id === id); return c ? c.short : ''; };
   const rmName = id => { const r = M().funnel.rms.find(x => x.id === id); return r ? r.name : ''; };
 
@@ -45,18 +45,19 @@
   };
 
   window.VIEWS = window.VIEWS || {};
-  /* ================= 综合服务方案（独立页 · 机会漏斗"建议服务方案"进入） ================= */
+  /* ================= 综合服务方案（独立页 · 漏斗"建议服务方案"/作战包/工作台进入） ================= */
   VIEWS.plan = {
     render(el) {
       const c = S.params.co && M().funnel.cos.find(x => x.id === S.params.co);
       if (!c) {
-        el.innerHTML = '<div class="card card-pad"><div class="empty"><div class="e-ico">📄</div><div class="e-title">请从机会漏斗的"建议服务方案"进入</div></div></div>';
+        el.innerHTML = '<div class="card card-pad"><div class="empty"><div class="e-ico">📄</div><div class="e-title">请从机会漏斗的"建议服务方案"、访前作战包或工作台进入</div></div></div>';
         return;
       }
       el.innerHTML = `
-        <div class="page-head"><div class="page-title">综合服务方案</div>
+        <div class="page-head"><div class="page-title">综合服务方案 · ${esc(c.short)}</div>
           <div class="flex" style="gap:8px">
             <button class="btn btn-ghost" onclick="APP.go('funnel',{tab:'co'})">← 返回机会漏斗</button>
+            <button class="btn btn-ghost" onclick="APP.go('pack')">← 返回访前作战包</button>
             <button class="btn btn-primary btn-sm" onclick="APP.toast('综合服务方案已下载（PDF）')">下载服务方案</button></div></div>
         <div id="planBoard">${VIEWS.workbench.planHtml(c)}</div>`;
       const board = el.querySelector('#planBoard');
@@ -73,7 +74,7 @@
       const r = ROLE(), tasks = S.fn ? S.fn.tasks : M().funnel.tasksSeed;
       const rmMap = M().funnel.rms;
       if (r.id === 'rm-drz' || r.key === 'rm') return tasks.filter(t => t.rm === 'rm-drz');
-      if (r.key === 'head') return tasks.filter(t => { const rm = rmMap.find(x => x.id === t.rm); return rm && rm.unit === '无锡分行营业部'; });
+      if (r.key === 'head') return tasks.filter(t => { const rm = rmMap.find(x => x.id === t.rm); return rm && rm.unit === '南京分行营业部'; });
       return tasks;
     },
     /* ---------- 访前一页纸（六张网企业） ---------- */
@@ -194,7 +195,7 @@
               <ul class="text-sm text-sub" style="padding-left:18px;line-height:2">
                 <li>母公司统一授信、子公司按用信场景拆分（保函/供应链/项目贷分别落到业务主体）；</li>
                 <li>${c.cat === '上游供应商' ? '关注其对链主的依赖度：前五大客户集中度需现场核实' : '关注项目公司资本金与并表范围，防止风险向母公司传导'}；</li>
-                <li>对外担保与关联交易须穿透核查（演示口径，正式环境接入工商穿透数据）。</li>
+                <li>对外担保与关联交易须穿透核查（正式环境接入工商穿透数据）。</li>
               </ul>
             </div>
             ${this.secHtml(7, '财务速览（示意）', '正式环境接入财报后自动生成')}
@@ -204,7 +205,7 @@
               <tr><td>杠杆水平</td><td>${c.cat === '建设运营商' ? '重资产高杠杆（项目期）' : '适中'}</td><td class="text-sub">${c.cat === '建设运营商' ? '关注资本金与期限匹配' : '授信空间充足'}</td></tr>
               <tr><td>现金流</td><td>${c.cat === '上游供应商' ? '回款账期是核心变量' : '政府/业主回款稳定'}</td><td class="text-sub">保理/资金监管切入点</td></tr>
             </tbody></table></div>
-            <div class="wp-note">财务数值为演示示意——正式环境接入财报/税务/行内数据后，本节自动生成完整四维分析（盈利·杠杆·现金流·营运）。</div></div>
+            <div class="wp-note">正式环境接入财报/税务/行内数据后，本节自动生成完整四维分析（盈利·杠杆·现金流·营运）。</div></div>
             ${this.secHtml(8, '资本市场表现', c.listed.indexOf('是') === 0 ? '不博弈股价，但须理解波动来源' : '非上市主体')}
             <div class="card card-pad mb3"><ul class="text-sm text-sub" style="padding-left:18px;line-height:2">
               ${c.listed.indexOf('是') === 0
@@ -222,7 +223,7 @@
             ${this.secHtml(10, '风险排查与综合评分', '公开信号交叉验证')}
             <div class="card card-pad mb3">
               <div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:200px">风险维度</th><th style="width:70px">评估</th><th>说明</th></tr></thead><tbody>
-                <tr><td>失信被执行 / 行政处罚</td><td><span class="tag tag-green" style="height:20px">正常</span></td><td class="text-sub">公开信息未见异常（演示口径）</td></tr>
+                <tr><td>失信被执行 / 行政处罚</td><td><span class="tag tag-green" style="height:20px">正常</span></td><td class="text-sub">公开信息未见异常</td></tr>
                 <tr><td>客户/业主集中度</td><td>${c.cat === '上游供应商' ? '<span class="tag tag-orange" style="height:20px">关注</span>' : '<span class="tag tag-green" style="height:20px">正常</span>'}</td><td class="text-sub">${c.cat === '上游供应商' ? '前五大客户集中度需现场核实' : '业主方以政府/国企为主，回款确定性强'}</td></tr>
                 <tr><td>同业竞争</td><td><span class="tag tag-orange" style="height:20px">关注</span></td><td class="text-sub">六张网名单为同业共同关注焦点，比拼方案与服务时效</td></tr>
                 <tr><td>政策依赖</td><td><span class="tag tag-gray" style="height:20px">了解</span></td><td class="text-sub">${esc(c.net)}投资节奏受政策与财政影响，跟踪专项规划落地</td></tr>
@@ -605,7 +606,6 @@
       if (!S.wbTab) S.wbTab = 'task';
       if (S.params.side) { S.wbSide = S.params.side; S.wbTab = 'task'; delete S.params.side; }
       if (S.params.tab && ['task', 'visit', 'ai', 'ledger'].includes(S.params.tab)) { S.wbTab = S.params.tab; delete S.params.tab; }
-      if (!S.wbSide) S.wbSide = 'brief';
       const selId = S.params.task && tasks.some(t => t.id === S.params.task) ? S.params.task : (tasks[0] || {}).id;
       const sel = tasks.find(t => t.id === selId);
       el.innerHTML = `
@@ -622,7 +622,7 @@
         <div id="wbTabs"></div>`;
       const tabs = [
         { id: 'task', name: '任务跟进' },
-        { id: 'visit', name: '访客纪要' },
+        { id: 'visit', name: '访客纪要与协同' },
         { id: 'ai', name: 'AI 问答' },
         { id: 'ledger', name: '跟进台账' }];
       renderTabs($('#wbTabs'), tabs, S.wbTab, t2 => { S.wbTab = t2; paint(); });
@@ -635,8 +635,10 @@
         if (S.wbTab === 'ledger') this.paintLedgerTab(box, tasks);
       }; paint();
     },
-    /* ---------- Tab1：任务跟进（任务列表 + 访前一页纸同页） ---------- */
+    /* ---------- Tab1：任务跟进（任务列表 + 右侧 AI作战包四Tab） ---------- */
     paintTaskTab(box, tasks, selId) {
+      if (!S.wbSide) S.wbSide = 'profile';
+      if (!['profile', 'fin', 'advice', 'plan'].includes(S.wbSide)) S.wbSide = 'profile';
       box.innerHTML = `
         <div style="display:grid;grid-template-columns:1fr 2.05fr;gap:var(--sp-4);align-items:start">
           <div class="card" style="min-width:0">
@@ -647,20 +649,179 @@
             <div id="wbTaskList" style="max-height:860px;overflow-y:auto"></div>
           </div>
           <div class="card" style="min-width:0">
-            <div class="card-head">
-              <div class="flex" style="gap:6px" id="wbSideTabs">
-                <button class="chip ${S.wbSide === 'brief' ? 'on' : ''}" data-side="brief" style="height:26px">访前准备</button>
+            <div class="card-head" style="flex-wrap:wrap;gap:8px">
+              <div class="card-title">AI 作战包<span class="card-sub" id="wbOneTitle"></span></div>
+              <div class="flex" style="gap:6px;flex-wrap:wrap" id="wbSideTabs">
+                <button class="chip ${S.wbSide === 'profile' ? 'on' : ''}" data-side="profile" style="height:26px">客户画像</button>
+                <button class="chip ${S.wbSide === 'fin' ? 'on' : ''}" data-side="fin" style="height:26px">财报与征信</button>
+                <button class="chip ${S.wbSide === 'advice' ? 'on' : ''}" data-side="advice" style="height:26px">拜访建议</button>
                 <button class="chip ${S.wbSide === 'plan' ? 'on' : ''}" data-side="plan" style="height:26px">综合服务方案</button>
               </div>
-              <span class="card-sub" id="wbOneTitle"></span>
+              <div class="flex" style="gap:6px;margin-left:auto">
+                <button class="btn btn-ghost btn-sm" id="wbPkDl" style="height:26px">下载作战包</button>
+              </div>
             </div>
             <div class="card-pad" style="padding-top:8px" id="wbOnePager"></div>
           </div>
         </div>`;
       this.paintTasks(box, tasks, selId);
-      box.querySelectorAll('[data-side]').forEach(b => b.onclick = () => { S.wbSide = b.dataset.side; this.paintTaskTab(box, this.myTasks(), S.params.task); const k2 = box.querySelector('#wbTaskKw'); if (k2 && S.wbKw) { k2.value = S.wbKw; } });
+      box.querySelectorAll('[data-side]').forEach(b => b.onclick = () => { S.wbSide = b.dataset.side; this.paintOnePager(box); });
+      const dlBtn = box.querySelector('#wbPkDl');
+      if (dlBtn) dlBtn.onclick = () => toast(S.wbSide === 'plan' ? '综合服务方案已下载（PDF）' : 'AI 作战包已下载（PDF）');
       const kw = box.querySelector('#wbTaskKw');
       kw.oninput = () => { S.wbKw = kw.value.trim(); this.paintTasks(box, tasks, selId); const k2 = box.querySelector('#wbTaskKw'); k2.focus(); k2.setSelectionRange(k2.value.length, k2.value.length); };
+    },
+    /* 右栏四Tab内容渲染（随 S.wbSide 切换，不重绘任务列表） */
+    paintOnePager(box) {
+      const coParam = S.params.co && (M().funnel.cos.find(x => x.id === S.params.co) || M().companies.find(x => x.id === S.params.co)) ? S.params.co : null;
+      const tasks = this.myTasks();
+      const selId = S.params.task && tasks.some(t => t.id === S.params.task) ? S.params.task : (tasks[0] || {}).id;
+      const sel = tasks.find(t => t.id === selId) || tasks[0];
+      const c = coParam ? M().coById(coParam) : (sel ? M().coById(sel.co) : null);
+      const opBox = box.querySelector('#wbOnePager');
+      const title = box.querySelector('#wbOneTitle');
+      if (!opBox) return;
+      box.querySelectorAll('[data-side]').forEach(b => b.classList.toggle('on', b.dataset.side === S.wbSide));
+      if (!c) {
+        opBox.innerHTML = '<div class="text-sm text-muted" style="padding:16px 4px">暂无任务，选择任务后生成看板</div>';
+        if (title) title.textContent = '';
+        return;
+      }
+      const side = S.wbSide;
+      if (side === 'plan') opBox.innerHTML = this.planSideHtml(c, sel);
+      else if (side === 'fin') opBox.innerHTML = this.finCredHtml(c);
+      else if (side === 'advice') opBox.innerHTML = this.adviceHtml(c);
+      else opBox.innerHTML = this.profileFullHtml(c);
+      if (title) title.textContent = '· ' + c.short;
+      const FX = AIFX();
+      FX.stagger(opBox); FX.countUp(opBox);
+      if (!FX.played.wbScript) { FX.played.wbScript = 1; FX.typewrite(opBox); }
+    },
+    /* ---------- AI作战包 · Tab1 客户画像（画像+股权治理+集团架构+财务速览+资本表现+行业地位+风险排查） ---------- */
+    profileFullHtml(c) {
+      /* 复用访前一页纸看板（其结构即这七节），仅去掉头尾的下载条避免与右栏头部重复 */
+      let html = this.briefHtml(c);
+      html = html.replace(/<div class="flex mt3"[^>]*>\s*<span class="text-xs text-muted">[^<]*<\/span>\s*<button[^>]*>下载访前准备<\/button>\s*<\/div>\s*$/, '');
+      return html;
+    },
+    /* ---------- AI作战包 · Tab2 财报与征信 ---------- */
+    finCredHtml(c) {
+      const o = c.internal || { credit: 0, used: 0, deposit: 0, settle: 0, products: [] };
+      const fin = [
+        ['营业收入', c.pos === '战略' ? '86.2 亿' : c.pos === '腰部' ? '23.5 亿' : '5.8 亿', '同比 +18%'],
+        ['归母净利润', c.pos === '战略' ? '6.4 亿' : c.pos === '腰部' ? '1.6 亿' : '0.32 亿', '同比 +12%'],
+        ['资产负债率', c.cat === '建设运营商' ? '68%' : '54%', c.cat === '建设运营商' ? '重资产项目期' : '行业均值 58%'],
+        ['应收账款周转', c.cat === '上游供应商' ? '127 天' : '86 天', c.cat === '上游供应商' ? '行业均值 98 天 · 偏长' : '行业均值 92 天'],
+        ['经营性现金流', c.cat === '建设运营商' ? '项目期波动' : '净流入', '近 3 年为正'],
+        ['研发投入占比', c.net === '新一代通信网' || c.net === '算力网' ? '11.2%' : '3.8%', 'AI 按行业口径核算'],
+      ];
+      const cred = [
+        ['征信查询授权', '已取得（营销用途授权）'],
+        ['征信记录', '无不良 · 无关注类'],
+        ['对外担保', c.cat === '建设运营商' ? '1 笔 · 项目公司互保' : '未披露'],
+        ['涉诉/失信', '公开信息未见异常'],
+        ['他行授信', o.credit ? `授信 ${o.credit} 亿 · 已用 ${o.used} 亿` : '无授信记录'],
+        ['人行征信区间', c.score >= 80 ? 'AA 级区间' : c.score >= 60 ? 'A 级区间' : 'BBB 区间'],
+      ];
+      return `
+        <div class="wp-kpis">
+          <div class="wp-kpi"><div class="k">综合评分</div><div class="v">${c.score}</div><div class="d">${c.sigLv} 级信号 · ${c.rel}</div></div>
+          <div class="wp-kpi"><div class="k">行内合作</div><div class="v">${o.credit ? o.credit + '亿' : '未合作'}</div><div class="d">${(o.products || []).length ? (o.products || []).slice(0, 2).join('/') : '新客户'}</div></div>
+          <div class="wp-kpi"><div class="k">存款日均</div><div class="v">${o.deposit ? o.deposit + '亿' : '—'}</div><div class="d">${o.settle ? '结算量 ' + o.settle + '亿' : '尚未建立结算'}</div></div>
+        </div>
+        ${this.secHtml(1, '财报速览（AI 解析）', '正式环境接入财报/税务数据后自动生成')}
+        <div class="card card-pad mb3">
+          <div class="grid-3" style="grid-template-columns:repeat(3,1fr);gap:10px">
+            ${fin.map(f2 => `<div class="wp-pcard" style="border-top:3px solid #2458F5"><div class="t">${f2[0]}</div><div class="s"><b style="font-size:15px">${f2[1]}</b><br><span class="text-xs text-muted">${f2[2]}</span></div></div>`).join('')}
+          </div>
+          <div class="wp-note mt2"><b>AI 财报结论：</b>${c.cat === '上游供应商' ? '盈利与成长正常，核心变量是应收账期与客户集中度——建议授信结构以应收盘活类产品为主。' : '项目期杠杆偏高属正常，关注资本金到位与回款现金流——建议期限匹配的项目类融资。'}</div>
+        </div>
+        ${this.secHtml(2, '征信速览', '正式环境接入人行征信后按授权生成')}
+        <div class="card card-pad">
+          <div class="grid-3" style="grid-template-columns:repeat(3,1fr);gap:10px">
+            ${cred.map(x => `<div class="wp-pcard" style="border-top:3px solid #16A34A"><div class="t">${x[0]}</div><div class="s">${x[1]}</div></div>`).join('')}
+          </div>
+          <div class="wp-note mt2"><b>提示：</b>征信信息仅限授信用途，需客户书面授权后查询。</div>
+        </div>`;
+    },
+    /* ---------- AI作战包 · Tab3 拜访建议（对接人+六议题话术+注意事项） ---------- */
+    adviceHtml(c) {
+      const doc = document.createElement('div'); doc.innerHTML = this.briefHtml(c);
+      const pick = sel2 => [...doc.querySelectorAll(sel2)].map(e => e.outerHTML).join('');
+      const persons = pick('.wp-person');
+      const topics = pick('.wp-topic');
+      const attention = (() => { const sec = [...doc.querySelectorAll('.card card-pad')]; return ''; })();
+      /* 注意事项与对接人标题区从 briefHtml 中截取：用 section 标记定位 */
+      const attentionHtml = (() => {
+        const m = doc.innerHTML.match(/拜访注意事项[\s\S]*?<\/div>\s*<\/div>/);
+        return m ? m[0] : '';
+      })();
+      return `
+        <div class="wp-kpis">
+          <div class="wp-kpi"><div class="k">拜访结论</div><div class="v">${c.prog === '突破' ? '重点介入' : c.prog === '攻坚' ? '适度介入' : '培育跟踪'}</div><div class="d">${c.pos}客户 · ${c.prog}档 · 授信评估</div></div>
+          <div class="wp-kpi"><div class="k">方案窗口</div><div class="v" style="font-size:15px;line-height:1.4">${c.prog === '突破' ? '11 月内' : c.prog === '攻坚' ? '年底前' : '建立联系'}</div><div class="d">错过需等下一周期</div></div>
+          <div class="wp-kpi"><div class="k">核心议题</div><div class="v">6</div><div class="d">每议题对应方案模块</div></div>
+        </div>
+        ${this.secHtml(1, '建议对接人', '首次拜访由下至上、二次拜访由内至外')}
+        <div class="grid-3 mb3">${persons || '<div class="text-sm text-muted">对接人信息完善中</div>'}</div>
+        ${this.secHtml(2, '六个核心交流议题（附交流理由 · 话术可照读）', '每个议题对应综合服务方案中的一个模块')}
+        <div class="grid-2 mb3">${topics}</div>
+        ${this.secHtml(3, '拜访注意事项', '时机 · 姿态 · 合规')}
+        <div class="card card-pad">
+          ${this.attentionHtml(c)}
+        </div>`;
+    },
+    /* 拜访注意事项（时机/姿态/合规 三卡，与访前一页纸同源口径） */
+    attentionHtml(c) {
+      return `<div class="grid-3">
+          <div class="card card-pad"><b class="text-sm mb2" style="display:block">时机选择</b><ul class="text-sm text-sub" style="padding-left:18px;line-height:1.9"><li>${c.prog === '突破' ? '<b>方案窗口在 11 月内</b>，错过需等下一周期；' : c.prog === '攻坚' ? '年底前是授信落地窗口；' : '以建立联系为主，不急于报价；'}</li><li>首访锁财务口 → 两周内提交定制方案 → 纳入年度授信盘子。</li></ul></div>
+          <div class="card card-pad"><b class="text-sm mb2" style="display:block">姿态与话术</b><ul class="text-sm text-sub" style="padding-left:18px;line-height:1.9"><li>切忌泛泛推销与低价竞争；</li><li>带具体方案上门：${esc((c.prods || []).slice(0, 2).join('、'))}要点与测算；</li><li>他行合作、股价等话题<b>不主动评论</b>。</li></ul></div>
+          <div class="card card-pad"><b class="text-sm mb2" style="display:block">合规红线</b><ul class="text-sm text-sub" style="padding-left:18px;line-height:1.9"><li>未公开数据按内幕信息管理，不用于营销对比；</li><li>调查数据以审计报告与公告为准，舆情仅作参考；</li><li>不承诺额度、利率、审批时限。</li></ul></div>
+        </div>`;
+    },
+    /* ---------- 综合服务方案（右侧面板版：方案看板 + 迭代记录入口） ---------- */
+    planSideHtml(c, task) {
+      const synCnt = task ? task.log.filter(l => l.t === '协同留言').length : 0;
+      const ver = 'V' + (1 + Math.min(synCnt, 3)) + '.0';
+      return `
+        <div class="flex-between mb2" style="gap:8px;flex-wrap:wrap">
+          <span class="tag tag-solid-red" style="height:24px">综合服务方案 · ${ver}</span>
+          <span class="text-xs text-muted">${synCnt ? '已经 ' + synCnt + ' 轮协同迭代' : '初版（随任务下发）'}</span>
+        </div>
+        ${this.planHtml(c)}
+        <div class="flex mt3" style="justify-content:space-between;align-items:center;gap:10px;border-top:1px dashed var(--line);padding-top:12px">
+          <span class="text-xs text-muted">纪要与协同推进后，方案逐版迭代。</span>
+          <div class="flex" style="gap:8px">
+            <button class="btn btn-ghost btn-sm" id="plIter">📝 迭代记录</button>
+            <button class="btn btn-primary btn-sm" id="plDl">下载服务方案</button>
+          </div>
+        </div>`;
+    },
+    /* 方案迭代记录弹窗：版本历程 + 新增记录 */
+    iterDlg(c, task) {
+      const logs = task ? task.log : [];
+      const synLogs = logs.filter(l => l.t === '协同留言');
+      const versions = [{ v: 'V1.0', d: '初版', x: '任务下发随附：AI 按产品库匹配生成建议服务方案', by: '系统 · AI' }]
+        .concat(synLogs.map((l, i) => ({ v: 'V' + (i + 2) + '.0', d: l.d + ' 迭代', x: l.x, by: l.by })));
+      openModal({ wide: true, title: `方案迭代记录 · ${esc(c.short)}`, body: `
+        <div class="timeline mb3">
+          ${versions.map((x, i) => `<div class="tl-item ${i === versions.length - 1 ? 'tl-ok' : ''}">
+            <div class="tl-time">${x.v} · ${esc(x.by)}</div>
+            <div class="tl-title">${esc(x.d)}</div>
+            <div class="tl-desc" style="white-space:normal">${esc(x.x)}</div></div>`).join('')}
+        </div>
+        <div style="border-top:1px dashed var(--line);padding-top:12px">
+          <div class="text-sm" style="font-weight:600;margin-bottom:8px">新增迭代记录</div>
+          <textarea class="input" id="itTxt" rows="3" placeholder="记录本次方案调整内容与依据（纪要结论 / 协同意见 / 客户反馈）"></textarea>
+        </div>`,
+        foot: `<button class="btn btn-ghost" onclick="APP.closeModal()">关闭</button><button class="btn btn-primary" id="itGo">保存记录</button>`,
+        onOpen: () => { document.querySelector('#itGo').onclick = () => {
+          const txt = document.querySelector('#itTxt').value.trim();
+          if (!txt) return toast('请输入迭代记录内容', 'warn');
+          if (task) task.log.unshift({ d: '11-04', t: '方案迭代', by: APP.curUser().name, x: txt });
+          APP.closeModal(); toast('方案迭代记录已保存');
+          this.render(document.querySelector('#viewRoot'));
+        }; } });
     },
     /* ---------- Tab2：访客纪要 ---------- */
     paintVisitTab(box, sel) {
@@ -691,7 +852,7 @@
         html = k('承接任务', tasks.length) + k('待接收', tasks.filter(t => t.status === '待接收').length)
           + k('跟进中', tasks.filter(t => t.status === '跟进中').length)
           + (od ? k('超期任务', od, '', true) : k('已反馈', tasks.filter(t => t.status === '已反馈').length))
-          + k('本周纪要', tasks.reduce((s2, t) => s2 + t.log.filter(l => l.t === '访客纪要').length, 0));
+          + k('本周纪要', tasks.reduce((s2, t) => s2 + t.log.filter(l => l.t.indexOf("访客纪要") >= 0).length, 0));
       } else if (r.key === 'head') {
         html = k('支行任务', tasks.length) + k('跟进中', tasks.filter(t => t.status === '跟进中').length)
           + k('已反馈', tasks.filter(t => t.status === '已反馈').length)
@@ -706,54 +867,9 @@
         html = k('全辖任务', tasks.length) + k('覆盖企业', new Set(tasks.map(t => t.co)).size)
           + k('参战经理', new Set(tasks.map(t => t.rm)).size)
           + k('整体反馈率', tasks.length ? Math.round(tasks.filter(t => t.status === '已反馈').length / tasks.length * 100) : 0, '%')
-          + (od ? k('超期任务', od, '', true) : k('本周纪要', tasks.reduce((s2, t) => s2 + t.log.filter(l => l.t === '访客纪要').length, 0)));
+          + (od ? k('超期任务', od, '', true) : k('本周纪要', tasks.reduce((s2, t) => s2 + t.log.filter(l => l.t.indexOf("访客纪要") >= 0).length, 0)));
       }
       box.innerHTML = html;
-    },
-    /* ---------- Tab1：任务跟进（任务列表 + 访前一页纸同页） ---------- */
-    paintTaskTab(box, tasks, selId) {
-      box.innerHTML = `
-        <div style="display:grid;grid-template-columns:1fr 2.05fr;gap:var(--sp-4);align-items:start">
-          <div class="card" style="min-width:0">
-            <div class="card-head">
-              <div class="card-title">${ROLE().key === 'pm' ? '我下发的任务' : ROLE().key === 'head' ? '本支行任务' : ROLE().key === 'gm' ? '全辖任务概览' : '我承接的任务'}</div>
-              <input class="input" id="wbTaskKw" placeholder="按企业名称筛选…" value="${esc(S.wbKw || '')}" style="width:170px;height:28px">
-            </div>
-            <div id="wbTaskList" style="max-height:860px;overflow-y:auto"></div>
-          </div>
-          <div class="card" style="min-width:0">
-            <div class="card-head">
-              <div class="flex" style="gap:6px" id="wbSideTabs">
-                <button class="chip ${S.wbSide === 'brief' ? 'on' : ''}" data-side="brief" style="height:26px">访前准备</button>
-                <button class="chip ${S.wbSide === 'plan' ? 'on' : ''}" data-side="plan" style="height:26px">综合服务方案</button>
-              </div>
-              <span class="card-sub" id="wbOneTitle"></span>
-            </div>
-            <div class="card-pad" style="padding-top:8px" id="wbOnePager"></div>
-          </div>
-        </div>`;
-      this.paintTasks(box, tasks, selId);
-      box.querySelectorAll('[data-side]').forEach(b => b.onclick = () => { S.wbSide = b.dataset.side; this.paintTaskTab(box, this.myTasks(), S.params.task); const k2 = box.querySelector('#wbTaskKw'); if (k2 && S.wbKw) { k2.value = S.wbKw; } });
-      const kw = box.querySelector('#wbTaskKw');
-      kw.oninput = () => { S.wbKw = kw.value.trim(); this.paintTasks(box, tasks, selId); const k2 = box.querySelector('#wbTaskKw'); k2.focus(); k2.setSelectionRange(k2.value.length, k2.value.length); };
-    },
-    /* ---------- Tab2：访客纪要 ---------- */
-    paintVisitTab(box, sel) {
-      box.innerHTML = `<div class="card"><div class="card-head"><div class="card-title">访客纪要<span class="card-sub">语音录入 · AI 自动整理 · 前中后台协同留痕</span></div></div>
-        <div class="card-pad" style="padding-top:8px" id="wbVisit"></div></div>`;
-      this.paintVisit(box, sel);
-    },
-    /* ---------- Tab3：AI 问答 ---------- */
-    paintAiTab(box) {
-      box.innerHTML = `<div class="card"><div class="card-head"><div class="card-title">AI 问答<span class="card-sub">产品 · 政策 · 营销建议</span></div></div>
-        <div class="card-pad" style="padding-top:8px" id="wbAi"></div></div>`;
-      this.paintAi(box);
-    },
-    /* ---------- Tab4：跟进台账 ---------- */
-    paintLedgerTab(box, tasks) {
-      box.innerHTML = `<div class="card"><div class="card-head"><div class="card-title">跟进台账<span class="card-sub">访客纪要 / 协同留言 / 反馈 全留痕</span></div></div>
-        <div class="card-pad" style="padding-top:8px" id="wbLedger"></div></div>`;
-      this.paintLedger(box, tasks);
     },
     taskCard(t, selId) {
       const stTag = s2 => ({ 待接收: 'tag-gray', 跟进中: 'tag-blue', 已反馈: 'tag-green', 已关闭: 'tag-line' }[s2] || 'tag-gray');
@@ -771,12 +887,19 @@
       const rk = ROLE().key;
       let listHtml = '';
       if (rk === 'pm') {
-        /* 产品经理：待陪访 / 待复核纪要 / 我下发的任务 三组 */
+        /* 产品经理：待陪访 / 待复核纪要 / 我下发的任务 三组（tab 切换） */
         const accompany = tasks.filter(t => t.status === '跟进中' && +t.due.replace('-', '') <= 1112);
         const review = tasks.filter(needReview);
-        const grp = (title, arr, tip) => `<div class="text-xs" style="font-weight:700;color:var(--brand-600);padding:10px 14px 4px">${title} <span class="text-xs text-muted" style="font-weight:400">（${arr.length}）${tip || ''}</span></div>` +
-          (arr.map(t => this.taskCard(t, selId)).join('') || '<div class="text-xs text-muted" style="padding:2px 14px 6px">暂无</div>');
-        listHtml = grp('待陪访', accompany, '跟进中且 7 天内到期') + grp('待复核纪要', review, '客户经理已归档，待产品经理复核') + grp('我下发的任务', list, '');
+        if (!S.wbPmTab) S.wbPmTab = 'all';
+        const pmTabs = [
+          { id: 'all', name: '我下发的任务', n: list.length },
+          { id: 'accompany', name: '待陪访', n: accompany.length, tip: '跟进中且7天内到期' },
+          { id: 'review', name: '待复核纪要', n: review.length, tip: '待产品经理复核' }];
+        const pmArr = S.wbPmTab === 'accompany' ? accompany : S.wbPmTab === 'review' ? review : list;
+        listHtml = `<div style="display:flex;gap:0;border-bottom:1px solid var(--line);padding:0 10px">
+            ${pmTabs.map(t => `<div data-pmtab="${t.id}" style="padding:10px 10px 8px;cursor:pointer;font-size:12px;font-weight:${S.wbPmTab === t.id ? 700 : 400};color:${S.wbPmTab === t.id ? 'var(--brand-600)' : 'var(--t2)'};border-bottom:2px solid ${S.wbPmTab === t.id ? 'var(--brand-500)' : 'transparent'}">${t.name}（${t.n}）</div>`).join('')}
+          </div>` +
+          (pmArr.map(t => this.taskCard(t, selId)).join('') || '<div class="text-xs text-muted" style="padding:14px">暂无任务</div>');
       } else if (rk === 'gm') {
         /* 总经理：客户经理排行 + 红黑榜 + 全辖任务 */
         const byRm = {};
@@ -803,17 +926,28 @@
           (list.map(t => this.taskCard(t, selId)).join('') || '<div class="empty" style="padding:36px 16px"><div class="e-ico">🔍</div><div class="e-title">无匹配任务</div></div>');
       }
       box.innerHTML = listHtml;
+      /* 产品经理左侧三组 tab 切换 */
+      box.querySelectorAll('[data-pmtab]').forEach(t => t.onclick = () => { S.wbPmTab = t.dataset.pmtab; this.paintTasks(box, tasks, selId); });
       box.querySelectorAll('[data-wt]').forEach(d => d.onclick = () => { S.params.task = d.dataset.wt; delete S.params.co; this.render(document.querySelector('#viewRoot')); });
-      /* 右栏看板：S.params.co 优先（来自机会漏斗"建议服务方案"跳转），否则随选中任务联动 */
-      const coParam = S.params.co && M().funnel.cos.find(x => x.id === S.params.co) ? S.params.co : null;
-      const sel = tasks.find(t => t.id === selId);
-      const c = coParam ? M().funnel.cos.find(x => x.id === coParam) : (sel ? M().funnel.cos.find(x => x.id === sel.co) : null);
+      /* 右栏看板：S.params.co 优先（来自机会漏斗"建议服务方案"跳转），否则随选中任务联动（无明确选中时取第一项） */
+      const coParam = S.params.co && (M().funnel.cos.find(x => x.id === S.params.co) || M().companies.find(x => x.id === S.params.co)) ? S.params.co : null;
+      const sel = tasks.find(t => t.id === selId) || tasks[0];
+      const c = coParam ? M().coById(coParam) : (sel ? M().coById(sel.co) : null);
       const opBox = el.querySelector('#wbOnePager');
       const title = el.querySelector('#wbOneTitle');
       if (opBox) {
         if (c) {
-          opBox.innerHTML = S.wbSide === 'plan' ? this.planHtml(c) : this.briefHtml(c);
-          if (title) title.textContent = (S.wbSide === 'plan' ? '综合服务方案' : '访前准备') + ' · ' + c.short;
+          if (S.wbSide === 'plan') {
+            opBox.innerHTML = this.planSideHtml(c, sel);
+            if (title) title.textContent = '· ' + c.short;
+            const bIter = opBox.querySelector('#plIter'), bDl = opBox.querySelector('#plDl');
+            if (bIter) bIter.onclick = () => this.iterDlg(c, sel);
+            if (bDl) bDl.onclick = () => toast('综合服务方案已下载（PDF）');
+          } else {
+            const side = S.wbSide;
+            opBox.innerHTML = side === 'fin' ? this.finCredHtml(c) : side === 'advice' ? this.adviceHtml(c) : this.profileFullHtml(c);
+            if (title) title.textContent = '· ' + c.short;
+          }
         } else {
           opBox.innerHTML = '<div class="text-sm text-muted" style="padding:16px 4px">暂无任务，选择任务后生成看板</div>';
           if (title) title.textContent = '';
@@ -824,23 +958,32 @@
         if (!FX.played.wbScript) { FX.played.wbScript = 1; FX.typewrite(opBox); }
       }
     },
-    /* ---------- 访客纪要（语音 + AI 整理 + 协同） ---------- */
+    /* ---------- 访客纪要与协同（客户经理录音纪要；中后台角色以本人身份协同留言；跟进记录全员可见） ---------- */
     paintVisit(el, sel) {
       const box = el.querySelector('#wbVisit');
-      if (!sel) { box.innerHTML = '<div class="text-sm text-muted" style="padding:16px 4px">暂无承接任务，无法录入纪要</div>'; return; }
-      const c = M().funnel.cos.find(x => x.id === sel.co);
+      if (!sel) { box.innerHTML = '<div class="text-sm text-muted" style="padding:16px 4px">暂无承接任务</div>'; return; }
+      const c = M().coById(sel.co) || {};
       const editable = ROLE().key === 'rm';
+      const me = APP.curUser();
+      const visitLogs = sel.log.filter(l => /纪要/.test(l.t));
+      const synCnt = sel.log.filter(l => l.t === '协同留言').length;
+      const packVer = 'V' + (1 + Math.min(synCnt, 3)) + '.0';
+      /* 该任务的访后报告 */
+      if (!S.visitReports) S.visitReports = [];
+      const vr = S.visitReports.filter(r => r.co === sel.co);
       box.innerHTML = `
         <div class="flex-between mb3" style="gap:10px;flex-wrap:wrap">
-          <div class="text-sm"><b>${esc(c.short)}</b><span class="text-xs text-muted" style="margin-left:8px">${esc(sel.note)}</span></div>
-          <div class="flex" style="gap:8px">
-            <select class="select" id="wbVTsk" style="width:auto;height:28px;font-size:12px">${this.myTasks().map(t => `<option value="${t.id}" ${t.id === sel.id ? 'selected' : ''}>${esc((M().funnel.cos.find(x => x.id === t.co) || {}).short)}（${t.status}）</option>`).join('')}</select>
+          <div class="text-sm"><b>${esc(c.short || '')}</b><span class="text-xs text-muted" style="margin-left:8px">${esc(sel.note || '')}</span></div>
+          <div class="flex" style="gap:8px;flex-wrap:wrap">
+            <span class="tag tag-blue" style="height:24px">第 ${visitLogs.length + 1} 次拜访待录</span>
+            <span class="tag tag-orange" style="height:24px">协同 ${synCnt} 次 · 方案 ${packVer}</span>
+            <select class="select" id="wbVTsk" style="width:auto;height:28px;font-size:12px">${this.myTasks().map(t => `<option value="${t.id}" ${t.id === sel.id ? 'selected' : ''}>${esc((M().coById(t.co) || {}).short || '')}（${t.status}）</option>`).join('')}</select>
           </div>
         </div>
         ${editable ? `
         <div class="wb-mic-row">
           <button class="wb-mic" id="wbMic">●</button>
-          <div class="wb-mic-tip" id="wbMicTip">点击录音，口述拜访过程（录音直接转文字，自动整理归档）</div>
+          <div class="wb-mic-tip" id="wbMicTip">点击录音，口述拜访过程（录音直接转文字，自动整理归档；支持多次拜访分别记录）</div>
           <span class="tag tag-line" style="height:22px" id="wbMicTime">00:00</span>
         </div>
         <div class="form mt2">
@@ -854,23 +997,57 @@
           <div id="wbAiOut"></div>
           <div class="flex" style="gap:8px;justify-content:flex-end;margin-top:4px">
             <button class="btn btn-ghost" id="wbAiBtn">✦ AI 整理</button>
-            <button class="btn btn-primary" id="wbVSave">保存归档</button>
-          </div>
-        </div>
-        <div class="mt4" style="border-top:1px dashed var(--line);padding-top:12px">
-          <div class="flex mb2" style="gap:8px"><b class="text-sm">协同留言（前中后台协同）</b><span class="text-xs text-muted">产品经理 / 风险经理 / 负责人补充意见，全部留痕</span></div>
-          <div class="flex" style="gap:8px;flex-wrap:wrap">
-            <select class="select" id="wbSyRole" style="width:auto;height:30px;font-size:12px"><option>分行产品经理 · 陈立</option><option>风险经理 · 刘珊</option><option>部门负责人 · 王健</option></select>
-            <input class="input" id="wbSyTxt" placeholder="补充产品方案 / 风险意见…" style="flex:1;min-width:180px;height:30px">
-            <button class="btn btn-ghost" id="wbSyGo">留言</button>
+            <button class="btn btn-primary" id="wbVSave">保存归档（第 ${visitLogs.length + 1} 次拜访）</button>
           </div>
         </div>` : `
-        <div class="text-sm text-muted" style="line-height:1.8">当前角色（${esc(ROLE().name)}）为只读视角：纪要由客户经理录入，您可在任务详情中查看全过程留痕并留言协同。</div>
-        <div class="mt3">${sel.log.map(l => `<div class="flex mb2" style="gap:8px;align-items:flex-start"><span class="tag tag-line" style="height:19px;font-size:10px;flex-shrink:0">${esc(l.d)} ${esc(l.t)}</span><span class="text-sm text-sub" style="line-height:1.7">${esc(l.x)}</span></div>`).join('')}</div>`}
+        <div class="card card-pad mb3" style="box-shadow:none;border-left:3px solid var(--blue-500)">
+          <div class="text-sm" style="line-height:1.8">您当前以 <b>${esc(me.role)} · ${esc(me.name)}</b> 身份查看该客户跟进过程：纪要由客户经理现场录入，您可在下方以本人身份补充协同意见（产品方案 / 风险意见），留言后自动通知客户经理并计入方案迭代。</div>
+        </div>`}
+        <div class="mt4" style="border-top:1px dashed var(--line);padding-top:12px">
+          <div class="flex mb2" style="gap:8px;align-items:center;flex-wrap:wrap">
+            <b class="text-sm">协同留言</b><span class="text-xs text-muted">${editable ? '中后台（产品/风险/负责人）在各自工作台补充意见' : '以本人身份留言（' + esc(me.role) + ' · ' + esc(me.name) + '）'}</span>
+          </div>
+          ${editable
+            ? (synCnt ? sel.log.filter(l => l.t === '协同留言').slice(0, 3).map(l => `<div class="flex mb2" style="gap:8px;align-items:flex-start"><span class="tag tag-orange" style="height:19px;font-size:10px;flex-shrink:0">${esc(l.d)}</span><span class="text-sm text-sub" style="line-height:1.7"><b>${esc(l.by)}</b> — ${esc(l.x)}</span></div>`).join('') : '<div class="text-sm text-muted mb2">暂无协同留言</div>')
+            : `<div class="flex" style="gap:8px;flex-wrap:wrap">
+              <input class="input" id="wbSyTxt" placeholder="以 ${esc(me.name)} 身份补充：产品方案 / 风险意见…" style="flex:1;min-width:220px;height:30px">
+              <button class="btn btn-primary" id="wbSyGo" style="height:30px">留言</button>
+            </div>`}
+        </div>
+        <div class="mt4" style="border-top:1px dashed var(--line);padding-top:12px">
+          <div class="flex-between mb2" style="gap:8px;flex-wrap:wrap">
+            <b class="text-sm">访后尽调报告</b>
+            <span class="text-xs text-muted">拜访完成后上传客户资料，生成尽调报告</span>
+          </div>
+          ${vr.length
+            ? vr.map(r => `<div class="flex-between" style="padding:8px 0;border-bottom:1px dashed var(--line)">
+              <span class="text-sm"><b>${esc(r.title)}</b> <span class="text-xs text-muted">${esc(r.t)} · ${esc(r.by)}</span></span>
+              <span class="flex" style="gap:6px"><button class="btn btn-text btn-sm" data-vr-view="${esc(r.id)}">查看</button><button class="btn btn-text btn-sm" data-vr-dl="${esc(r.id)}">下载尽调报告</button></span>
+            </div>`).join('')
+            : `<div class="flex" style="gap:8px;align-items:center;flex-wrap:wrap">
+              <span class="text-sm text-muted">尚无访后报告</span>
+              ${editable ? '<button class="btn btn-primary btn-sm" id="wbVrNew">＋ 上传资料生成访后报告</button>' : ''}
+            </div>`}
+        </div>
+        <div class="mt4" style="border-top:1px dashed var(--line);padding-top:12px">
+          <div class="flex mb2" style="gap:8px"><b class="text-sm">拜访与协同全流程记录（${sel.log.length} 条）</b><span class="text-xs text-muted">最新在上 · 全员可见</span></div>
+          ${sel.log.map(l => `<div class="flex mb2" style="gap:8px;align-items:flex-start">
+            <span class="tag ${l.t === '协同留言' ? 'tag-orange' : /纪要/.test(l.t) ? 'tag-blue' : l.t === '方案迭代' ? 'tag-violet' : 'tag-line'}" style="height:19px;font-size:10px;flex-shrink:0">${esc(l.d)} ${esc(l.t)}</span>
+            <span class="text-sm text-sub" style="line-height:1.7"><b style="color:var(--t3);font-weight:400">${esc(l.by)}</b> — ${esc(l.x)}</span></div>`).join('') || '<div class="text-sm text-muted">暂无记录</div>'}
+        </div>
       `;
       const tsk = el.querySelector('#wbVTsk');
       if (tsk) tsk.onchange = () => { S.params.task = tsk.value; this.render(document.querySelector('#viewRoot')); };
-      if (!editable) return;
+      /* 访后报告：查看 / 下载 / 生成 */
+      box.querySelectorAll('[data-vr-view]').forEach(b => b.onclick = () => { if (window.VIEWS.visitReport) { S._visitId = b.dataset.vrView; VIEWS.visitReport.open(S._visitId); } });
+      box.querySelectorAll('[data-vr-dl]').forEach(b => b.onclick = () => {
+        const r = S.visitReports.find(x => x.id === b.dataset.vrDl);
+        if (r && window.VIEWS.visitReport) VIEWS.visitReport.downloadWord(r);
+        else toast('报告生成后可下载尽调报告', 'warn');
+      });
+      const vrNew = box.querySelector('#wbVrNew');
+      if (vrNew) vrNew.onclick = () => this.vrUploadDlg(sel, c);
+      if (!editable) { this.bindSyn(el, sel); return; }
       /* 录音（真实按钮 + 演示转写） */
       let rec = null, timer = null, sec = 0;
       const mic = el.querySelector('#wbMic'), tip = el.querySelector('#wbMicTip'), timeEl = el.querySelector('#wbMicTime');
@@ -878,7 +1055,7 @@
       mic.onclick = () => {
         if (!rec) {
           rec = { start: Date.now() };
-          mic.classList.add('rec'); tip.textContent = '正在录音（演示：浏览器录音），再次点击结束并转写';
+          mic.classList.add('rec'); tip.textContent = '正在录音，再次点击结束并转写';
           try { navigator.mediaDevices.getUserMedia({ audio: true }).then(st => { recser = st; }).catch(() => { }); } catch (e) { }
           timer = setInterval(() => { sec++; timeEl.textContent = String(Math.floor(sec / 60)).padStart(2, '0') + ':' + String(sec % 60).padStart(2, '0'); }, 1000);
         } else {
@@ -908,17 +1085,66 @@
         if (!note) return toast('请先录入交流要点', 'warn');
         const ai = el.querySelector('#wbAiOut').dataset.done === '1';
         const peer = el.querySelector('#wbVPeer').value.trim() || '关键人';
-        sel.log.unshift({ d: '11-04', t: '访客纪要', by: APP.curUser().name, x: `【${el.querySelector('#wbVWay').value} · ${peer}】${note.slice(0, 60)}…（AI 已整理${ai ? '：识别需求与产品服务建议，含非信贷服务' : ''}）` });
+        const visitCnt = sel.log.filter(l => /纪要/.test(l.t)).length + 1;
+        sel.log.unshift({ d: '11-04', t: '访客纪要（第' + visitCnt + '次）', by: APP.curUser().name, x: `【${el.querySelector('#wbVWay').value} · ${peer}】${note.slice(0, 60)}…（AI 已整理${ai ? '：识别需求与产品服务建议，含非信贷服务' : ''}）` });
         S._logNew = true;
         if (sel.status === '待接收') sel.status = '跟进中';
-        toast('纪要已归档，任务状态更新为"跟进中"，过程记录已同步任务跟踪');
+        toast(`第 ${visitCnt} 次拜访纪要已归档，任务状态更新为"跟进中"；待中后台协同后方案包迭代`);
         this.render(document.querySelector('#viewRoot'));
       };
-      el.querySelector('#wbSyGo').onclick = () => {
+      this.bindSyn(el, sel);
+    },
+    /* 中后台协同留言（客户经理页与协同页共用）：多次协同推动方案包迭代 */
+    bindSyn(el, sel) {
+      const go = el.querySelector('#wbSyGo');
+      if (!go) return;
+      go.onclick = () => {
         const txt = el.querySelector('#wbSyTxt').value.trim();
         if (!txt) return toast('请输入留言内容', 'warn');
-        sel.log.unshift({ d: '11-04', t: '协同留言', by: el.querySelector('#wbSyRole').value, x: txt });
-        toast('协同留言已留痕'); this.render(document.querySelector('#viewRoot'));
+        const me = APP.curUser();
+        sel.log.unshift({ d: '11-04', t: '协同留言', by: me.role + ' · ' + me.name, x: txt });
+        const synCnt = sel.log.filter(l => l.t === '协同留言').length;
+        toast(`协同留言已提交（${me.role} · ${me.name}），已通知客户经理，方案迭代至 V${1 + Math.min(synCnt, 3)}.0`);
+        this.render(document.querySelector('#viewRoot'));
+      };
+    },
+    /* 访后报告上传弹窗（客户经理：点击任务 → 上传资料 → 生成尽调报告） */
+    vrUploadDlg(sel, c) {
+      if (!S.visitReports) S.visitReports = [];
+      openModal({ wide: true, title: `上传资料 · 生成访后尽调报告（${esc(c.short || '')}）`, body: `
+        <div class="text-xs text-muted mb3" style="line-height:1.7">拜访完成后上传客户资料，AI 自动勾稽比对生成尽调报告，支持在线编辑与 Word 下载。</div>
+        <div class="grid-3" style="gap:10px" id="vrCats">
+          ${[['财务报表', '2025年度审计报告.pdf'], ['纳税申报表', '2025增值税申报表.pdf'], ['银行流水', '基本户流水_2025.xlsx'], ['上下游合同', '核心客户销售合同.pdf'], ['证照章程', '营业执照.jpg'], ['其他资料', '现场照片.jpg']].map(([n, f]) => `
+          <div class="up-zone" data-vrcat="${n}" style="cursor:pointer"><div class="flex-between"><b class="text-sm">${n}</b><span class="tag tag-line">上传</span></div><div class="text-xs mt2 text-muted">点击上传</div></div>`).join('')}
+        </div>
+        <div id="vrPicked" class="mt2"></div>`,
+        foot: `<button class="btn btn-ghost" onclick="APP.closeModal()">取消</button><button class="btn btn-primary" id="vrGen">⚡ 解析并生成尽调报告</button>` });
+      const picked = [];
+      const paintPicked = () => { document.querySelector('#vrPicked').innerHTML = picked.length ? `<div class="flex wrap" style="gap:6px">${picked.map(f => `<span class="tag tag-green" style="height:24px">📄 ${f}</span>`).join('')}</div>` : ''; };
+      document.querySelectorAll('[data-vrcat]').forEach(z => z.onclick = () => {
+        const n = z.dataset.vrcat;
+        const f = z.querySelector('.text-xs').textContent === '点击上传' ? ({ '财务报表': '2025年度审计报告.pdf', '纳税申报表': '2025增值税申报表.pdf', '银行流水': '基本户流水_2025.xlsx', '上下游合同': '核心客户销售合同.pdf', '证照章程': '营业执照.jpg', '其他资料': '现场照片.jpg' })[n] : n;
+        if (!picked.includes(f)) picked.push(f);
+        z.classList.add('on'); z.querySelector('.tag').className = 'tag tag-green'; z.querySelector('.tag').textContent = '✓ 已上传';
+        z.querySelector('.text-xs').textContent = '📄 ' + f;
+        paintPicked();
+      });
+      document.querySelector('#vrGen').onclick = () => {
+        if (!picked.length) return toast('请至少上传一类资料', 'warn');
+        const CAT_KEY = { '财务报表': 'fin', '纳税申报表': 'tax', '银行流水': 'bank', '上下游合同': 'ct', '证照章程': 'cert', '其他资料': 'other' };
+        openModal({ small: true, title: `正在生成尽调报告 · ${esc(c.short || '')}`, body: `<div style="padding:8px">${['识别上传资料', '执行财务勾稽', '提取合同条款', '生成对比分析'].map((x, i) => `<div class="flex mb3"><span class="rank-pill" id="vsp${i}">${i + 1}</span><span>${x}</span></div>`).join('')}</div>`, foot: '' });
+        [500, 1000, 1500, 2000].forEach((ms, i) => setTimeout(() => { const p = document.querySelector('#vsp' + i); if (p) { p.textContent = '✓'; p.style.color = 'var(--ok-500)'; } }, ms));
+        setTimeout(() => {
+          APP.closeModal();
+          const files = picked.map(n => ({ k: CAT_KEY[n.split('.')[0]] || 'other', n }));
+          const rpt = window.buildVisitReport ? window.buildVisitReport(c, files) : null;
+          if (rpt) {
+            S.visitReports.unshift(rpt);
+            sel.log.unshift({ d: '11-04', t: '访后报告', by: APP.curUser().name, x: `上传 ${picked.length} 项资料，生成访后尽调报告《${rpt.title}》` });
+            toast('访后尽调报告已生成，可在「访后尽调报告」区查看与下载');
+          } else { toast('报告模块加载中，请稍后再试', 'warn'); }
+          this.render(document.querySelector('#viewRoot'));
+        }, 2300);
       };
     },
     aiOrganize(el, c, txt) {
@@ -942,7 +1168,7 @@
       const qa = M().aiQA.filter(x => /六张网|管网|算力|风电|物流|通信|海风|电网/.test(x.q) || true).slice(0, 3);
       box.innerHTML = `
         <div id="wbAiChat" style="max-height:300px;overflow:auto;padding:2px 2px 8px">
-          <div class="aip-a" style="margin-bottom:8px">您好，我是工作台 AI 助手，可解答产品、政策与营销策略问题（演示为预置问答）。建议点击下方推荐问题体验完整回答。</div>
+          <div class="aip-a" style="margin-bottom:8px">您好，我是工作台 AI 助手，可解答产品、政策与营销策略问题，建议点击下方推荐问题。</div>
         </div>
         <div class="flex wrap mb2" style="gap:6px" id="wbAiSugs">${qa.map(x => `<span class="chip" data-q="${esc(x.q)}" style="height:24px;font-size:11px;padding:0 10px">${esc(x.q.slice(0, 14))}…</span>`).join('')}</div>
         <div class="flex" style="gap:8px"><input class="input" id="wbAiQ" placeholder="输入问题…" style="height:32px"><button class="btn btn-primary" id="wbAiGo" style="height:32px">提问</button></div>`;
@@ -952,7 +1178,7 @@
         chat.insertAdjacentHTML('beforeend', `<div class="aip-q">${esc(q)}</div>`);
         const hit = M().aiQA.find(x => x.q.includes(q.slice(0, 4)) || q.includes(x.q.slice(0, 4)));
         setTimeout(() => {
-          chat.insertAdjacentHTML('beforeend', `<div class="aip-a">${hit ? hit.a + '<span class="src">来源：' + esc(hit.src) + '</span>' : '已收到您的问题，正结合六张网企业库与产品政策生成回答（演示环境为预置问答，建议点击下方推荐问题）。'}</div>`);
+          chat.insertAdjacentHTML('beforeend', `<div class="aip-a">${hit ? hit.a + '<span class="src">来源：' + esc(hit.src) + '</span>' : '已收到您的问题，正结合六张网企业库与产品政策生成回答。'}</div>`);
           chat.scrollTop = chat.scrollHeight;
         }, 600);
         chat.scrollTop = chat.scrollHeight;

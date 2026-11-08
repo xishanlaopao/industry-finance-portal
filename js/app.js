@@ -4,7 +4,7 @@
    ============================================================ */
 window.APP = (function () {
   const S = {
-    view: 'dashboard', role: 'manager', params: {}, industry: 'ic',
+    view: 'workbench', role: 'manager', params: {}, industry: 'ic',
     newsFilter: { seg: '全部', region: '全部', etype: '全部' },
     custLayer: '全部', custStatus: '全部', custKw: '',
     oppList: null, addedCust: [], removedCust: [], inputs: [],
@@ -71,10 +71,10 @@ window.APP = (function () {
   /* ---------- 路由 ---------- */
   function go(view, params) { Object.assign(S.params, params || {}); location.hash = '#/' + view; }
   function route() {
-    const v = (location.hash || '#/dashboard').replace('#/', '') || 'dashboard';
+    const v = (location.hash || '#/workbench').replace('#/', '') || 'workbench';
     const conf = window.NAV_ITEMS[v];
-    S.view = (conf ? v : 'dashboard');
-    if (S.view === 'cockpit' && !canCockpit()) S.view = 'dashboard';
+    S.view = (conf ? v : 'workbench');
+    if (S.view === 'cockpit' && !canCockpit()) S.view = 'workbench';
     const root = $('#viewRoot'); window.scrollTo(0, 0);
     renderNav();
     /* 非试点行业：展示专版开通进度页（平台定位：热门产业挖掘与管理） */
@@ -87,7 +87,7 @@ window.APP = (function () {
       return;
     }
     const view = window.VIEWS[S.view];
-    $('#crumbBar').innerHTML = `当前位置：首页 ${window.NAV_ITEMS[S.view] && window.NAV_ITEMS[S.view].id !== 'dashboard' ? `<span style="margin:0 6px;color:var(--line-strong)">/</span> <b>${window.NAV_ITEMS[S.view].name}</b>` : ''}`;
+    $('#crumbBar').innerHTML = `当前位置：${window.NAV_ITEMS[S.view] ? `<b>${window.NAV_ITEMS[S.view].name}</b>` : ''}`;
     view.render(root);
   }
   function buildIndustryPage(ind) {
@@ -133,18 +133,21 @@ window.APP = (function () {
     $('#indApply').onclick = () => { menu.classList.remove('show'); toast('已登记新行业开通意向：请提供行业名称，战略团队将在3个工作日内完成评估'); };
   }
 
-  /* ---------- 顶部导航 / 用户（V3：不区分角色） ---------- */
+  /* ---------- 顶部导航 / 用户（V4：五大一级导航） ---------- */
   function renderNav() {
     const nav = $('#pnav');
-    nav.innerHTML = window.NAV.filter(it => it.id !== 'cockpit' || canCockpit()).map(it => `
-      <div class="pnav-item ${S.view === it.id ? 'active' : ''}" data-view="${it.id}">${it.name}</div>`).join('');
+    /* 主导航：隐藏路由（dashboard/report/news/cockpit/company 等）按别名归入对应一级项高亮 */
+    const ALIAS = { dashboard: 'insight', news: 'insight', report: 'pack', cockpit: 'manage' };
+    const active = ALIAS[S.view] || S.view;
+    nav.innerHTML = window.NAV.filter(it => it.id !== 'workbench' || true).map(it => `
+      <div class="pnav-item ${active === it.id ? 'active' : ''}" data-view="${it.id}">${it.name}</div>`).join('');
     nav.querySelectorAll('.pnav-item').forEach(n => n.onclick = () => go(n.dataset.view));
   }
   /* ---------- 用户与角色（对齐过程管理演示：客户经理/支行长/分行产品经理/公司部负责人） ---------- */
   const USERS = [
-    { id: 'drz', name: '邓瑞忠', av: '邓', role: '客户经理', roleShort: '客户经理', dept: '无锡分行营业部', key: 'rm',
+    { id: 'drz', name: '邓瑞忠', av: '邓', role: '客户经理', roleShort: '客户经理', dept: '南京分行营业部', key: 'rm',
       tip: '客户经理（本人名下任务）', range: '我承接的下发任务' },
-    { id: 'lq', name: '陆青', av: '陆', role: '支行长', roleShort: '支行长', dept: '无锡分行营业部', key: 'head',
+    { id: 'lq', name: '陆青', av: '陆', role: '支行长', roleShort: '支行长', dept: '南京分行营业部', key: 'head',
       tip: '支行长（本支行）', range: '本支行任务与人员' },
     { id: 'cl', name: '陈立', av: '陈', role: '分行产品经理', roleShort: '产品经理', dept: '公司银行部', key: 'pm',
       tip: '分行产品经理（全辖 · 可操作）', range: '机会漏斗 · 订阅 · 下发' },
@@ -169,16 +172,15 @@ window.APP = (function () {
     $('#uRole').textContent = curUser.role + ' · ' + curUser.dept;
     $('#uAv').textContent = curUser.av;
   }
+  /* ---------- 用户菜单（工作台现为一级导航，菜单仅保留切换/退出） ---------- */
   function renderUserMenu() {
     const um = $('#userMenu');
     um.innerHTML = `
-      <div class="dd-item" id="uWb" style="color:var(--brand-600);font-weight:600">🧭 工作台</div>
       <div class="dd-item" id="uSwitch">👥 切换角色</div>
       <div class="dd-item" id="uLogout">↩️ 退出登录</div>`;
-    um.querySelector('#uWb').onclick = () => { um.classList.remove('show'); go('workbench'); };
     um.querySelector('#uSwitch').onclick = () => {
       um.classList.remove('show');
-      openModal({ small: true, title: '切换角色（演示）', body: `
+      openModal({ small: true, title: '切换角色', body: `
         <div style="display:flex;flex-direction:column;gap:6px">
           ${USERS.map(u => `<div class="dd-item ${u.id === curUser.id ? 'on' : ''}" data-su="${u.id}" style="border:1px solid var(--line);border-radius:10px">
             <div class="avatar" style="width:28px;height:28px">${u.av}</div>
@@ -196,7 +198,7 @@ window.APP = (function () {
     if (!u || u === curUser) return;
     curUser = u;
     renderUser(); renderUserMenu();
-    if (S.view === 'cockpit' && !canCockpit()) { go('dashboard'); return; }
+    if (S.view === 'cockpit' && !canCockpit()) { go('workbench'); return; }
     route();
     toast(`已切换：${u.name}（${u.role} · ${u.dept}）`);
   }
@@ -410,7 +412,7 @@ window.APP = (function () {
         <button class="btn btn-primary btn-sm" id="dwView">⚡ 生成AI报告</button>
       </div>`);
     setTimeout(() => {
-      $('#dwView').onclick = () => { closeDrawer(); S.reportCo = id; go('report', { co: id, tab: 'detail' }); VIEWS.report.gen(id); };
+      $('#dwView').onclick = () => { closeDrawer(); S.packCo = id; S.packGoal = 'detail'; S.reportCo = id; go('pack'); VIEWS.report.gen(id); };
       $('#dwOpp').onclick = () => { closeDrawer(); go('funnel', { tab: 'sub' }); };
       $('#dwTask').onclick = () => { closeDrawer(); go('funnel', { tab: 'task' }); };
     });
@@ -490,7 +492,7 @@ window.APP = (function () {
   function boot() {
     buildSearch(); initSearch(); initMsg(); initAiPanel(); initIndustry(); renderUser();
     window.addEventListener('hashchange', route);
-    if (!location.hash) location.hash = '#/dashboard'; else route();
+    if (!location.hash) location.hash = '#/workbench'; else route();
     $('#modalX').onclick = closeModal;
     $('#mask').addEventListener('click', e => { if (e.target.id === 'mask') closeModal(); });
     $('#drawerX').onclick = closeDrawer;
