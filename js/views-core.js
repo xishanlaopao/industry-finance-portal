@@ -34,28 +34,6 @@
     render(el) {
       const m = M();
       el.innerHTML = `
-        <!-- ===== Banner：浅色品牌主视觉（紧凑版） ===== -->
-        <div class="hero2">
-          <div class="hero2-deco"></div>
-          <div class="hero2-main">
-            <div class="hero2-brand">
-              <div class="hero2-title">北斗·产融智航系统</div>
-              <div class="hero2-en">BOB NANJING · INDUSTRIAL FINANCE INTELLIGENCE</div>
-              <div class="hero2-sub">洞察产业 · 链动金融</div>
-            </div>
-            <div class="hero2-search">
-              <span class="hs-ico">🔍</span>
-              <input id="heroQ" placeholder="搜索企业名称 / 政策 / 资讯关键词…">
-              <button id="heroGo">搜 索</button>
-            </div>
-          </div>
-          <div class="hero2-links">
-            <span class="hero2-link" onclick="APP.go('report')">⚡ AI智能分析</span>
-            <span class="hero2-link" onclick="APP.go('news')">📜 产业动态</span>
-            ${APP.canCockpit && APP.canCockpit() ? '<span class="hero2-link" onclick="APP.go(\'cockpit\')">📊 管理驾驶舱</span>' : ''}
-          </div>
-        </div>
-
         <!-- ===== 行情速查（点击右侧抽屉查看完整报价） ===== -->
         <div class="card card-pad mb4" id="rateEntry" style="cursor:pointer;transition:.15s" onmouseover="this.style.borderColor='var(--brand-500)'" onmouseout="this.style.borderColor='var(--line)'">
           <div class="flex-between wrap" style="gap:14px">
@@ -113,15 +91,6 @@
       this.renderLp(el, m);
       this.renderRisk(el, m);
       this.renderSub(el, m);
-      const doSearch = () => {
-        const q = $('#heroQ').value.trim();
-        if (!q) return toast('请输入搜索关键词', 'warn');
-        const co = M().companies.find(c => (c.name + c.short).includes(q));
-        if (co) { toast(`找到企业「${co.short}」`); APP.openCompanyDrawer(co.id); return; }
-        APP.S.newsKw = q; go('news'); toast(`已为您检索“${q}”相关资讯`);
-      };
-      $('#heroGo').onclick = doSearch;
-      $('#heroQ').addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
       /* 机会条目展开/收起 */
       el.querySelectorAll('.opp-head').forEach(h => h.onclick = () => h.parentElement.classList.toggle('open'));
     },

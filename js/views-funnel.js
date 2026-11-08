@@ -750,7 +750,7 @@
       if (!st.projSel) st.projSel = [];
       const sel = st.projSel.filter(id => projs.some(p => p.id === id));
       const taskOfProj = p => st.tasks.find(t => t.proj === p.id);
-      const cName = id => { const c = M().funnel.cos.find(x => x.id === id); return c ? c.short : '—'; };
+      const cName = id => { if (!id) return '—'; const c = M().funnel.cos.find(x => x.id === id); return c ? c.short : '—'; };
       const stTag = s => ({ 储备: 'tag-gray', 前期对接: 'tag-blue', 方案阶段: 'tag-orange', 已批复: 'tag-green', 已投放: 'tag-solid-red' }[s] || 'tag-gray');
       const pjChip = (k, v) => `<button class="chip ${pf[k] === v ? 'on' : ''}" data-pjf="${k}" data-pjv="${esc(v)}" style="height:24px;font-size:11px;padding:0 10px">${v}</button>`;
       box.innerHTML = `
@@ -781,19 +781,21 @@
           <button class="btn btn-primary btn-sm" id="pjDsp">下发选中（${sel.length}）</button>
         </div>
         <div class="card"><div class="tbl-wrap"><table class="tbl"><thead><tr>
-          <th style="width:40px"></th><th style="min-width:190px">项目名称</th><th style="width:96px">关联客户</th><th style="width:96px">所属网</th>
-          <th style="width:88px">投资额</th><th style="width:80px">阶段</th><th style="width:74px">营销进展</th><th style="min-width:200px">项目要点 / 金融服务切入</th><th style="width:96px">操作</th></tr></thead><tbody>
+          <th style="width:40px"></th><th style="min-width:200px">项目名称</th><th style="width:96px">所属网</th><th style="width:70px">权重</th>
+          <th style="width:88px">投资额</th><th style="width:80px">阶段</th><th style="width:74px">营销进展</th><th style="width:120px">所在地</th><th style="min-width:190px">实施主体</th><th style="min-width:170px">可参与方式</th><th style="width:90px">操作</th></tr></thead><tbody>
         ${projs.map(p => { const t = taskOfProj(p), rm = t ? rmById(t.rm) : null; return `<tr>
           <td>${t ? '<span class="tag tag-green" style="height:19px;font-size:10px;padding:0 5px">已下发</span>' : `<input type="checkbox" data-pjsel="${p.id}" ${sel.includes(p.id) ? 'checked' : ''} style="accent-color:var(--brand-500)">`}</td>
           <td><b class="text-sm">${esc(p.name)}</b></td>
-          <td class="text-sm">${esc(cName(p.co))}</td>
           <td class="text-sm">${esc(p.net)}</td>
+          <td><span class="tag ${wtTag(p.wt || '承接')}" style="height:19px;font-size:10px;padding:0 6px">${esc(p.wt || '承接')}</span></td>
           <td class="text-sm fs-num">${esc(p.amt)}</td>
           <td><span class="tag ${stTag(p.stage)}" style="height:19px;font-size:10px;padding:0 6px">${p.stage}</span></td>
           <td><span class="tag ${progTag(p.prog)}" style="height:19px;font-size:10px;padding:0 6px">${p.prog}</span></td>
-          <td class="text-sm text-sub" style="white-space:normal;line-height:1.6">${esc(p.note)}</td>
+          <td class="text-sm text-sub">${esc(p.city || '—')}</td>
+          <td class="text-sm text-sub" style="white-space:normal;line-height:1.5">${esc(p.owner || '—')}</td>
+          <td class="text-sm text-sub" style="white-space:normal;line-height:1.5">${esc((p.prods || []).join(' / '))}</td>
           <td onclick="event.stopPropagation()" style="white-space:nowrap">${t ? `<span class="text-xs text-muted">${esc(rm ? rm.name : '')} 承接</span>` : `<button class="btn btn-text btn-sm" data-pjone="${p.id}">下发</button>`}</td></tr>`; }).join('') ||
-        '<tr><td colspan="9"><div class="empty"><div class="e-ico">🏗</div><div class="e-title">当前条件下暂无项目</div></div></td></tr>'}</tbody></table></div></div>`;
+        '<tr><td colspan="11"><div class="empty"><div class="e-ico">🏗</div><div class="e-title">当前条件下暂无项目</div></div></td></tr>'}</tbody></table></div></div>`;
       box.querySelectorAll('[data-pjf]').forEach(b => b.onclick = () => { pf[b.dataset.pjf] = b.dataset.pjv; this.paintProj(box); });
       const pjKw = box.querySelector('#pjKw');
       if (pjKw) pjKw.oninput = () => { pf.kw = pjKw.value.trim(); this.paintProj(box); const k2 = box.querySelector('#pjKw'); k2.focus(); k2.setSelectionRange(k2.value.length, k2.value.length); };
@@ -837,10 +839,15 @@
         const st = F();
         projs.forEach(p => {
           if (st.tasks.find(t => t.proj === p.id)) return;
+          /* 关联客户：实施主体在客户池中命中则绑定；否则挂到该网第一个储备客户，任务卡片以项目名为主标识 */
+          let coId = p.co;
+          if (!coId && p.owner) { const hit = M().funnel.cos.find(c => p.owner.indexOf(c.short) >= 0 || c.name.indexOf(p.owner.slice(0, 6)) >= 0); coId = hit ? hit.id : null; }
+          if (!coId) { const fb = M().funnel.cos.find(c => c.net === p.net) || M().funnel.cos[0]; coId = fb.id; }
           st.tasks.unshift({
-            id: 'FTP' + Date.now().toString(36) + p.id, co: p.co, proj: p.id, rm: rmId, type: '项目跟进', due, status: '待接收', d: '2026-11-04',
-            note: note || `跟进项目「${p.name}」`, prods: p.prods || ['项目贷款'],
-            log: [{ d: '11-04', t: '任务下发', by: '分行产品经理 · 陈立', x: `下发项目跟进清单：${p.name}（${p.net} · ${p.amt}）` }],
+            id: 'FTP' + Date.now().toString(36) + p.id, co: coId, proj: p.id, rm: rmId, type: '项目跟进', due, status: '待接收', d: '2026-11-04',
+            note: `【项目】${p.name}（${p.net} · ${p.amt} · 实施主体：${p.owner || '—'}）：` + (note || (p.prods || []).join('/')),
+            prods: p.prods || ['项目贷款'],
+            log: [{ d: '11-04', t: '任务下发', by: APP.curUser().role + ' · ' + APP.curUser().name, x: `下发项目跟进清单：${p.name}（${p.net} · ${p.amt} · ${p.city || ''}）` }],
           });
         });
         APP.closeModal();

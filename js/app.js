@@ -87,7 +87,19 @@ window.APP = (function () {
       return;
     }
     const view = window.VIEWS[S.view];
-    $('#crumbBar').innerHTML = `当前位置：${window.NAV_ITEMS[S.view] ? `<b>${window.NAV_ITEMS[S.view].name}</b>` : ''}`;
+    /* 面包屑：首页 › 一级导航 / 明细页，层级可点击返回 */
+    const CRUMB_PARENT = { company: { v: 'funnel', n: '客户清单' }, plan: { v: 'funnel', n: '客户清单' }, visitReport: { v: 'workbench', n: '个人工作台' } };
+    const cur = window.NAV_ITEMS[S.view];
+    const lnk = (v, n) => `<a href="#/${v}" style="color:var(--t2);text-decoration:none;cursor:pointer" onmouseover="this.style.color='var(--brand-600)'" onmouseout="this.style.color='var(--t2)'">${n}</a>`;
+    let crumbHtml = '当前位置：' + lnk('workbench', '首页');
+    const sep = ` <span style="margin:0 6px;color:var(--line-strong)">›</span> `;
+    if (cur && window.NAV.find(n => n.id === S.view)) {
+      crumbHtml += sep + `<b>${cur.name}</b>`;
+    } else if (cur && CRUMB_PARENT[S.view]) {
+      const p2 = CRUMB_PARENT[S.view];
+      crumbHtml += sep + lnk(p2.v, p2.n) + sep + `<b>${cur.name}</b>`;
+    }
+    $('#crumbBar').innerHTML = `<span class="text-xs text-muted">${crumbHtml}</span>`;
     view.render(root);
   }
   function buildIndustryPage(ind) {
@@ -121,6 +133,7 @@ window.APP = (function () {
   }
   function initIndustry() {
     const sw = $('#indSwitch'), menu = $('#indMenu');
+    if (!sw || !menu) return;   /* 赛道专版切换入口已移除（默认集成电路专版） */
     sw.onclick = e => { e.stopPropagation(); menu.classList.toggle('show'); };
     document.addEventListener('click', e => { if (!e.target.closest('#indSwitch') && !e.target.closest('#indMenu')) menu.classList.remove('show'); });
     menu.innerHTML = window.MOCK.industries.map(i => `
@@ -306,6 +319,7 @@ window.APP = (function () {
   }
   function initSearch() {
     const inp = $('#pSearch'), drop = $('#psDrop');
+    if (!inp || !drop) return;   /* 头部搜索已移除（市场洞察保留页内搜索） */
     inp.addEventListener('input', () => {
       const q = inp.value.trim();
       if (!q) { drop.classList.remove('show'); return; }

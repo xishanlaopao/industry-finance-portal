@@ -1018,3 +1018,30 @@ table.fn-tbl td.fn-prod-td { white-space:normal; overflow:visible; padding-top:8
 /* D8 台账写入光点 */
 .log-new td { animation:logIn .7s both; }
 @keyframes logIn { from { background:#FBE7E9; transform:translateX(-10px); opacity:0; } to { transform:none; opacity:1; } }
+
+/* ============ V4 红色一体头部（品牌区+一级导航+用户，合并原 ptop/phead） ============ */
+.phead2 { background:var(--hdr-grad); position:sticky; top:0; z-index:40; box-shadow:0 2px 12px rgba(142,16,25,.32); }
+.phead2-in { max-width:var(--pmain-w); margin:0 auto; padding:10px var(--sp-5) 0; }
+.phead2-top { display:flex; align-items:center; gap:14px; min-height:52px; }
+.pbrand { display:flex; align-items:center; gap:13px; flex-shrink:0; }
+.pbrand .logo-mark { width:46px; height:46px; border-radius:11px; background:#fff; padding:4px; box-shadow:0 2px 8px rgba(80,0,0,.3); }
+.pbrand .logo-mark img { width:100%; height:100%; object-fit:contain; display:block; border-radius:8px; }
+.pbrand-t .pname { color:#fff; font-size:24px; font-weight:800; letter-spacing:1.5px; line-height:1.2; text-shadow:0 1px 3px rgba(80,0,0,.35); }
+.pbrand-t .pen { color:rgba(255,255,255,.62); font-size:10px; letter-spacing:2.2px; font-weight:600; margin-top:2px; }
+.pbrand-t .pslogan { display:inline-block; margin-top:3px; color:#fff; font-size:12.5px; font-weight:700; letter-spacing:4px;
+  background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.22); border-radius:999px; padding:1px 12px; }
+.phead2-top .spacer { flex:1; }
+.phead2-top .pt-date { color:rgba(255,255,255,.55); font-size:11.5px; }
+.phead2 .dd { position:relative; }
+.phead2 .user-chip { cursor:pointer; display:flex; align-items:center; gap:9px; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2); border-radius:12px; padding:6px 12px; transition:.15s; }
+.phead2 .user-chip:hover { background:rgba(255,255,255,.2); }
+.phead2 .user-chip .avatar { width:34px; height:34px; font-size:14px; background:rgba(255,255,255,.25); }
+.phead2 .user-chip .u-name { color:#fff; font-size:13.5px; font-weight:700; line-height:1.2; }
+.phead2 .user-chip .u-role { color:rgba(255,255,255,.66); font-size:10.5px; margin-top:1px; }
+.phead2 .dd-menu { right:0; }
+.pnav2 { display:flex; align-items:stretch; margin-top:6px; overflow-x:auto; scrollbar-width:none; }
+.pnav2::-webkit-scrollbar { display:none; }
+.pnav2 .pnav-item { height:44px; padding:0 22px; color:rgba(255,255,255,.72); font-size:15px; }
+.pnav2 .pnav-item:hover { color:#fff; background:rgba(255,255,255,.1); }
+.pnav2 .pnav-item.active { color:#fff; font-weight:700; }
+.pnav2 .pnav-item.active::after { left:16px; right:16px; bottom:0; height:3px; background:#fff; border-radius:3px 3px 0 0; }

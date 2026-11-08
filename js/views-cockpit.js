@@ -61,11 +61,10 @@
           <div class="card-head"><div class="card-title">项目储备清单<span class="card-sub">来源：机会漏斗 · 项目清单（产品经理下发）</span></div>
             <button class="btn btn-ghost btn-sm" onclick="APP.go('funnel',{tab:'proj'})">到机会漏斗管理 ›</button></div>
           <div class="tbl-wrap"><table class="tbl"><thead><tr>
-            <th style="width:170px">项目名称</th><th style="width:96px">关联客户</th><th style="width:88px">所属网</th><th style="width:88px">投资额</th>
+            <th style="width:190px">项目名称</th><th style="width:170px">实施主体</th><th style="width:80px">投资额</th><th style="width:88px">所属网</th>
             <th style="width:80px">阶段</th><th style="width:74px">营销进展</th><th style="width:78px">承接经理</th><th>储备要点</th></tr></thead><tbody>
           ${projs.map(p => { const rm = M().funnel.rms.find(r => r.id === p.rm) || {}; return `<tr>
-            <td><b class="text-sm">${esc(p.name)}</b></td><td class="text-sm">${esc(cName(p.co))}</td><td class="text-sm">${esc(p.net)}</td>
-            <td class="text-sm fs-num">${esc(p.amt)}</td>
+            <td><b class="text-sm">${esc(p.name)}</b></td><td class="text-sm text-sub" style="max-width:180px;white-space:normal;line-height:1.5">${esc(p.owner || cName(p.co) || '—')}</td><td class="text-sm fs-num">${esc(p.amt)}</td><td class="text-sm">${esc(p.net)}</td>
             <td><span class="tag ${stTag(p.stage)}" style="height:19px;font-size:10px;padding:0 6px">${p.stage}</span></td>
             <td><span class="tag ${progTag(p.prog)}" style="height:19px;font-size:10px;padding:0 6px">${p.prog}</span></td>
             <td class="text-sm">${esc(rm.name || '—')}</td>
