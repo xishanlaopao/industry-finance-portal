@@ -54,12 +54,12 @@
           <div class="card" style="display:flex;flex-direction:column;min-width:0;overflow:hidden">
             <div class="sec-head" style="padding:14px 16px 4px"><div class="sec-title"><span class="tbar"></span>近期政策<span class="text-xs text-muted" style="font-weight:400;margin-left:8px">政策库 · 申报窗口提醒</span></div>
               <span class="sec-more" onclick="APP.go('news',{cat:'政策资讯'})">全部政策 ›</span></div>
-            <div id="insPolicy" style="flex:1;min-height:0;overflow-y:auto"></div>
+            <div id="insPolicy" style="flex:1;min-height:0;overflow-y:auto;padding:0 16px 6px;box-sizing:border-box;display:flex;flex-direction:column"></div>
           </div>
           <div class="card" style="display:flex;flex-direction:column;min-width:0;overflow:hidden">
             <div class="sec-head" style="padding:14px 16px 4px"><div class="sec-title"><span class="tbar"></span>同业动态<span class="text-xs text-muted" style="font-weight:400;margin-left:8px">他行新产品 / 战略合作 / 授信动作</span></div>
               <span class="sec-more" onclick="APP.go('news',{cat:'同行资讯'})">全部同业 ›</span></div>
-            <div id="insPeer" style="flex:1;min-height:0;overflow-y:auto"></div>
+            <div id="insPeer" style="flex:1;min-height:0;overflow-y:auto;padding:0 16px 6px;box-sizing:border-box;display:flex;flex-direction:column"></div>
           </div>
           <div class="card rail-sub">
             <div class="rs-head"><b>异常数据监控<span class="text-xs text-muted" style="font-weight:400;margin-left:8px">T+1跑批 · 10-19 06:00</span></b><span class="rs-manage" id="rkMore">更多 ›</span></div>
@@ -149,7 +149,7 @@
       const box = el.querySelector('#insPolicy'); if (!box) return;
       const pols = m.policies.slice(0, 6);
       const lvTag = l => l === '国家' ? 'tag-red' : l === '江苏省' ? 'tag-blue' : 'tag-cyan';
-      box.innerHTML = pols.map(p => `<div class="nl-row" onclick="APP.openPolicy('${p.id}')" style="display:flex;flex-direction:column;align-items:stretch;gap:4px;padding:11px 2px;border-bottom:1px solid var(--line);border-radius:0">
+      box.innerHTML = pols.map(p => `<div class="nl-row" onclick="APP.openPolicy('${p.id}')" style="display:flex;flex-direction:column;align-items:stretch;justify-content:center;gap:4px;flex:1;min-height:0;padding:10px 4px;border-bottom:1px solid var(--line);border-radius:0">
         <div class="nl-l1" style="min-width:0;gap:6px"><span class="tag ${lvTag(p.level)}" style="height:20px;font-size:10px;padding:0 7px;flex-shrink:0">${esc(p.level)}</span><span class="tag tag-violet" style="height:20px;font-size:10px;padding:0 7px;flex-shrink:0">${esc(p.type)}</span><span class="nl-t" style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700">${esc(p.title)}</span><span class="nl-d">${p.date.slice(5)}</span></div>
         <div style="font-size:11.5px;color:var(--t3);display:flex;gap:6px"><span>${p.date}</span><span>·</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(p.dept)}</span></div>
         <div style="display:flex;gap:6px;align-items:flex-start;min-width:0"><span class="ai-badge" style="font-size:9px;height:16px;padding:0 4px;flex-shrink:0;margin-top:2px">AI</span><span style="flex:1;min-width:0;font-size:12px;color:var(--t2);line-height:1.55;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${esc(p.ai)}</span><span class="nl-more" style="flex-shrink:0;margin-top:2px">详情 ›</span></div>
@@ -159,7 +159,7 @@
     renderInsPeer(el, m) {
       const box = el.querySelector('#insPeer'); if (!box) return;
       const rows = m.peerNews.slice(0, 6);
-      box.innerHTML = rows.map(p => `<div class="nl-row" style="cursor:default;display:flex;flex-direction:column;align-items:stretch;gap:4px;padding:11px 2px;border-bottom:1px solid var(--line);border-radius:0">
+      box.innerHTML = rows.map(p => `<div class="nl-row" style="cursor:default;display:flex;flex-direction:column;align-items:stretch;justify-content:center;gap:4px;flex:1;min-height:0;padding:10px 4px;border-bottom:1px solid var(--line);border-radius:0">
         <div class="nl-l1" style="min-width:0;gap:6px"><span class="tag tag-orange" style="height:20px;font-size:10px;padding:0 7px;flex-shrink:0">同行资讯</span><span class="tag tag-red" style="height:20px;font-size:10px;padding:0 7px;flex-shrink:0">${esc(p.bank)}</span><span class="nl-t" style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700">${esc(p.title)}</span><span class="nl-d">${p.date.slice(5)}</span></div>
         <div style="font-size:11.5px;color:var(--t3);display:flex;gap:6px"><span>${p.date}</span><span>·</span><span>${esc(p.type)}</span></div>
         <div style="display:flex;gap:6px;align-items:flex-start;min-width:0"><span style="flex:1;min-width:0;font-size:12px;color:var(--t2);line-height:1.55;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${esc(p.detail)}</span></div>
