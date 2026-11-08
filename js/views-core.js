@@ -144,23 +144,25 @@
           <div class="fk-feed">${this.homeFeed(m, cat)}</div>
         </div>`;
     },
-    /* 近期政策（政策库前6条 · 点击进政策详情） */
+    /* 近期政策（三行卡片：标签+标题 / 日期·来源 / AI摘要，撑满区域后内部滚动） */
     renderInsPolicy(el, m) {
       const box = el.querySelector('#insPolicy'); if (!box) return;
       const pols = m.policies.slice(0, 6);
       const lvTag = l => l === '国家' ? 'tag-red' : l === '江苏省' ? 'tag-blue' : 'tag-cyan';
-      box.innerHTML = pols.map(p => `<div class="nl-row" onclick="APP.openPolicy('${p.id}')">
-        <div class="nl-l1" style="min-width:0"><span class="tag ${lvTag(p.level)}" style="height:19px;font-size:10px;padding:0 6px;flex-shrink:0">${esc(p.level)}</span><span class="tag tag-violet" style="height:19px;font-size:10px;padding:0 6px;flex-shrink:0">${esc(p.type)}</span><span class="nl-t">${esc(p.title)}</span><span class="nl-d">${p.date.slice(5)}</span></div>
-        <div class="nl-l2" style="min-width:0"><span style="flex-shrink:0">${p.date} · ${esc(p.dept)}</span><span class="nl-ai" style="min-width:0"><span class="ai-badge" style="font-size:9px;height:15px;padding:0 4px;flex-shrink:0">AI</span><span class="t" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(p.ai)}</span></span><span class="nl-more" style="flex-shrink:0">详情 ›</span></div>
+      box.innerHTML = pols.map(p => `<div class="nl-row" onclick="APP.openPolicy('${p.id}')" style="display:flex;flex-direction:column;align-items:stretch;gap:4px;padding:11px 2px;border-bottom:1px solid var(--line);border-radius:0">
+        <div class="nl-l1" style="min-width:0;gap:6px"><span class="tag ${lvTag(p.level)}" style="height:20px;font-size:10px;padding:0 7px;flex-shrink:0">${esc(p.level)}</span><span class="tag tag-violet" style="height:20px;font-size:10px;padding:0 7px;flex-shrink:0">${esc(p.type)}</span><span class="nl-t" style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700">${esc(p.title)}</span><span class="nl-d">${p.date.slice(5)}</span></div>
+        <div style="font-size:11.5px;color:var(--t3);display:flex;gap:6px"><span>${p.date}</span><span>·</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(p.dept)}</span></div>
+        <div style="display:flex;gap:6px;align-items:flex-start;min-width:0"><span class="ai-badge" style="font-size:9px;height:16px;padding:0 4px;flex-shrink:0;margin-top:2px">AI</span><span style="flex:1;min-width:0;font-size:12px;color:var(--t2);line-height:1.55;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${esc(p.ai)}</span><span class="nl-more" style="flex-shrink:0;margin-top:2px">详情 ›</span></div>
       </div>`).join('') || '<div class="text-sm text-muted" style="padding:14px 2px">暂无政策</div>';
     },
-    /* 同业动态（peerNews 前6条 · 单行省略不换行） */
+    /* 同业动态（三行卡片：标签+标题 / 日期·类型 / 动态摘要，撑满区域后内部滚动） */
     renderInsPeer(el, m) {
       const box = el.querySelector('#insPeer'); if (!box) return;
       const rows = m.peerNews.slice(0, 6);
-      box.innerHTML = rows.map(p => `<div class="nl-row" style="cursor:default">
-        <div class="nl-l1" style="min-width:0"><span class="tag tag-orange" style="height:19px;font-size:10px;padding:0 6px;flex-shrink:0">同行资讯</span><span class="tag tag-red" style="height:19px;font-size:10px;padding:0 6px;flex-shrink:0">${esc(p.bank)}</span><span class="nl-t">${esc(p.title)}</span><span class="nl-d">${p.date.slice(5)}</span></div>
-        <div class="nl-l2" style="min-width:0"><span style="flex-shrink:0">${p.date} · ${esc(p.type)}</span><span class="nl-ai" style="min-width:0"><span class="t" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(p.detail)}</span></span></div>
+      box.innerHTML = rows.map(p => `<div class="nl-row" style="cursor:default;display:flex;flex-direction:column;align-items:stretch;gap:4px;padding:11px 2px;border-bottom:1px solid var(--line);border-radius:0">
+        <div class="nl-l1" style="min-width:0;gap:6px"><span class="tag tag-orange" style="height:20px;font-size:10px;padding:0 7px;flex-shrink:0">同行资讯</span><span class="tag tag-red" style="height:20px;font-size:10px;padding:0 7px;flex-shrink:0">${esc(p.bank)}</span><span class="nl-t" style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700">${esc(p.title)}</span><span class="nl-d">${p.date.slice(5)}</span></div>
+        <div style="font-size:11.5px;color:var(--t3);display:flex;gap:6px"><span>${p.date}</span><span>·</span><span>${esc(p.type)}</span></div>
+        <div style="display:flex;gap:6px;align-items:flex-start;min-width:0"><span style="flex:1;min-width:0;font-size:12px;color:var(--t2);line-height:1.55;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${esc(p.detail)}</span></div>
       </div>`).join('') || '<div class="text-sm text-muted" style="padding:14px 2px">暂无同业动态</div>';
     },
     renderLp(el, m) {
@@ -393,7 +395,10 @@
   VIEWS.news = {
     render(el) {
       el.innerHTML = `
-        <div class="page-head"><div class="page-title">产业动态</div></div>
+        <div class="page-head"><div class="page-title">产业动态</div>
+          <div class="flex" style="gap:8px">
+            <button class="btn btn-ghost" onclick="APP.go('insight')">← 返回市场洞察</button>
+            <button class="btn btn-ghost" onclick="APP.go('workbench')">返回工作台</button></div></div>
         <div id="newsMain"></div>`;
       this.paintMain($('#newsMain'));
     },

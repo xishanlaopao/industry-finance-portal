@@ -795,10 +795,10 @@
     const S = APP.S;
     const cur = S.packCo && M().coById(S.packCo);
     el.innerHTML = `
-        <div class="card card-pad mb4" style="background:linear-gradient(120deg,#7E0E19 0%,#A61521 55%,#C0202C 130%);border:none;color:#fff;box-shadow:0 6px 20px rgba(142,16,25,.25)">
-          <div style="font-size:var(--fs-xl);font-weight:700">我的报告</div>
-          <div class="text-xs mt1" style="opacity:.85">企业分析报告 / 产业链报告 历史存档</div>
-        </div>
+        <div class="page-head"><div class="page-title">我的报告</div>
+          <div class="flex" style="gap:8px">
+            <button class="btn btn-ghost" onclick="APP.go('insight')">← 返回市场洞察</button>
+            <button class="btn btn-ghost" onclick="APP.go('workbench')">返回工作台</button></div></div>
         <div id="rptTabs"></div>`;
     if (!S.rptMy) S.rptMy = [
       { co: 'JH', kind: '企业报告', t: '2026-09-28 10:32', by: '李晓' },

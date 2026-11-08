@@ -87,19 +87,23 @@ window.APP = (function () {
       return;
     }
     const view = window.VIEWS[S.view];
-    /* 面包屑：首页 › 一级导航 / 明细页，层级可点击返回 */
-    const CRUMB_PARENT = { company: { v: 'funnel', n: '客户清单' }, plan: { v: 'funnel', n: '客户清单' }, visitReport: { v: 'workbench', n: '个人工作台' } };
+    /* 面包屑：一级导航页不显示层级（导航即层级）；跳转页/明细页显示「父级 › 当前」可点击返回 */
+    const CRUMB_PARENT = {
+      news: { v: 'insight', n: '市场洞察' },
+      report: { v: 'insight', n: '市场洞察' },
+      company: { v: 'funnel', n: '客户清单' },
+      plan: { v: 'funnel', n: '客户清单' },
+      visitReport: { v: 'workbench', n: '个人工作台' },
+    };
     const cur = window.NAV_ITEMS[S.view];
     const lnk = (v, n) => `<a href="#/${v}" style="color:var(--t2);text-decoration:none;cursor:pointer" onmouseover="this.style.color='var(--brand-600)'" onmouseout="this.style.color='var(--t2)'">${n}</a>`;
-    let crumbHtml = '当前位置：' + lnk('workbench', '首页');
+    let crumbHtml = '';
     const sep = ` <span style="margin:0 6px;color:var(--line-strong)">›</span> `;
-    if (cur && window.NAV.find(n => n.id === S.view)) {
-      crumbHtml += sep + `<b>${cur.name}</b>`;
-    } else if (cur && CRUMB_PARENT[S.view]) {
+    if (cur && !window.NAV.find(n => n.id === S.view) && CRUMB_PARENT[S.view]) {
       const p2 = CRUMB_PARENT[S.view];
-      crumbHtml += sep + lnk(p2.v, p2.n) + sep + `<b>${cur.name}</b>`;
+      crumbHtml = '当前位置：' + lnk(p2.v, p2.n) + sep + `<b>${cur.name}</b>`;
     }
-    $('#crumbBar').innerHTML = `<span class="text-xs text-muted">${crumbHtml}</span>`;
+    $('#crumbBar').innerHTML = crumbHtml ? `<span class="text-xs text-muted">${crumbHtml}</span>` : '';
     view.render(root);
   }
   function buildIndustryPage(ind) {
