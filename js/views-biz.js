@@ -240,6 +240,25 @@
     /* ---------- Tab2 行业分析：所属行业景气看板 ---------- */
     industryTab(c) {
       const m = M();
+      if (c.name && c.name.indexOf('朗新') >= 0) {
+        return `
+        <div class="card card-pad mb4">
+          <div class="flex-between wrap" style="gap:10px">
+            <div><div class="card-title" style="font-size:var(--fs-lg)">能源数字化与电力产业链 · 行业分析</div>
+              <div class="text-xs text-muted mt1">朗新科技集团 所属行业 ｜ 按《访前准备看板》口径 ｜ 赛道空间：虚拟电厂与充电基础设施（政策锚定）</div></div>
+            <button class="btn btn-ghost btn-sm" onclick="APP.go('manage')">完整产业分析 ›</button>
+          </div>
+          <div class="kpi-grid mt3 mb0" style="grid-template-columns:repeat(4,1fr)">
+            ${kv('市场化交易电量占比', '<b style="font-size:20px">约70%</b>')}${kv('虚拟电厂调节能力', '<b style="font-size:20px">2030年 5000万kW</b>')}${kv('充电设施（2027底）', '<b style="font-size:20px">2800万个</b>')}${kv('三年倍增拉动投资', '<b style="font-size:20px">2000亿+</b>')}
+          </div>
+          <ul class="text-sm text-sub mt3" style="padding-left:18px;line-height:2">
+            <li><span class="tag tag-green" style="height:20px">政策强β</span>"十五五"新型电力系统规划：市场化交易电量占比约70%；能源局2026年部署充电设施"三年倍增"、新型储能2027年1.8亿kW；</li>
+            <li><span class="tag tag-blue" style="height:20px">赛道景气</span>虚拟电厂2025年项目470个、调节能力1685万kW（+70%），市场约百亿、2030年有望破千亿；</li>
+            <li><span class="tag tag-orange" style="height:20px">双刃剑</span>电价市场化既是电力交易盈利来源，也是2026年亏损主因——机会与风险同源；</li>
+            <li><span class="tag tag-cyan" style="height:20px">朗新卡位</span>电力营销2.0核心系统（31省/2.7亿+终端）+ 缴费5亿户 + 新电途1800万用户 + 虚拟电厂25GW——C端能源流量入口业内罕见；竞争压力：电力IT看国网系/远光软件/东方电子，充电聚合看高德/快电。</li>
+          </ul>
+        </div>`;
+      }
       const ci = m.cockpitInd.ciInds;
       const keyByNet = { '新一代通信网': 'ic', '算力网': 'ai', '新型电网': 'ev', '物流网': 'low', '水网': 'low', '城市地下管网': 'low' };
       const key = (c.industry && Object.keys(ci).find(k => ci[k].name.indexOf(String(c.industry).slice(0, 2)) >= 0)) || keyByNet[c.net] || 'ic';

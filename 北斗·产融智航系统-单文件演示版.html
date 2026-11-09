@@ -1164,9 +1164,9 @@ table.fn-tbl td.fn-prod-td { white-space:normal; overflow:visible; padding-top:8
   </aside>
 
   <!-- 脚本（顺序勿变；迭代升版时递增 ?v=） -->
-  <script src="config/nav.js?v=203"></script>
-  <script src="data/jxmap.js?v=203"></script>
-  <script src="data/mock.js?v=203"></script>
+  <script src="config/nav.js?v=204"></script>
+  <script src="data/jxmap.js?v=204"></script>
+  <script src="data/mock.js?v=204"></script>
   <script>
 /* ============================================================
    轻量 SVG 图表库（无外部依赖，离线可用）
@@ -3691,6 +3691,25 @@ window.APP = (function () {
     /* ---------- Tab2 行业分析：所属行业景气看板 ---------- */
     industryTab(c) {
       const m = M();
+      if (c.name && c.name.indexOf('朗新') >= 0) {
+        return `
+        <div class="card card-pad mb4">
+          <div class="flex-between wrap" style="gap:10px">
+            <div><div class="card-title" style="font-size:var(--fs-lg)">能源数字化与电力产业链 · 行业分析</div>
+              <div class="text-xs text-muted mt1">朗新科技集团 所属行业 ｜ 按《访前准备看板》口径 ｜ 赛道空间：虚拟电厂与充电基础设施（政策锚定）</div></div>
+            <button class="btn btn-ghost btn-sm" onclick="APP.go('manage')">完整产业分析 ›</button>
+          </div>
+          <div class="kpi-grid mt3 mb0" style="grid-template-columns:repeat(4,1fr)">
+            ${kv('市场化交易电量占比', '<b style="font-size:20px">约70%</b>')}${kv('虚拟电厂调节能力', '<b style="font-size:20px">2030年 5000万kW</b>')}${kv('充电设施（2027底）', '<b style="font-size:20px">2800万个</b>')}${kv('三年倍增拉动投资', '<b style="font-size:20px">2000亿+</b>')}
+          </div>
+          <ul class="text-sm text-sub mt3" style="padding-left:18px;line-height:2">
+            <li><span class="tag tag-green" style="height:20px">政策强β</span>"十五五"新型电力系统规划：市场化交易电量占比约70%；能源局2026年部署充电设施"三年倍增"、新型储能2027年1.8亿kW；</li>
+            <li><span class="tag tag-blue" style="height:20px">赛道景气</span>虚拟电厂2025年项目470个、调节能力1685万kW（+70%），市场约百亿、2030年有望破千亿；</li>
+            <li><span class="tag tag-orange" style="height:20px">双刃剑</span>电价市场化既是电力交易盈利来源，也是2026年亏损主因——机会与风险同源；</li>
+            <li><span class="tag tag-cyan" style="height:20px">朗新卡位</span>电力营销2.0核心系统（31省/2.7亿+终端）+ 缴费5亿户 + 新电途1800万用户 + 虚拟电厂25GW——C端能源流量入口业内罕见；竞争压力：电力IT看国网系/远光软件/东方电子，充电聚合看高德/快电。</li>
+          </ul>
+        </div>`;
+      }
       const ci = m.cockpitInd.ciInds;
       const keyByNet = { '新一代通信网': 'ic', '算力网': 'ai', '新型电网': 'ev', '物流网': 'low', '水网': 'low', '城市地下管网': 'low' };
       const key = (c.industry && Object.keys(ci).find(k => ci[k].name.indexOf(String(c.industry).slice(0, 2)) >= 0)) || keyByNet[c.net] || 'ic';
@@ -5151,6 +5170,8 @@ window.APP = (function () {
         '新一代通信网': [['通信设备与器件', c.cat === '建设运营商' ? '通信网络建设运营，运营商集采与政企专网为主' : '光模块/射频/卫星等器件供货', 1], ['AI 与算力带动', 'AI 算力建设带动高速光模块/连接需求', 2], ['业务壁垒', '技术认证与客户验证周期长，高速率环节格局集中', 3]],
       }[c.net] || [['主营业务', esc(c.track), 1], ['场景延伸', '产业链上下游协同', 2], ['业务壁垒', '细分领域认证与客户壁垒', 3]];
       const PCS = { 1: '#C0202C', 2: '#2458F5', 3: '#B08A00' };
+      const BIZLX = [['能源数智化（to G/B）', '电力营销2.0核心系统主要服务商，覆盖31省、2.7亿+电力终端用户；客户为国家电网、南方电网、发电能源集团——收入压舱石，利润集中Q4确认。', 1], ['能源互联网（to C/场景）', '生活缴费平台5亿+表计用户、日活近2000万；"新电途"聚合充电1800万+注册用户、充电量75亿度(+65%)；虚拟电厂接入25GW——流量与负荷资源入口。', 2], ['业务闭环（护城河）', '"负荷聚合→充电服务→电力交易→能源优化"：以充电负荷汇聚可调负荷资产，反向支撑电力交易与需求侧响应——场景稀缺性构成竞争壁垒。', 3]];
+      const bizRows = isLX ? BIZLX : BIZ;
       return `
         <div class="flex-between mb2"><b class="text-sm" style="font-size:var(--fs-md)">客户画像</b><span class="text-xs text-muted">来源：AI 访前准备看板</span></div>
         <div class="wp-cloud mb2">
@@ -5159,7 +5180,7 @@ window.APP = (function () {
           ${cl(c.pos + '客户', 'wp-cl-a')}${cl('营销进展：' + c.prog, 'wp-cl-b')}${cl('权重：' + c.wt, 'wp-cl-c')}
           ${cl(c.rel, 'wp-cl-a')}${cl('四线得分 ' + c.score, 'wp-cl-b')}${cl(c.city + '属地', 'wp-cl-c')}
         </div>
-        <div class="grid-3 mb2">${BIZ.map(b => `<div class="wp-pcard" style="border-top:3px solid ${PCS[b[2]]}"><div class="t">${esc(b[0])}</div><div class="s">${esc(b[1])}</div></div>`).join('')}</div>
+        <div class="grid-3 mb2">${bizRows.map(b => `<div class="wp-pcard" style="border-top:3px solid ${PCS[b[2]]}"><div class="t">${esc(b[0])}</div><div class="s">${esc(b[1])}</div></div>`).join('')}</div>
         <div class="flex mb2" style="gap:6px;flex-wrap:wrap;align-items:center">
           <span class="text-xs text-muted">✦ 建议服务方案：</span>${(c.prods || []).slice(0, 4).map(pp => `<span class="tag tag-blue" style="height:22px">${esc(pp)}</span>`).join('')}
           <button class="btn btn-text btn-sm" onclick="APP.go('plan',{co:'${c.id}'})">查看综合服务方案 ›</button>
@@ -5170,8 +5191,9 @@ window.APP = (function () {
     secHtml(no, t, hint) { return `<div class="wp-sec"><span class="no">${no}</span><b>${t}</b><span class="hint">${hint || ''}</span></div>`; },
     briefHtml(c) {
       const t = (S.fn && S.fn.tasks.find(x => x.co === c.id)) || null;
-      const verdict = c.prog === '突破' ? '重点介入' : c.prog === '攻坚' ? '适度介入' : '培育跟踪';
-      const vSub = `${c.pos}客户 · ${c.prog}档 · 授信评估`;
+      const isLX = c.name && c.name.indexOf('朗新') >= 0;
+      const verdict = isLX ? '适度介入' : c.prog === '突破' ? '重点介入' : c.prog === '攻坚' ? '适度介入' : '培育跟踪';
+      const vSub = isLX ? '授信评估 · 支持类' : `${c.pos}客户 · ${c.prog}档 · 授信评估`;
       const kpi = (k, v, d) => `<div class="wp-kpi"><div class="k">${k}</div><div class="v">${v}</div><div class="d">${d}</div></div>`;
       const cl = (x, cls) => `<span class="wp-cl ${cls}">${esc(x)}</span>`;
       const BIZ = {
@@ -5183,9 +5205,19 @@ window.APP = (function () {
         '新一代通信网': [['通信设备与器件', `${c.cat === '建设运营商' ? '通信网络建设运营，运营商集采与政企专网为主' : '光模块/射频/卫星等器件供货，客户为设备商与运营商'}`, 1], ['AI 与算力带动', 'AI算力建设带动高速光模块/连接需求，订单能见度高', 2], ['业务壁垒', '技术认证与客户验证周期长，车规/高速率环节格局集中', 3]],
       }[c.net] || [['主营业务', esc(c.track), 1], ['场景延伸', '产业链上下游协同场景', 2], ['业务壁垒', '细分领域认证与客户壁垒', 3]];
       const PCS = { 1: '#C0202C', 2: '#2458F5', 3: '#B08A00' };
+      const BIZLX = [['能源数智化（to G/B）', '电力营销2.0核心系统主要服务商，覆盖31省、2.7亿+电力终端用户；客户为国家电网、南方电网、发电能源集团——收入压舱石，利润集中Q4确认。', 1], ['能源互联网（to C/场景）', '生活缴费平台5亿+表计用户、日活近2000万；"新电途"聚合充电1800万+注册用户、充电量75亿度(+65%)；虚拟电厂接入25GW——流量与负荷资源入口。', 2], ['业务闭环（护城河）', '"负荷聚合→充电服务→电力交易→能源优化"：以充电负荷汇聚可调负荷资产，反向支撑电力交易与需求侧响应——场景稀缺性构成竞争壁垒。', 3]];
+      const bizRows = isLX ? BIZLX : BIZ;
       /* 六个核心交流议题（问/为什么谈/对应方案/话术示范） */
       const p0 = (c.prods || [])[0] || '项目贷款';
-      const topics = [
+      const LXTOPICS = [
+        { q: '电力交易亏损的敞口结构与2027年合约重签', ask: '问：粤桂现货波动亏损规模、头寸管理方式、2027年度合约重签的定价机制与扭亏路径？', why: '这是2026年亏损2.68亿的直接原因，决定信用基本面何时修复；按"暂时性困难"还是"模式缺陷"定价，是额度上量的前提。', plan: '电力交易专项流贷+扭亏挂钩定价', script: '「三季报我们连夜做了功课——粤桂现货的事，我们理解是电力市场化过程中的阶段性敞口，不是商业模式出了问题。更关心2027年合约重签的定价机制何时明朗；四季度到明年初如果有个现金流过渡期，我们愿意备一笔用途限定购电和保证金的专项流贷，先把通道铺好，扭亏信号确认了再谈上量。」' },
+        { q: '应收账款账龄结构与电网回款节奏', ask: '问：257天周转天数的账龄分布、确权流程、可否接受应收账款质押/保理？', why: '应收占款约20亿+是最大财务痛点，也是供应链金融天然入口；债务人若可确权为国网/南网省级公司，坏账风险极低。', plan: '电网应收保理+票据池', script: '「按45亿收入体量，应收占款应该在20亿上下——电网应收的债务人资质很好，能不能走保理或者应收质押？方便的话给我一份账龄结构表，两周之内我们出一份具体融资方案，价格放到桌面上谈。」' },
+        { q: '现有15+家银行授信格局与用信体验', ask: '问：2026年3月授信框架下各行份额、已用信品种、哪类产品响应最慢？', why: '正面拼价格无意义（四大行与股份行均已入场）；摸清"体验洼地"——保函时效、异地审批、系统对接——才能找到城商行差异化切入口。', plan: '保函T+0+专属服务团队', script: '「合作行十几家，我们今天不是来拼价格的，这个价我们也拼不起。哪类业务您用下来体验最差？您指哪里，我们改哪里——我们的优势是决策链条短：无锡当天就能约到审批人。」' },
+        { q: '新耀能源5亿元保函授信的落地进展', ask: '问：邦道拟为新耀申请的5亿分离式保函授信推进到哪家银行、偏好何种审批路径？', why: '需求已公告但未必落地=明确的业务机会；新耀自身负债率91%，须穿透集团现金流设计缓释结构——"需求明确+风控有解"的最佳首单场景。', plan: '新耀专项授信+收费权质押', script: '「邦道给新耀申请五个亿分离式保函额度，这个需求我们想接。新耀做充电桩和光伏投建营，投标保函是刚需——我们承诺开立时效，当天受理次日出函；担保结构建议邦道担保叠加项目收费权质押，方案先出一版给您参考。」' },
+        { q: '海外业务的结算币种与避险需求', ask: '问：尼泊尔、孟加拉、东南亚、非洲项目的收付币种、回款账期、汇兑避险安排？', why: '海外10余国带来跨境结算、外汇套保、内保外贷需求；本地行审批半径短、费率灵活可抢结算主户——结算绑定是最深的护城河。', plan: '跨境结算主户+锁汇额度', script: '「海外项目回款币种杂、账期长，避险成本是隐性问题。建议从存量项目切入：先挑一两个国家试点，跨境人民币结算和远期锁汇一起做起来。费率比股份行灵活，出了问题当天能找到人。」' },
+        { q: '资本运作：再融资 / 并购 / 资产证券化', ask: '问：是否有新一轮定增/可转债计划、充电桩收费权或电力资产的证券化意愿？', why: 'IPO+2次重组+1次定增传统，2024年刚完成瘦身；商投行联动是提升综合回报（中收+存款）的杠杆，也便于建立超越信贷的关系层级。', plan: '承销+并购贷+收费权ABS', script: '「从IPO到两轮重组、一轮定增，公司资本运作经验很足。往后不管是再融资、并购整合还是充电桩收费权ABS，我们投行条线都愿意提前介入、先把方案备着——节奏你们定，我们做备份。」' },
+      ];
+      const topics = isLX ? LXTOPICS : [
         { q: '订单与项目节奏', ask: '问：未来 6—12 个月订单储备/项目进度如何？正式合同与框架协议各占多少？关键交付与验收节点？', why: `这是${c.cat === '建设运营商' ? '资本开支与融资排期' : '收入与垫资规模'}的直接变量，决定授信上量节奏与期限设计。`, plan: p0, script: `「想先了解贵司${c.cat === '建设运营商' ? '项目核准与资本金安排' : '订单能见度与交付节奏'}——如果四季度到明年有资金过渡需求，我们可以备一笔专项额度，先把通道铺好，节奏由您定。」` },
         { q: '回款与结算方式', ask: '问：主要客户/业主方的账期多长？电汇、票据、平台结算各占多少？可否确权？', why: c.cat === '上游供应商' ? '应收占款是最适合银行工具盘活的板块；链主确权后保理风险极低，是差异化抓手。' : '回款结构决定现金流测算与资金监管方案设计。', plan: (c.prods || []).find(x => /供应链|票据|应收/.test(x)) || '供应链金融', script: `「应收这块我们做了功课——${c.cat === '上游供应商' ? '债务人是链主客户，资质很好，能不能走保理或者应收质押？' : '业主回款的归集与监管方案我们可以出一版'}两周内给您一份具体的融资方案，价格放到桌面上谈。」` },
         { q: '产能与投资安排', ask: '问：现有产能利用率？在建/拟建产线与设备采购的付款计划怎样安排？', why: '资本开支节奏决定中长期融资窗口与产品组合（项目贷/设备更新贷/租赁）。', plan: (c.prods || []).find(x => /项目|设备|技改/.test(x)) || p0, script: `「扩产和设备投入的时间表，我们可以按付款节点测算资金方案，让融资进度跟着项目走，不占用日常周转。」` },
@@ -5205,38 +5237,33 @@ window.APP = (function () {
           <div class="wp-verdict"><div class="lv">${verdict}</div><div class="sm">${vSub}</div></div>
         </div>
         <div class="wp-kpis">
-          ${kpi('综合评分', c.score, c.sigLv + ' 级信号 · ' + c.rel)}
-          ${kpi('客户大类', c.cat === '建设运营商' ? '运营商' : '供应商', esc(c.nat))}
-          ${kpi('上市情况', c.listed.indexOf('是') === 0 ? '是' : '否', c.listed.indexOf('是') === 0 ? c.listed.slice(2, 14) : '非上市主体')}
-          ${kpi('营销进展', c.prog, '地位 ' + c.pos + ' · 权重 ' + c.wt)}
-          ${kpi('AI 信号', c.sigLv + ' 级', esc(c.sig[0]).slice(0, 18) + '…')}
-          ${kpi('建议服务方案', (c.prods || []).length + ' 项', (c.prods || []).slice(0, 2).join(' / '))}
+          ${isLX
+            ? [kpi('最新收盘价', '8.40 元', '52周 8.16–20.36'), kpi('总市值', '90.6 亿', 'PB 1.42 ｜ PE(TTM)为负'), kpi('2026Q1-3 营收', '24.61 亿', '同比 +0.61%'), kpi('归母净利', '-2.68 亿', '电力交易阶段性亏损'), kpi('资产负债率', '29.4%', '流动比率 3.12 ｜ 杠杆低'), kpi('35维风险扫描', '28项为零', '无失信/被执行/行政处罚')].join('')
+            : [kpi('综合评分', c.score, c.sigLv + ' 级信号 · ' + c.rel), kpi('客户大类', c.cat === '建设运营商' ? '运营商' : '供应商', esc(c.nat)), kpi('上市情况', c.listed.indexOf('是') === 0 ? '是' : '否', c.listed.indexOf('是') === 0 ? c.listed.slice(2, 14) : '非上市主体'), kpi('营销进展', c.prog, '地位 ' + c.pos + ' · 权重 ' + c.wt), kpi('AI 信号', c.sigLv + ' 级', esc(c.sig[0]).slice(0, 18) + '…'), kpi('建议服务方案', (c.prods || []).length + ' 项', (c.prods || []).slice(0, 2).join(' / '))].join('')}
         </div>
         ${this.secHtml(1, '客户画像', '先看清"他是谁"——标签、定位、业务底盘')}
         <div class="card card-pad mb3">
           <div class="wp-cloud mb2">
-            ${cl(c.listed.indexOf('是') === 0 ? c.listed.slice(2) : '非上市主体', c.listed.indexOf('是') === 0 ? 'wp-cl-a' : 'wp-cl-e')}
-            ${cl(c.net + ' · ' + c.track, 'wp-cl-b')}
-            ${cl(c.cat, 'wp-cl-a')}${cl(c.nat, 'wp-cl-c')}${cl(c.pos + '客户', 'wp-cl-a')}
-            ${cl('营销进展：' + c.prog, 'wp-cl-b')}${cl('权重：' + c.wt, 'wp-cl-c')}${cl(c.rel, 'wp-cl-a')}
-            ${cl('经营四线得分 ' + c.score, 'wp-cl-b')}${cl(c.city + '属地', 'wp-cl-c')}
+            ${isLX
+              ? ['创业板上市公司 300682', '蚂蚁集团战略股东 ~14.5%', 'AI驱动的能源科技企业', '国网/南网核心供应商', '华为生态战略伙伴', '国家级高新技术企业(2025)', '中国软件150强 · 工信部软件百强', '中国ESG先锋企业', '连续亏损期（2024起）', '大股东高比例质押', '员工持股平台深度绑定', '海外10余国业务'].map((x, i) => cl(x, ['wp-cl-a', 'wp-cl-b', 'wp-cl-c'][i % 3])).join('')
+              : [cl(c.listed.indexOf('是') === 0 ? c.listed.slice(2) : '非上市主体', c.listed.indexOf('是') === 0 ? 'wp-cl-a' : 'wp-cl-e'), cl(c.net + ' · ' + c.track, 'wp-cl-b'), cl(c.cat, 'wp-cl-a') + cl(c.nat, 'wp-cl-c') + cl(c.pos + '客户', 'wp-cl-a'), cl('营销进展：' + c.prog, 'wp-cl-b') + cl('权重：' + c.wt, 'wp-cl-c') + cl(c.rel, 'wp-cl-a'), cl('经营四线得分 ' + c.score, 'wp-cl-b') + cl(c.city + '属地', 'wp-cl-c')].join('')}
           </div>
-          <div class="grid-3 mb2">${BIZ.map(b => `<div class="wp-pcard" style="border-top:3px solid ${PCS[b[2]]}"><div class="t">${esc(b[0])}</div><div class="s">${esc(b[1])}</div></div>`).join('')}</div>
-          <div class="wp-note"><b>画像小结：</b>一家"${esc(c.net)}"方向的${esc(c.nat)}${esc(c.cat)}——经营基本面看${c.cat === '建设运营商' ? '项目核准与现金流' : '链主订单与回款'}（稳），成长弹性看${esc(c.track.split('·')[0])}（跟随${esc(c.net)}建设放量），信用观察点看${c.cat === '上游供应商' ? '客户集中度与账期变化' : '资本开支与资本金到位节奏'}。</div>
+          <div class="grid-3 mb2">${bizRows.map(b => `<div class="wp-pcard" style="border-top:3px solid ${PCS[b[2]]}"><div class="t">${esc(b[0])}</div><div class="s">${esc(b[1])}</div></div>`).join('')}</div>
+          <div class="wp-note"><b>画像小结：</b>${isLX ? '一家"国家队客户+互联网流量+AI叙事"三重基因的能源科技公司——信用基本面看电网（稳），成长弹性看电力交易与充电（波动大），股东看蚂蚁与实控人（背书强但减持/质押并存）。' : '一家"' + esc(c.net) + '"方向的' + esc(c.nat) + esc(c.cat) + '——经营基本面看' + (c.cat === '建设运营商' ? '项目核准与现金流' : '链主订单与回款') + '（稳），成长弹性看' + esc(c.track.split('·')[0]) + '（跟随' + esc(c.net) + '建设放量），信用观察点看' + (c.cat === '上游供应商' ? '客户集中度与账期变化' : '资本开支与资本金到位节奏') + '。'}</div>
         </div>
         ${this.secHtml(2, '建议对接人', '首次拜访由下至上、二次拜访由内至外')}
         <div class="grid-3 mb3">
-          <div class="wp-person"><div class="nm">周敏</div><div class="rl">财务总监</div><div class="pt">资金安排、融资需求、应收与回款、结算方案的实际决策者——<b>方案落地的关键人</b>。</div></div>
-          <div class="wp-person"><div class="nm">王涛</div><div class="rl">董事会秘书 / 综合管理部负责人</div><div class="pt">对外信息与授信框架的统一接口人——<b>首次拜访第一对象</b>。</div></div>
-          <div class="wp-person"><div class="nm">陈志强</div><div class="rl">总经理 / 董事长</div><div class="pt">战略层对话对象：${esc(c.net)}布局、资本运作。<b>二次拜访升级</b>谈综合合作框架。</div></div>
+          ${isLX
+            ? '<div class="wp-person"><div class="nm">王慎勇</div><div class="rl">副总经理 · 董事会秘书（任职13年+）</div><div class="pt">对外信息与授信框架的统一接口人；历次授信、担保、并购公告均经其手——<b>首次拜访第一对象</b>。</div></div><div class="wp-person"><div class="nm">鲁清芳</div><div class="rl">财务总监（任职10年+）</div><div class="pt">资金安排、保函/流贷需求、应收账款与回款、结算方案的实际决策参与者——<b>方案落地的关键人</b>。</div></div><div class="wp-person"><div class="nm">彭知平</div><div class="rl">副董事长 · 总经理</div><div class="pt">战略层对话对象：华为合作、海外拓展、电力交易布局——<b>二次拜访升级</b>谈综合合作框架。</div></div>'
+            : '<div class="wp-person"><div class="nm">周敏</div><div class="rl">财务总监</div><div class="pt">资金安排、融资需求、应收与回款、结算方案的实际决策者——<b>方案落地的关键人</b>。</div></div><div class="wp-person"><div class="nm">王涛</div><div class="rl">董事会秘书 / 综合管理部负责人</div><div class="pt">对外信息与授信框架的统一接口人——<b>首次拜访第一对象</b>。</div></div><div class="wp-person"><div class="nm">陈志强</div><div class="rl">总经理 / 董事长</div><div class="pt">战略层对话对象：' + esc(c.net) + '布局、资本运作。<b>二次拜访升级</b>谈综合合作框架。</div></div>'}
         </div>
         ${this.secHtml(3, '六个核心交流议题（附交流理由）', '每个议题对应《综合服务方案》中的一个模块')}
         <div class="grid-2 mb3">${topicHtml}</div>
         ${this.secHtml(4, '拜访注意事项', '时机 · 姿态 · 合规')}
         <div class="grid-3 mb3">
-          <div class="card card-pad"><b class="text-sm mb2" style="display:block">时机选择</b><ul class="text-sm text-sub" style="padding-left:18px;line-height:1.9"><li>${c.prog === '突破' ? '<b>方案窗口在 11 月内</b>，错过需等下一周期；' : c.prog === '攻坚' ? '年底前是授信落地窗口；' : '以建立联系为主，不急于报价；'}</li><li>首访锁财务口 → 两周内提交定制方案 → 纳入年度授信盘子。</li></ul></div>
-          <div class="card card-pad"><b class="text-sm mb2" style="display:block">姿态与话术</b><ul class="text-sm text-sub" style="padding-left:18px;line-height:1.9"><li>切忌泛泛推销与低价竞争；</li><li>带具体方案上门：${esc((c.prods || []).slice(0, 2).join('、'))}要点与测算；</li><li>他行合作、股价等话题<b>不主动评论</b>。</li></ul></div>
-          <div class="card card-pad"><b class="text-sm mb2" style="display:block">合规红线</b><ul class="text-sm text-sub" style="padding-left:18px;line-height:1.9"><li>未公开数据按内幕信息管理，不用于营销对比；</li><li>调查数据以审计报告与公告为准，舆情仅作参考；</li><li>不承诺额度、利率、审批时限。</li></ul></div>
+          ${isLX
+            ? '<div class="card card-pad"><b class="text-sm mb2" style="display:block">时机选择</b><ul class="text-sm text-sub" style="padding-left:18px;line-height:1.9"><li>三季报（10/29）刚披露亏损：以<b>"倾听+方案"</b>姿态切入，避开业绩敏感追问；</li><li>Q4为利润确认旺季——<b>年底前是授信落地黄金窗口</b>（3年期授信框架2026年内落地）；</li><li>节奏：首访锁财务总监+资金岗 → 两周内提交定制方案 → 纳入2027年度授信盘子。</li></ul></div><div class="card card-pad"><b class="text-sm mb2" style="display:block">姿态与话术</b><ul class="text-sm text-sub" style="padding-left:18px;line-height:1.9"><li>财务团队成熟、合作行15+家：<b>切忌泛泛推销与低价竞争</b>；</li><li>带具体方案上门：保函时效承诺、应收账款融资模型、跨境结算报价；</li><li>质押、减持话题<b>不主动评论</b>；对方提及则聚焦"银行看现金流与主体资质，不博弈股价"。</li></ul></div><div class="card card-pad"><b class="text-sm mb2" style="display:block">合规红线</b><ul class="text-sm text-sub" style="padding-left:18px;line-height:1.9"><li>内幕信息管理：接触未公开数据须按<b>内幕信息知情人管理</b>处理，不得用于营销对比；</li><li>调查数据以<b>审计报告与公告</b>为准，舆情仅作参考；</li><li>子公司授信（新耀）须穿透资金用途，防止资金回流集团补质押。</li></ul></div>'
+            : '<div class="card card-pad"><b class="text-sm mb2" style="display:block">时机选择</b><ul class="text-sm text-sub" style="padding-left:18px;line-height:1.9"><li>' + (c.prog === '突破' ? '<b>方案窗口在 11 月内</b>，错过需等下一周期；' : c.prog === '攻坚' ? '年底前是授信落地窗口；' : '以建立联系为主，不急于报价；') + '</li><li>首访锁财务口 → 两周内提交定制方案 → 纳入年度授信盘子。</li></ul></div><div class="card card-pad"><b class="text-sm mb2" style="display:block">姿态与话术</b><ul class="text-sm text-sub" style="padding-left:18px;line-height:1.9"><li>切忌泛泛推销与低价竞争；</li><li>带具体方案上门：' + esc((c.prods || []).slice(0, 2).join('、')) + '要点与测算；</li><li>他行合作、股价等话题<b>不主动评论</b>。</li></ul></div><div class="card card-pad"><b class="text-sm mb2" style="display:block">合规红线</b><ul class="text-sm text-sub" style="padding-left:18px;line-height:1.9"><li>未公开数据按内幕信息管理，不用于营销对比；</li><li>调查数据以审计报告与公告为准，舆情仅作参考；</li><li>不承诺额度、利率、审批时限。</li></ul></div>'}
         </div>
         <details class="mb3" id="wpMoreWrap">
           <summary class="btn btn-ghost wp-more-btn" style="list-style:none;text-align:center;cursor:pointer">展开更多：股权治理 · 集团架构 · 财务速览 · 资本表现 · 行业地位 · 风险排查（5-10） ▾</summary>
@@ -5486,6 +5513,8 @@ window.APP = (function () {
         : full ? '北交所已问询 ｜ 封装测试（先进封装）｜ 无锡锡山 · 员工1750人 ｜ 数据基准日：2026-09-28'
         : `${esc(c.city || '')}·${esc(c.zone || '')} ｜ ${esc(c.seg || '')} ｜ 数据基准日：2026-09-28`;
       const PCS = { 1: '#C0202C', 2: '#2458F5', 3: '#B08A00' };
+      const BIZLX = [['能源数智化（to G/B）', '电力营销2.0核心系统主要服务商，覆盖31省、2.7亿+电力终端用户；客户为国家电网、南方电网、发电能源集团——收入压舱石，利润集中Q4确认。', 1], ['能源互联网（to C/场景）', '生活缴费平台5亿+表计用户、日活近2000万；"新电途"聚合充电1800万+注册用户、充电量75亿度(+65%)；虚拟电厂接入25GW——流量与负荷资源入口。', 2], ['业务闭环（护城河）', '"负荷聚合→充电服务→电力交易→能源优化"：以充电负荷汇聚可调负荷资产，反向支撑电力交易与需求侧响应——场景稀缺性构成竞争壁垒。', 3]];
+      const bizRows = isLX ? BIZLX : BIZ;
       return `
         ${this.rptSide(c, 'brief')}
         ${hero(D.verdict, D.vsub, esc(c.name), sub)}
@@ -5808,6 +5837,44 @@ window.APP = (function () {
     /* ---------- AI作战包 · Tab2 财报与征信 ---------- */
     finCredHtml(c) {
       const o = c.internal || { credit: 0, used: 0, deposit: 0, settle: 0, products: [] };
+      if (c.name && c.name.indexOf('朗新') >= 0) {
+        const finLX = [
+          ['营业收入（2026Q1-3）', '24.61 亿', '同比 +0.61% ｜ 2025全年 45.17亿'],
+          ['归母净利润', '-2.68 亿', '电力现货交易合约性亏损'],
+          ['资产负债率', '29.4%', '流动比率 3.12 ｜ 杠杆低'],
+          ['应收账款周转', '257 天', '历史161-177天 · 骤升为核心痛点'],
+          ['经营性现金流', '-4.15 亿', '2025年为 +4.78亿 ｜ 购电保证金占用'],
+          ['毛利率', '41.1%', '软件属性稳定 40%+ ｜ 主业造血未受损'],
+        ];
+        const credLX = [
+          ['征信记录', '无不良 · 无关注类（35维扫描28项为零）'],
+          ['涉诉情况', '裁判文书7 / 立案14 / 开庭18——常规合同纠纷，无重大未决诉讼'],
+          ['对外担保', '累计审议13亿（占净资产19.14%）· 实际发生6.69亿 · 均体系内无逾期'],
+          ['失信/被执行', '0 · 主体信用清洁'],
+          ['他行授信', '合作行15+家 · 2026年度授信框架充足'],
+          ['本行授信', '无存量授信（首授攻坚目标 · 存量口径）'],
+        ];
+        return `
+        <div class="wp-kpis">
+          <div class="wp-kpi"><div class="k">综合评分</div><div class="v">82.5</div><div class="d">A 级信号 · 一般相关</div></div>
+          <div class="wp-kpi"><div class="k">行内合作</div><div class="v">未合作</div><div class="d">首授攻坚目标</div></div>
+          <div class="wp-kpi"><div class="k">总市值</div><div class="v">90.6 亿</div><div class="d">PB 1.42 ｜ 股息率 2.26%</div></div>
+        </div>
+        ${this.secHtml(1, '财报速览（AI 解析 · 三季报披露口径）', '数据基准日 2026-10-29')}
+        <div class="card card-pad mb3">
+          <div class="grid-3" style="grid-template-columns:repeat(3,1fr);gap:10px">
+            ${finLX.map(f2 => `<div class="wp-pcard" style="border-top:3px solid ${f2[1].indexOf('-') === 0 || f2[0].indexOf('应收') >= 0 || f2[0].indexOf('现金流') >= 0 ? '#D96A72' : '#12A981'}"><div class="t">${f2[0]}</div><div class="s"><b style="font-size:15px">${f2[1]}</b><br><span class="text-xs text-muted">${f2[2]}</span></div></div>`).join('')}
+          </div>
+          <div class="wp-note mt2"><b>AI 财报结论：</b>2024年首亏为剥离非核心业务的"手术式出清"（一次性影响4.88亿）；2026年亏损为电力现货交易<b>合约性亏损</b>——"仅限2026年度"须以2026年报+2027Q1验证；应收257天骤升（占款约20亿+）既是最大痛点也是保理切入入口；资产负债率29.4%、权益58.3亿，授信容量充足。</div>
+        </div>
+        ${this.secHtml(2, '征信速览', '正式环境接入人行征信后按授权生成')}
+        <div class="card card-pad">
+          <div class="grid-3" style="grid-template-columns:repeat(3,1fr);gap:10px">
+            ${credLX.map(x => `<div class="wp-pcard" style="border-top:3px solid #16A34A"><div class="t">${x[0]}</div><div class="s">${x[1]}</div></div>`).join('')}
+          </div>
+          <div class="wp-note mt2"><b>提示：</b>质押记录集中在控股股东链条（历史占比一度达总股本15%+）——贷后按月监测质押率，授信决策不与股价挂钩；征信信息仅限授信用途，需客户书面授权后查询。</div>
+        </div>`;
+      }
       const fin = [
         ['营业收入', c.pos === '战略' ? '86.2 亿' : c.pos === '腰部' ? '23.5 亿' : '5.8 亿', '同比 +18%'],
         ['归母净利润', c.pos === '战略' ? '6.4 亿' : c.pos === '腰部' ? '1.6 亿' : '0.32 亿', '同比 +12%'],
@@ -5875,9 +5942,9 @@ window.APP = (function () {
     /* 拜访注意事项（时机/姿态/合规 三卡，与访前一页纸同源口径） */
     attentionHtml(c) {
       return `<div class="grid-3">
-          <div class="card card-pad"><b class="text-sm mb2" style="display:block">时机选择</b><ul class="text-sm text-sub" style="padding-left:18px;line-height:1.9"><li>${c.prog === '突破' ? '<b>方案窗口在 11 月内</b>，错过需等下一周期；' : c.prog === '攻坚' ? '年底前是授信落地窗口；' : '以建立联系为主，不急于报价；'}</li><li>首访锁财务口 → 两周内提交定制方案 → 纳入年度授信盘子。</li></ul></div>
-          <div class="card card-pad"><b class="text-sm mb2" style="display:block">姿态与话术</b><ul class="text-sm text-sub" style="padding-left:18px;line-height:1.9"><li>切忌泛泛推销与低价竞争；</li><li>带具体方案上门：${esc((c.prods || []).slice(0, 2).join('、'))}要点与测算；</li><li>他行合作、股价等话题<b>不主动评论</b>。</li></ul></div>
-          <div class="card card-pad"><b class="text-sm mb2" style="display:block">合规红线</b><ul class="text-sm text-sub" style="padding-left:18px;line-height:1.9"><li>未公开数据按内幕信息管理，不用于营销对比；</li><li>调查数据以审计报告与公告为准，舆情仅作参考；</li><li>不承诺额度、利率、审批时限。</li></ul></div>
+          ${isLX
+            ? '<div class="card card-pad"><b class="text-sm mb2" style="display:block">时机选择</b><ul class="text-sm text-sub" style="padding-left:18px;line-height:1.9"><li>三季报（10/29）刚披露亏损：以<b>"倾听+方案"</b>姿态切入，避开业绩敏感追问；</li><li>Q4为利润确认旺季——<b>年底前是授信落地黄金窗口</b>（3年期授信框架2026年内落地）；</li><li>节奏：首访锁财务总监+资金岗 → 两周内提交定制方案 → 纳入2027年度授信盘子。</li></ul></div><div class="card card-pad"><b class="text-sm mb2" style="display:block">姿态与话术</b><ul class="text-sm text-sub" style="padding-left:18px;line-height:1.9"><li>财务团队成熟、合作行15+家：<b>切忌泛泛推销与低价竞争</b>；</li><li>带具体方案上门：保函时效承诺、应收账款融资模型、跨境结算报价；</li><li>质押、减持话题<b>不主动评论</b>；对方提及则聚焦"银行看现金流与主体资质，不博弈股价"。</li></ul></div><div class="card card-pad"><b class="text-sm mb2" style="display:block">合规红线</b><ul class="text-sm text-sub" style="padding-left:18px;line-height:1.9"><li>内幕信息管理：接触未公开数据须按<b>内幕信息知情人管理</b>处理，不得用于营销对比；</li><li>调查数据以<b>审计报告与公告</b>为准，舆情仅作参考；</li><li>子公司授信（新耀）须穿透资金用途，防止资金回流集团补质押。</li></ul></div>'
+            : '<div class="card card-pad"><b class="text-sm mb2" style="display:block">时机选择</b><ul class="text-sm text-sub" style="padding-left:18px;line-height:1.9"><li>' + (c.prog === '突破' ? '<b>方案窗口在 11 月内</b>，错过需等下一周期；' : c.prog === '攻坚' ? '年底前是授信落地窗口；' : '以建立联系为主，不急于报价；') + '</li><li>首访锁财务口 → 两周内提交定制方案 → 纳入年度授信盘子。</li></ul></div><div class="card card-pad"><b class="text-sm mb2" style="display:block">姿态与话术</b><ul class="text-sm text-sub" style="padding-left:18px;line-height:1.9"><li>切忌泛泛推销与低价竞争；</li><li>带具体方案上门：' + esc((c.prods || []).slice(0, 2).join('、')) + '要点与测算；</li><li>他行合作、股价等话题<b>不主动评论</b>。</li></ul></div><div class="card card-pad"><b class="text-sm mb2" style="display:block">合规红线</b><ul class="text-sm text-sub" style="padding-left:18px;line-height:1.9"><li>未公开数据按内幕信息管理，不用于营销对比；</li><li>调查数据以审计报告与公告为准，舆情仅作参考；</li><li>不承诺额度、利率、审批时限。</li></ul></div>'}
         </div>`;
     },
     /* ---------- 综合服务方案（右侧面板版：方案看板 + 迭代记录入口） ---------- */
