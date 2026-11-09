@@ -294,6 +294,35 @@
     },
     paintChain(box) {
       const m = M(), cd = m.chainData;
+      const ctxCo = S.reportCo && m.coById(S.reportCo);
+      if (ctxCo && ctxCo.name.indexOf('朗新') >= 0) {
+        box.innerHTML = `
+        <div class="card card-pad mb4">
+          <div class="flex-between wrap" style="gap:12px">
+            <div class="flex" style="gap:12px;align-items:center">
+              <div><div style="font-size:var(--fs-xl);font-weight:700">能源数字化与电力产业链分析报告 · 朗新科技集团</div>
+              <div class="text-xs text-muted mt2">数据时点 2026-10-29 ｜ 产业链定位：电网侧数字化（上游）→ 朗新（软件平台与负荷聚合）→ 电网/发电集团/充电生态（下游）</div></div>
+            </div>
+            <button class="btn btn-ghost" id="chainDl">⬇ 下载报告</button>
+          </div>
+        </div>
+        <div class="grid-2 mb3">
+          <div class="card card-pad"><h3 style="font-size:15px;font-weight:700;margin-bottom:10px">行业景气（政策锚定）</h3>
+            <ul class="text-sm text-sub" style="padding-left:18px;line-height:2">
+              <li>"十五五"新型电力系统：市场化交易电量占比约 <b>70%</b>；虚拟电厂调节能力超 5000万kW；充电设施超 4000万个</li>
+              <li>能源局2026年部署：充电设施"三年倍增"——2027年底2800万个、拉动投资2000亿+；新型储能2027年1.8亿kW</li>
+              <li>虚拟电厂：2025年项目470个、调节能力1685万kW（+70%）；市场约百亿，2030年有望破千亿</li>
+            </ul></div>
+          <div class="card card-pad"><h3 style="font-size:15px;font-weight:700;margin-bottom:10px">朗新卡位与银行机会</h3>
+            <ul class="text-sm text-sub" style="padding-left:18px;line-height:2">
+              <li>链条卡位：营销2.0核心系统（31省/2.7亿终端）+ 缴费5亿户 + 新电途1800万用户 + 虚拟电厂25GW</li>
+              <li>金融切入点：新耀5亿保函（首单）→ 电网应收保理/票据池（257天应收）→ 电力交易专项流贷（扭亏挂钩）</li>
+              <li>风险传导：电价现货波动→交易亏损；股价回撤→质押链压力——授信与现金流绑定、与股价脱敏</li>
+            </ul></div>
+        </div>`;
+        const dlx = box.querySelector('#chainDl'); if (dlx) dlx.onclick = () => toast('行业报告已下载');
+        return;
+      }
       const sec = (no, t) => `<div class="rpt-sec" id="c${no}"><div class="rs-head"><span class="rs-no">${no}</span><span class="rs-title">${t}</span>${srcTip('c' + no)}</div>`;
       let body = '';
       const segOpts = ['全部环节', '芯片设计', '晶圆制造/IDM', '封装测试', '设备/材料', 'EDA/IP'];
@@ -407,14 +436,16 @@
       const selCo = m.coById(S.reportCo);
       /* 作战包/抽屉带入企业：搜索框预填当前企业，免二次选择 */
       if (selCo && S._rptCoId !== selCo.id && !F.kw) { F.kw = selCo.short; S._rptCoId = selCo.id; }
-      const r = (selCo && selCo.id === 'TH' && m.reportTH) ? m.reportTH : (selCo && selCo.id === 'XJH' && m.reportXJH) ? m.reportXJH : m.report;
+      const isLXco = selCo && selCo.name && selCo.name.indexOf('朗新') >= 0 && m.reportLX;
+      const r = isLXco ? m.reportLX : (selCo && selCo.id === 'TH' && m.reportTH) ? m.reportTH : (selCo && selCo.id === 'XJH' && m.reportXJH) ? m.reportXJH : m.report;
+      const fullRpt = selCo && r && selCo.id === r.coId;
       if (!S.rptHist) S.rptHist = ['XJH', 'JH', 'TH'];
       if (!Array.isArray(F.files)) F.files = [];
       if (F.mat) F.mat = '';
       const filePool = ['2025年度审计报告.pdf', '2026H1财务报表.xlsx', '前五大客户订单明细.csv', '发明专利清单.pdf', '他行授信批复截图.png'];
       const supOpen = S._rptSupOpen || !!F.req || F.files.length > 0;
-      const formHtml = `
-        <div class="rpt-form mb4" style="flex-direction:column;align-items:stretch;gap:10px">
+      const formHtml = (fullRpt ? `<div class="flex mb4" style="gap:8px;align-items:center"><span class="tag tag-green" style="height:32px;display:inline-flex;align-items:center">✓ ${esc(selCo.short)} · AI 报告已生成</span><button class="btn btn-sm btn-ghost" id="rptReSearch">检索其他企业</button></div>` : ``) + `
+        <div class="rpt-form mb4" style="flex-direction:column;align-items:stretch;gap:10px;${fullRpt ? 'display:none' : ''}">
           <div class="flex" style="gap:10px">
             <div style="position:relative;flex:1;min-width:260px">
               <input id="rptQ" class="rf-ctl" placeholder="企业名称 · 支持模糊搜索，如：晶汇封测 / 晶封" autocomplete="off" value="${esc(F.kw)}" style="width:100%">
@@ -471,6 +502,8 @@
         </div>`;
       }
       box.innerHTML = formHtml + content;
+      const rsBtn = box.querySelector('#rptReSearch');
+      if (rsBtn) rsBtn.onclick = () => { const f = box.querySelector('.rpt-form'); if (f) f.style.display = 'flex'; rsBtn.style.display = 'none'; };
       /* 搜索表单绑定（行业 + 模糊搜索 + 补充要求 → 生成） */
       const q = box.querySelector('#rptQ'), sug = box.querySelector('#rptSug');
       const fuzzy = (co, kw) => {
