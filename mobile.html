@@ -509,7 +509,7 @@ function pageOp(){
       '<div style="text-align:center" class="sub mt2">切「完整」查看全部</div>';
   }
   return sw+'<div class="picker">'+
-  +ts.map(function(t){ var cc=co(t.co); return '<div class="pitem '+(cc.id===selCo?'on':'')+'" onclick="openOp(\''+cc.id+'\')">'+esc(cc.short)+'</div>'; }).join('')+'</div>'+
+  ts.map(function(t){ var cc=co(t.co); return '<div class="pitem '+(cc.id===selCo?'on':'')+'" onclick="openOp(\''+cc.id+'\')">'+esc(cc.short)+'</div>'; }).join('')+'</div>'+
   /* HERO */
   '<div class="opb-hero"><div><div class="ey">访前准备 · 客户经理速览</div><h2>'+esc(c.name)+'</h2>'+
     '<div class="sb">'+(c.listed.indexOf('是')===0?esc(c.listed.slice(2))+' ｜ ':'')+esc(c.city)+'·'+esc(c.zone)+(c.opp?'（机会地：'+esc(c.opp)+'）':'')+' ｜ '+esc(c.net)+'·'+esc(c.track)+' ｜ 数据基准日 2026-11-04 ｜ 配套：《综合服务方案》</div></div>'+
