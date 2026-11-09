@@ -491,4 +491,48 @@
 
   /* 市场洞察 = 原门户首页（去掉任务待办，上浮近期政策/同业动态） */
   VIEWS.insight = VIEWS.dashboard;
+
+  /* ================= 搜索结果页（系统内容跳转 + AI问答，带返回） ================= */
+  VIEWS.search = {
+    render(el) {
+      const m = M();
+      const q = (APP.S.params.q || '').trim();
+      const st = APP.S.fn || { admitted: true, admittedIds: [], projAdmitted: true };
+      /* 系统内容匹配 */
+      const inPool = c => !APP.S.fn || !APP.S.fn.admitted || APP.S.fn.admittedIds.includes(c.id);
+      const coHits = [...m.companies, ...m.funnel.cos.filter(c => !m.companies.some(y => y.id === c.id))]
+        .filter(c => inPool(c) && q && ((c.name + c.short + (c.seg || '') + (c.track || '')).includes(q) || [...q].every(ch => (c.name + c.short).includes(ch)))).slice(0, 6);
+      const pjHits = (APP.S.fn && !APP.S.fn.projAdmitted ? [] : ((m.manage || { projects: [] }).projects)).filter(p => q && (p.name + (p.note || '')).includes(q)).slice(0, 4);
+      const polHits = m.policies.filter(p => q && (p.title + p.ai).includes(q)).slice(0, 3);
+      const newsHits = m.news.filter(n => q && (n.title + n.ai).includes(q)).slice(0, 3);
+      /* AI 问答 */
+      const hit = APP.aiMatch ? APP.aiMatch(q) : null;
+      el.innerHTML = `
+        <div class="page-head"><div class="page-title">搜索：${esc(q)}</div>
+          <div class="flex" style="gap:8px">
+            <button class="btn btn-ghost" onclick="APP.go('insight')">← 返回市场洞察</button>
+            <button class="btn btn-ghost" onclick="APP.go('workbench')">返回工作台</button></div></div>
+        <div class="card card-pad mb4" style="display:flex;gap:8px">
+          <input class="input" id="schQ" placeholder="搜索企业 / 项目 / 政策，或直接问 AI…" value="${esc(q)}" style="flex:1;height:34px" onkeydown="if(event.key==='Enter')document.querySelector('#schGo').click()">
+          <button class="btn btn-primary" id="schGo" style="height:34px">再次搜索</button>
+        </div>
+        ${coHits.length ? `<div class="card card-pad mb4"><div class="flex-between mb3"><b>企业客户</b><span class="text-xs text-muted">${coHits.length} 家匹配</span></div>
+          ${coHits.map(c => `<div class="flex-between" style="padding:8px 0;border-bottom:1px dashed var(--line)">
+            <span class="text-sm"><b>${esc(c.short)}</b> <span class="text-xs text-muted">${esc(c.seg || c.net || '')} · ${esc(c.city || '')}</span></span>
+            <button class="btn btn-text btn-sm" onclick="APP.openCompanyDrawer('${c.id}')">查看详情 ›</button></div>`).join('')}</div>` : ''}
+        ${pjHits.length ? `<div class="card card-pad mb4"><div class="flex-between mb3"><b>机会项目</b><span class="text-xs text-muted">${pjHits.length} 个匹配</span></div>
+          ${pjHits.map(p => `<div class="flex-between" style="padding:8px 0;border-bottom:1px dashed var(--line)">
+            <span class="text-sm"><b>${esc(p.name)}</b> <span class="text-xs text-muted">${esc(p.net)} · ${esc(p.amt)}</span></span>
+            <button class="btn btn-text btn-sm" onclick="APP.go('funnel',{tab:'proj'})">到项目清单 ›</button></div>`).join('')}</div>` : ''}
+        ${polHits.length || newsHits.length ? `<div class="card card-pad mb4"><div class="flex-between mb3"><b>政策 / 资讯</b></div>
+          ${polHits.map(p => `<div class="flex-between" style="padding:8px 0;border-bottom:1px dashed var(--line)"><span class="text-sm"><span class="tag tag-violet" style="height:19px;font-size:10px;padding:0 6px;margin-right:6px">政策</span>${esc(p.title)}</span><button class="btn btn-text btn-sm" onclick="APP.openPolicy('${p.id}')">详情 ›</button></div>`).join('')}
+          ${newsHits.map(n => `<div class="flex-between" style="padding:8px 0;border-bottom:1px dashed var(--line)"><span class="text-sm"><span class="tag tag-blue" style="height:19px;font-size:10px;padding:0 6px;margin-right:6px">资讯</span>${esc(n.title)}</span><button class="btn btn-text btn-sm" onclick="APP.openNews('${n.id}')">详情 ›</button></div>`).join('')}
+        </div>` : ''}
+        <div class="card card-pad"><div class="flex-between mb3"><b>AI 问答</b><span class="text-xs text-muted">整合自 AI 问述 · 可继续在上方输入追问</span></div>
+          <div class="aip-a">${hit ? hit.a + '<span class="src">来源：' + esc(hit.src) + '</span>' : esc(m.qaFallback)}</div>
+        </div>`;
+      const go2 = () => { const q2 = document.querySelector('#schQ').value.trim(); if (!q2) return toast('请输入关键词', 'warn'); APP.go('search', { q: q2 }); };
+      el.querySelector('#schGo').onclick = go2;
+    },
+  };
 })();

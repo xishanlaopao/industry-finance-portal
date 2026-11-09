@@ -49,6 +49,10 @@
       accChips: [],            /* 已选准入标准 chips（多选） */
       claims: [],              /* 客户经理/支行自认领的企业 id（留痕） */
       projSel: [],             /* 项目清单勾选 */
+      admitted: false,         /* 准入状态：未经准入客户池为空 */
+      admittedIds: [],         /* 已放行企业 id */
+      blockedIds: [],          /* 被拦截企业 id（含 ST 禁止准入） */
+      projAdmitted: false,     /* 项目清单准入状态 */
     };
     return S.fn;
   }
@@ -77,6 +81,12 @@
   function listHit(c) { const pos = Object.entries(LISTS).filter(([k, l]) => l.kind === 'pos' && l.cond(c)).map(([k]) => k); const neg = Object.entries(LISTS).filter(([k, l]) => l.kind === 'neg' && l.cond(c)).map(([k]) => k); return { pos, neg }; }
 
   /* ---------- 筛选 ---------- */
+  /* 已准入客户池（未经准入为空） */
+  function pool() {
+    const st = F();
+    if (!st.admitted) return [];
+    return M().funnel.cos.filter(c => st.admittedIds.includes(c.id));
+  }
   function filteredCos() {
     const f = F().f, conds = F().conds, subs = F().subs, st = F();
     const minScore = f.score === '全部' ? 0 : +f.score.replace('+', '');
@@ -101,7 +111,7 @@
       return true;
     };
     const listOk = c => plistOk(f.plist, c) && plistOk(nlPlist, c);
-    return M().funnel.cos.filter(c =>
+    return pool().filter(c =>
       (f.nets.length === 0 || f.nets.includes(c.net)) &&
       (f.track === '全部' || c.track === f.track) &&
       (f.prog === '全部' || c.prog === f.prog) &&
@@ -198,12 +208,15 @@
   VIEWS.funnel = {
     render(el) {
       F();
+      const st = F();
+      const rk = ROLE_KEY();
       el.innerHTML = `
         <div class="page-head"><div class="page-title">机会漏斗</div>
           <div class="flex" style="gap:8px">
-            <button class="btn btn-primary" id="fnImport">导入企业</button></div></div>
+            ${rk === 'pm' ? `<button class="btn btn-primary" id="fnImport">${st.admitted ? '准入管理' : '导入企业（执行准入）'}</button>` : ''}
+          </div></div>
         <div id="fnTabs"></div>`;
-      const imp = el.querySelector('#fnImport'); if (imp) imp.onclick = () => this.importDlg();
+      const imp = el.querySelector('#fnImport'); if (imp) imp.onclick = () => this.admissionDlg();
       const tabs = [
         { id: 'co', name: '客户清单', count: M().funnel.cos.length },
         { id: 'proj', name: '项目清单', count: (M().manage || { projects: [] }).projects.length },
@@ -225,7 +238,7 @@
     /* ---------------- Tab 1：企业总览 ---------------- */
     paintCo(box) {
       const f = F().f, st = F();
-      const all = M().funnel.cos;
+      const all = pool();
       const list = filteredCos();
       const tracks = ['全部', ...new Set(all.filter(c => f.nets.length === 0 || f.nets.includes(c.net)).map(c => c.track))];
       const stat = {
@@ -245,6 +258,7 @@
           ${kpi('战略客户（地位）', stat.pos, '原链主口径，地位=战略')}
           ${kpi('突破档（四线）', stat.brk, '突破/攻坚/培育 最高档')}
         </div>
+        ${!st.admitted ? `<div class="banner b-warn mb3" style="padding:12px 16px"><b>客户池尚未准入。</b>机会漏斗遵循总分行授信指引与正负面清单管理——由${ROLE_KEY() === 'pm' ? '您在右上角「导入企业（执行准入）」' : '产品经理在「导入企业（执行准入）」'}中完成筛选后，通过的企业与项目才会放行进入客户池；命中负面清单的企业（含 ST 上市公司）将被拦截。</div>` : ''}
         <div class="flex mb3" style="gap:10px;flex-wrap:wrap">
           <div class="fn-ai-engine" title="AI 数据引擎：每日 04:00 自动跑批，从工商公示、舆情监测、招投标、融资事件等公开渠道拉取并整理企业数据（24 小时更新）">
             <span class="ai-radar"></span>
@@ -506,54 +520,65 @@
       this.paintCo(document.querySelector('#fnTabs .tab-panel'));
     },
 
-    /* ---------- 导入企业（Excel 模拟解析 + 手动录入） ---------- */
-    importDlg() {
-      const IMP_DEMO = [
-        ['南京江北智慧城市科技有限公司', '新一代通信网', '城市物联', '南京', '江北新区', 71, '培养', '基础', '择优'],
-        ['江苏国粮冷链物流有限公司', '物流网', '冷链物流', '南京', '建邺区', 69, '储备', '基础', '承接'],
-        ['泰州恒润特种电缆有限公司', '新型电网', '特种电缆', '泰州', '海陵区', 64, '储备', '基础', '择优'],
-        ['淮海算力（徐州）中心有限公司', '算力网', '智算中心运营', '徐州', '泉山区', 73, '培养', '腰部', '次攻'],
-      ];
-      openModal({ small: true, title: '导入企业 · 名单导入', body: `
-        <div class="flex mb2" style="gap:8px"><b>Excel 名单导入</b><span class="text-xs text-muted">支持 xlsx / csv · 导入后来源标记为"导入"</span></div>
-        <div class="drop" id="fnDrop"><b>拖拽文件到此处，或点击选择</b>示例：六张网补充名单.xlsx（4 行）<div class="mt2"><button class="btn btn-ghost btn-sm" id="fnParse">解析示例文件</button><button class="btn btn-text btn-sm" id="fnTpl">下载导入模板</button></div></div>
-        <div id="fnParseOut" class="mt3"></div>`,        foot: `<button class="btn btn-ghost" onclick="APP.closeModal()">关闭</button>` });
-      $('#fnTpl').onclick = () => toast('模板已开始下载：六张网企业导入模板.xlsx');
-      const drop = $('#fnDrop');
-      drop.onclick = () => $('#fnParse').click();
-      $('#fnParse').onclick = e => {
-        e.stopPropagation();
-        const out = $('#fnParseOut');
-        out.innerHTML = `<div class="ai-panel"><div class="ai-head"><span class="ai-badge">AI</span>正在解析…</div><div class="ai-body text-sm text-sub">读取文件 → 字段映射 → 工商信息补全 → 查重 → 四维标签预打分</div></div>`;
-        setTimeout(() => {
-          out.innerHTML = `
-            <div class="card" style="box-shadow:none;border:1px solid var(--line)">
-              <table class="tbl"><thead><tr><th>企业名称</th><th>方向</th><th>地区</th><th>预评分</th></tr></thead><tbody>
-              ${IMP_DEMO.map(r => `<tr><td class="text-sm">${esc(r[0])}</td><td class="text-sm">${esc(r[1])}/${esc(r[2])}</td><td class="text-sm">${esc(r[3])}·${esc(r[4])}</td><td class="text-sm"><b>${r[5]}</b></td></tr>`).join('')}
-              </tbody></table>
-              <div class="text-xs text-muted" style="padding:8px 12px">解析 4 行 · 查重跳过 0 行 · AI 已按六张网口径完成标签预打分</div>
-              <div style="padding:10px 12px;border-top:1px solid var(--line)"><button class="btn btn-primary" id="fnImpOk">确认导入 4 家</button></div>
-            </div>`;
-          $('#fnImpOk').onclick = () => {
-            IMP_DEMO.forEach(r => {
-              if (M().funnel.cos.some(c => c.name === r[0])) return;
-              M().funnel.cos.push({
-                id: 'FI' + Date.now().toString(36) + r[0].length, name: r[0], short: r[0].replace(/(股份有限公司|有限责任公司|有限公司|集团|（.*?）)/g, '').slice(0, 8) || r[0].slice(0, 8),
-                net: r[1], track: r[2], city: r[3], zone: r[4], layer: '储备', status: '潜在', cap: '—', score: r[5], prog: r[6], pos: r[7], wt: r[8], src: 'IMP',
-                cat: '上游供应商', nat: '民营企业', listed: '否', sigLv: r[5] >= 80 ? 'A' : r[5] >= 60 ? 'B' : '观察', rel: '一般相关',
-                prods: NET_PROD[r[1]] || ['流动资金贷款'], opp: '',
-                sig: ['产品经理导入名单（' + (r[2]) + '）', 'AI 已按六张网口径完成标签预打分'], recent: '产品经理导入，AI 已完成标签预打分，待补充公开信息', tags: ['导入名单'],
-                imp: { by: '分行产品经理 · 陈立', d: '2026-11-04', note: '六张网补充名单.xlsx' },
-                industry: r[1], seg: r[2], est: '—', emp: '—', legal: '—', uscc: '—', type: '—', park: '—', addr: '—', scope: '—', qual: [],
-                grade: r[5] >= 85 ? 'A' : r[5] >= 70 ? 'B' : 'C', ipo: '',
-                internal: { credit: 0, used: 0, deposit: 0, settle: 0, products: [] },
-              });
+    /* ---------- 导入企业 = 准入弹窗（总分行授信指引 + 正负面清单 → 执行准入放行） ---------- */
+    admissionDlg() {
+      const st = F();
+      if (st.admitted) {
+        const blocked = st.blockedIds.map(coById).filter(Boolean);
+        openModal({ small: true, title: '准入管理', body: `
+          <div class="text-sm text-sub" style="line-height:1.9">当前客户池 <b>${st.admittedIds.length}</b> 家 · 项目清单 <b>${st.projAdmitted ? (M().manage || { projects: [] }).projects.length : 0}</b> 个已放行。<br>
+          拦截 ${blocked.length} 家（负面清单命中 / ST 禁止准入）：</div>
+          <div style="margin-top:8px">${blocked.map(c => '<span class="tag tag-red" style="height:22px;margin:2px 6px 2px 0">' + esc(c.short) + ' 禁止准入</span>').join('')}</div>`,
+          foot: '<button class="btn btn-primary" onclick="APP.closeModal()">关闭</button>' });
+        return;
+      }
+      const ACC_ITEMS = Object.keys(ACC);
+      const POS_ITEMS = Object.keys(LISTS).filter(k => LISTS[k].kind === 'pos');
+      const NEG_ITEMS = Object.keys(LISTS).filter(k => LISTS[k].kind === 'neg');
+      openModal({ wide: true, title: '导入企业 · 准入筛选', body: `
+        <div class="text-xs text-muted mb3" style="line-height:1.8">勾选总分行授信指引与正负面清单后执行准入：命中负面清单的企业被拦截（含 ST 上市公司，强制禁止准入），通过的企业与项目进入机会漏斗。</div>
+        <div class="form">
+          <div class="form-item"><label class="form-label">总分行授信指引</label>
+            <div class="flex wrap" style="gap:6px">${ACC_ITEMS.map(a => `<label style="display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line-strong);border-radius:8px;padding:5px 10px;font-size:12px;cursor:pointer"><input type="checkbox" checked data-adacc="${esc(a)}" style="accent-color:var(--brand-500)">${esc(a)}</label>`).join('')}</div></div>
+          <div class="form-item"><label class="form-label">正面清单（命中优先放行并打标）</label>
+            <div class="flex wrap" style="gap:6px">${POS_ITEMS.map(a => `<label style="display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line-strong);border-radius:8px;padding:5px 10px;font-size:12px;cursor:pointer"><input type="checkbox" checked data-adpos="${esc(a)}" style="accent-color:var(--ok-500)">${esc(a)}</label>`).join('')}</div></div>
+          <div class="form-item"><label class="form-label">负面清单（命中拦截）</label>
+            <div class="flex wrap" style="gap:6px">${NEG_ITEMS.map(a => `<label style="display:inline-flex;align-items:center;gap:5px;border:1px solid var(--danger-500);border-radius:8px;padding:5px 10px;font-size:12px;cursor:pointer"><input type="checkbox" checked data-adneg="${esc(a)}" style="accent-color:var(--danger-500)">${esc(a)}</label>`).join('')}
+            <span class="text-xs text-muted" style="align-self:center">ST 上市公司强制禁止准入</span></div></div>
+        </div>
+        <div id="adResult" class="mt3"></div>`,
+        foot: '<button class="btn btn-ghost" onclick="APP.closeModal()">取消</button><button class="btn btn-primary" id="adGo">执行准入</button>',
+        onOpen: () => {
+          document.querySelector('#adGo').onclick = () => {
+            const negSel = [...document.querySelectorAll('[data-adneg]:checked')].map(x => x.dataset.adneg);
+            const admitted = [], blocked = [];
+            M().funnel.cos.forEach(c => {
+              const negHit = c.stRisk || negSel.some(k => LISTS[k] && LISTS[k].cond(c));
+              if (negHit) blocked.push({ c, why: c.stRisk ? 'ST 上市公司 · 禁止准入' : '负面清单命中：' + negSel.filter(k => LISTS[k] && LISTS[k].cond(c)).join('、') });
+              else admitted.push(c);
             });
-            APP.closeModal(); toast('已导入 4 家企业（来源标记为"导入"），可在"来源=导入"中查看');
-            S.params.tab = 'co'; this.render(document.querySelector('#viewRoot'));
+            const pjOk = (M().manage || { projects: [] }).projects.length;
+            const box = document.querySelector('#adResult');
+            box.innerHTML = `
+              <div class="card card-pad" style="box-shadow:none">
+                <div class="flex" style="gap:14px;margin-bottom:8px">
+                  <span class="tag tag-green" style="height:24px">放行 ${admitted.length} 家企业</span>
+                  <span class="tag tag-red" style="height:24px">拦截 ${blocked.length} 家</span>
+                  <span class="tag tag-blue" style="height:24px">项目放行 ${pjOk} 个</span></div>
+                ${blocked.map(b => `<div class="text-sm" style="color:var(--danger-500);padding:2px 0"><b>${esc(b.c.short)}</b>（${esc(b.c.listed.indexOf('是') === 0 ? b.c.listed.slice(2) : '未上市')}）— ${esc(b.why)}</div>`).join('')}
+                <div class="text-xs text-muted" style="margin-top:6px">放行企业进入客户清单与订阅池；项目同步放行至项目清单。</div>
+                <button class="btn btn-primary btn-sm" id="adCommit" style="margin-top:8px">确认入池</button></div>`;
+            document.querySelector('#adCommit').onclick = () => {
+              st.admitted = true;
+              st.admittedIds = admitted.map(c => c.id);
+              st.blockedIds = blocked.map(b => b.c.id);
+              st.projAdmitted = true;
+              APP.closeModal();
+              toast(`准入完成：放行 ${admitted.length} 家企业 / ${pjOk} 个项目，拦截 ${blocked.length} 家`);
+              this.render(document.querySelector('#viewRoot'));
+            };
           };
-        }, 900);
-      };
+        } });
     },
 
     /* ---------------- Tab 2：订阅的企业（下发） ---------------- */
@@ -569,7 +594,7 @@
         <div class="card card-pad mb3">
           <div class="flex mb2" style="gap:8px"><b>机会转化漏斗</b><span class="text-xs text-muted">企业库 → 已订阅 → 已下发 → 已反馈</span></div>
           <div class="fn-funnel">
-            ${stage('全部企业', all.length, '六张网企业库总量（AI网络筛选 + 产品经理导入）')}
+            ${stage('全部企业', pool().length, '客户池总量（经总分行授信指引与正负面清单准入）')}
             ${stage('已订阅', st.subs.length, '产品经理订阅的企业（订阅不等于下发）')}
             ${stage('已下发', st.tasks.length, '已下发客户经理的任务')}
             ${stage('已反馈', fedCnt, '客户经理已反馈进展的任务', true)}
@@ -687,7 +712,7 @@
       const st = F();
       if (!st.pjF) st.pjF = { net: '全部', stage: '全部', prog: '全部', kw: '' };
       const pf = st.pjF;
-      const allProjs = (M().manage || { projects: [] }).projects;
+      const allProjs = st.projAdmitted ? (M().manage || { projects: [] }).projects : [];
       const projs = allProjs.filter(p =>
         (pf.net === '全部' || p.net === pf.net) &&
         (pf.stage === '全部' || p.stage === pf.stage) &&

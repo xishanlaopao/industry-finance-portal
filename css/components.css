@@ -1045,3 +1045,11 @@ table.fn-tbl td.fn-prod-td { white-space:normal; overflow:visible; padding-top:8
 .pnav2 .pnav-item:hover { color:#fff; background:rgba(255,255,255,.1); }
 .pnav2 .pnav-item.active { color:#fff; font-weight:700; }
 .pnav2 .pnav-item.active::after { left:16px; right:16px; bottom:0; height:3px; background:#fff; border-radius:3px 3px 0 0; }
+
+/* ============ V5 顶部搜索（整合AI问述） ============ */
+.psearch2 { display:flex; align-items:center; gap:8px; background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.25); border-radius:999px; padding:7px 16px; width:300px; transition:.15s; }
+.psearch2:focus-within { background:rgba(255,255,255,.22); border-color:rgba(255,255,255,.5); }
+.psearch2 .ps2-ico { font-size:13px; flex-shrink:0; }
+.psearch2 input { flex:1; min-width:0; background:transparent; border:none; outline:none; color:#fff; font-size:12.5px; font-family:inherit; }
+.psearch2 input::placeholder { color:rgba(255,255,255,.55); }
+.pslogan2 { color:#fff; font-size:12px; font-weight:700; letter-spacing:3px; background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.24); border-radius:999px; padding:3px 13px; white-space:nowrap; }

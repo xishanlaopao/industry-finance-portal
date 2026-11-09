@@ -707,7 +707,7 @@ function saveVisit(){
   if (!note) { toastMsg('请先录入交流要点'); return; }
   var aiOK=$('#aiOut').dataset.done==='1';
   var peer=$('#vPeer').value.trim()||'关键人';
-  t.log.unshift({ d:'11-04', t:'访客纪要（第'+(t.log.filter(function(l){return l.t.indexOf('访客纪要')>=0;}).length+1)+'次）', by:user().name, x:'【'+$('#vWay').value+' · '+peer+'】'+note.slice(0,56)+'…（AI 已整理'+(aiOK?'：需求识别+综合方案（含非信贷服务）':'')+'）' });
+  t.log.unshift({ d:'11-04', t:'访客纪要（第'+(t.log.filter(function(l){return l.t.indexOf('访客纪要')>=0;}).length+1)+'次）', by:user().name, x:'【'+$('#vWay').value+' · '+peer+'】'+note+'（AI 已整理'+(aiOK?'：需求识别+综合方案（含非信贷服务）':'')+'）' });
   S._justSaved=true;
   if (t.status==='待接收') t.status='跟进中';
   toastMsg('第 '+(t.log.filter(function(l){return l.t.indexOf('访客纪要')>=0;}).length)+' 次拜访纪要已归档 · 任务更新为「跟进中」，待中后台协同后方案迭代');

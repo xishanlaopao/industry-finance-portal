@@ -37,7 +37,9 @@
     /* ---------- Tab1：项目储备情况汇总（项目清单 + 客户清单 + 储备漏斗） ---------- */
     paintReserve(box) {
       const mg = M().manage || {};
-      const projs = mg.projects || [];
+      const admitted = APP.S.fn && APP.S.fn.projAdmitted;
+      const projs = admitted ? (mg.projects || []) : [];
+      const pjNote = admitted ? '' : '<div class="banner b-warn mb3" style="padding:10px 16px"><b>项目储备尚未准入。</b>由产品经理在机会漏斗「导入企业（执行准入）」中完成筛选后，' + (mg.projects || []).length + ' 个项目才会放行进入储备。</div>';
       const st = APP.S.fn || { tasks: M().funnel.tasksSeed, subs: M().funnel.subsSeed };
       const cName = id => { const c = M().funnel.cos.find(x => x.id === id); return c ? c.short : ''; };
       const stage = (lab, n, end) => `<div class="fn-stage ${end ? 'fn-stage-end' : ''}"><div class="fn-s-n fs-num">${n}</div><div class="fn-s-l">${lab}</div></div>${end ? '' : '<span class="fn-arrow">›</span>'}`;
@@ -45,6 +47,7 @@
       const stTag = s => ({ 储备: 'tag-gray', 前期对接: 'tag-blue', 方案阶段: 'tag-orange', 已批复: 'tag-green', 已投放: 'tag-solid-red' }[s] || 'tag-gray');
       box.innerHTML = `
         <div class="kpi-grid mb3" style="grid-template-columns:repeat(5,1fr)">
+          ${pjNote}
           ${kv('储备项目', '<b style="font-size:22px">' + projs.length + '</b> 个', '六张网重大项目')}
           ${kv('覆盖企业', '<b style="font-size:22px">' + new Set(projs.map(p => p.co)).size + '</b> 家', '项目关联客户')}
           ${kv('客户清单储备', '<b style="font-size:22px">' + M().funnel.cos.length + '</b> 家', '企业总览全库')}
@@ -81,7 +84,7 @@
       const overdue = t => +t.due.replace('-', '') < 1105 && t.status !== '已反馈' && t.status !== '已关闭';
       const needReview = t => t.log.some(l => l.t === '访客纪要') && !t.log.some(l => l.t === '协同留言' && l.by.indexOf('产品经理') >= 0);
       box.innerHTML = `
-        <div class="kpi-grid mb3" style="grid-template-columns:repeat(5,1fr)">
+
           ${kv('在途任务', '<b style="font-size:22px">' + tasks.length + '</b> 项', '')}
           ${kv('待接收', '<b style="font-size:22px">' + tasks.filter(t => t.status === '待接收').length + '</b> 项', '')}
           ${kv('跟进中', '<b style="font-size:22px">' + tasks.filter(t => t.status === '跟进中').length + '</b> 项', '')}

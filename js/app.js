@@ -71,7 +71,8 @@ window.APP = (function () {
   /* ---------- 路由 ---------- */
   function go(view, params) { Object.assign(S.params, params || {}); location.hash = '#/' + view; }
   function route() {
-    const v = (location.hash || '#/workbench').replace('#/', '') || 'workbench';
+    let v = (location.hash || '#/workbench').replace('#/', '') || 'workbench';
+    if (v === 'pack') { v = 'workbench'; S.wbTab = 'prepare'; }
     const conf = window.NAV_ITEMS[v];
     S.view = (conf ? v : 'workbench');
     if (S.view === 'cockpit' && !canCockpit()) S.view = 'workbench';
@@ -154,7 +155,7 @@ window.APP = (function () {
   function renderNav() {
     const nav = $('#pnav');
     /* 主导航：隐藏路由（dashboard/report/news/cockpit/company 等）按别名归入对应一级项高亮 */
-    const ALIAS = { dashboard: 'insight', news: 'insight', report: 'pack', cockpit: 'manage' };
+    const ALIAS = { dashboard: 'insight', news: 'insight', report: 'insight', cockpit: 'manage', pack: 'workbench' };
     const active = ALIAS[S.view] || S.view;
     nav.innerHTML = window.NAV.filter(it => it.id !== 'workbench' || true).map(it => `
       <div class="pnav-item ${active === it.id ? 'active' : ''}" data-view="${it.id}">${it.name}</div>`).join('');
@@ -301,6 +302,7 @@ window.APP = (function () {
   }
   function initAiPanel() {
     const panel = $('#aiPanel'), box = $('#aipBody'), input = $('#aipInput');
+    if (!panel || !$('#aiFab')) return;   /* AI问述已整合进顶部搜索 */
     $('#aiFab').onclick = () => {
       const show = panel.classList.toggle('show');
       if (show && !box.dataset.inited) { aiChatInit(box); box.dataset.inited = '1'; }
@@ -322,21 +324,10 @@ window.APP = (function () {
     ];
   }
   function initSearch() {
-    const inp = $('#pSearch'), drop = $('#psDrop');
-    if (!inp || !drop) return;   /* 头部搜索已移除（市场洞察保留页内搜索） */
-    inp.addEventListener('input', () => {
-      const q = inp.value.trim();
-      if (!q) { drop.classList.remove('show'); return; }
-      const hits = SEARCH.filter(s => s.t.toLowerCase().includes(q.toLowerCase()) || s.sub.includes(q)).slice(0, 9);
-      if (!hits.length) { drop.innerHTML = `<div class="gs-item text-muted" style="cursor:default">未找到“${esc(q)}”相关内容</div>`; drop.classList.add('show'); return; }
-      const groups = [...new Set(hits.map(h => h.g))];
-      drop.innerHTML = groups.map(g => `<div class="gs-group">${g}</div>` + hits.filter(h => h.g === g).map(h => `
-        <div class="gs-item" data-i="${SEARCH.indexOf(h)}">${esc(h.t)}<span class="gs-tag">${esc(h.sub)}</span></div>`).join('')).join('');
-      drop.classList.add('show');
-      drop.querySelectorAll('.gs-item[data-i]').forEach(el => el.onclick = () => { drop.classList.remove('show'); inp.value = ''; SEARCH[el.dataset.i].act(); });
-    });
-    inp.addEventListener('keydown', e => { if (e.key === 'Escape') { drop.classList.remove('show'); inp.blur(); } });
-    document.addEventListener('click', e => { if (!e.target.closest('.psearch')) drop.classList.remove('show'); });
+    const inp = $('#pSearch');
+    if (!inp) return;
+    const go = () => { const q = inp.value.trim(); if (!q) return toast('请输入企业 / 项目 / 政策关键词，或直接提问', 'warn'); APP.go('search', { q }); inp.value = ''; };
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
   }
 
   /* ---------- 消息推送 ---------- */
@@ -515,14 +506,14 @@ window.APP = (function () {
     $('#mask').addEventListener('click', e => { if (e.target.id === 'mask') closeModal(); });
     $('#drawerX').onclick = closeDrawer;
     $('#drawerMask').onclick = closeDrawer;
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); closeDrawer(); $('#aiPanel').classList.remove('show'); } });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); closeDrawer(); if ($('#aiPanel')) $('#aiPanel').classList.remove('show'); } });
     const udd = $('#userDd'), um = $('#userMenu');
     udd.onclick = e => { e.stopPropagation(); um.classList.toggle('show'); };
     document.addEventListener('click', () => um.classList.remove('show'));
     renderUserMenu();
   }
 
-  return { S, $, esc, layerTag, statusTag, riskTag, segTag, scoreRing, aiPanel, kv, toast,
+  return { aiMatch, S, $, esc, layerTag, statusTag, riskTag, segTag, scoreRing, aiPanel, kv, toast,
     openModal, closeModal, openDrawer, closeDrawer, confirmDlg, renderTabs, switchTab,
     go, route, setRole, switchUser, canCockpit, switchIndustry, aiChatInit, aiAsk, openNews, openPolicy, openCompanyDrawer, boot,
     USERS, curUser: curUserMeta, role: roleMeta, AIFX };

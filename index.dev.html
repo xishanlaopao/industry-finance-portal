@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>北斗·产融智航系统 · 北京银行南京分行 · V4</title>
-  <link rel="stylesheet" href="css/theme.tokens.css?v=198">
-  <link rel="stylesheet" href="css/components.css?v=198">
+  <link rel="stylesheet" href="css/theme.tokens.css?v=199">
+  <link rel="stylesheet" href="css/components.css?v=199">
 </head>
 <body>
   <div class="portal">
@@ -20,7 +20,8 @@
           </div>
         </div>
         <span class="spacer"></span>
-        <span class="pt-date">洞察产业 · 链动金融 ｜ 数据时点 2026-09-28</span>
+        <div class="pslogan2">洞察产业 · 链动金融</div>
+        <div class="psearch2"><span class="ps2-ico">🔍</span><input id="pSearch" placeholder="搜索企业 / 项目 / 政策，或直接问 AI…" autocomplete="off"></div>
         <div class="dd">
           <div class="user-chip" id="userDd">
             <div class="avatar" id="uAv">王</div>
@@ -43,17 +44,6 @@
     </footer>
   </div>
 
-  <!-- AI问述浮动面板与按钮 -->
-  <button class="ai-fab" id="aiFab">✦ AI问述</button>
-  <div class="ai-panel-box" id="aiPanel">
-    <div class="aip-head">
-      <div><div class="t">✦ AI 智能问述</div><div class="s">产业知识库 · 政策库 · 实时资讯</div></div>
-      <button class="modal-x" id="aipClose" style="color:#fff">✕</button>
-    </div>
-    <div class="aip-body" id="aipBody"></div>
-    <div class="aip-foot"><input id="aipInput" placeholder="提问，或描述企业情况与需求获取营销建议…"><button id="aipSend">提问</button></div>
-  </div>
-
   <!-- 弹窗 / 抽屉 / 角标 -->
   <div class="mask" id="mask"><div class="modal" id="modalBox">
     <div class="modal-head"><div class="modal-title" id="modalTitle"></div><button class="modal-x" id="modalX">✕</button></div>
@@ -67,17 +57,17 @@
   </aside>
 
   <!-- 脚本（顺序勿变；迭代升版时递增 ?v=） -->
-  <script src="config/nav.js?v=198"></script>
-  <script src="data/jxmap.js?v=198"></script>
-  <script src="data/mock.js?v=198"></script>
-  <script src="js/charts.js?v=198"></script>
-  <script src="js/app.js?v=198"></script>
-  <script src="js/views-funnel.js?v=198"></script>
-  <script src="js/views-core.js?v=198"></script>
-  <script src="js/views-biz.js?v=198"></script>
-  <script src="js/views-visit.js?v=198"></script>
-  <script src="js/views-cockpit.js?v=198"></script>
-  <script src="js/views-workbench.js?v=198"></script>
+  <script src="config/nav.js?v=199"></script>
+  <script src="data/jxmap.js?v=199"></script>
+  <script src="data/mock.js?v=199"></script>
+  <script src="js/charts.js?v=199"></script>
+  <script src="js/app.js?v=199"></script>
+  <script src="js/views-funnel.js?v=199"></script>
+  <script src="js/views-core.js?v=199"></script>
+  <script src="js/views-biz.js?v=199"></script>
+  <script src="js/views-visit.js?v=199"></script>
+  <script src="js/views-cockpit.js?v=199"></script>
+  <script src="js/views-workbench.js?v=199"></script>
   <script>APP.boot();</script>
 </body>
 </html>

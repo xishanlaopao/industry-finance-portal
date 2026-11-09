@@ -1952,6 +1952,12 @@ window.MOCK = (function () {
   ];
   const funnel = { nets: NETS, cos: funnelCos, rms: funnelRms, subsSeed: funnelSubsSeed, tasksSeed: funnelTasksSeed };
 
+  /* 准入演示：两家上市公司触发负面清单（ST · 禁止准入） */
+  ['江阴市恒润重工股份有限公司', '通富微电子股份有限公司'].forEach(nm => {
+    const c = funnelCos.find(x => x.name === nm);
+    if (c) { c.stRisk = true; c.stCode = (c.listed.match(/\((\d+)\)/) || [])[1] || ''; }
+  });
+
   /* ============================================================
      管理视图 · 项目储备数据（六张网重大项目 · 关联客户池企业）
      阶段：储备 → 前期对接 → 方案阶段 → 已批复 → 已投放
