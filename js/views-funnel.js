@@ -218,10 +218,10 @@
         <div id="fnTabs"></div>`;
       const imp = el.querySelector('#fnImport'); if (imp) imp.onclick = () => this.admissionDlg();
       const tabs = [
-        { id: 'co', name: '客户清单', count: M().funnel.cos.length },
-        { id: 'proj', name: '项目清单', count: (M().manage || { projects: [] }).projects.length },
-        { id: 'sub', name: '订阅的企业', count: F().subs.length },
-        { id: 'task', name: '任务下发与跟踪', count: F().tasks.length }];
+        { id: 'co', name: '客户清单', count: st.admitted ? pool().length : 0 },
+        { id: 'proj', name: '项目清单', count: st.projAdmitted ? (M().manage || { projects: [] }).projects.length : 0 },
+        { id: 'sub', name: '订阅的企业', count: st.admitted ? st.subs.filter(id => st.admittedIds.includes(id)).length : 0 },
+        { id: 'task', name: '任务下发与跟踪', count: st.tasks.length }];
       let act = S.params.tab;
       if (!['co', 'sub', 'task', 'proj'].includes(act)) act = 'co';
       delete S.params.tab;   /* 一次性消费，避免角色切换后残留 */
@@ -292,7 +292,6 @@
             <div class="fn-fgroup">${netChip('全部')}${NETS().map(netChip).join('')}
               <span class="fn-sep"></span><span class="f-label">赛道</span>
               <select class="select" id="fnTrack" style="width:126px;height:26px">${tracks.map(t => `<option ${f.track === t ? 'selected' : ''}>${t}</option>`).join('')}</select>
-              <input class="input" id="fnKw" placeholder="搜索企业…" value="${esc(f.kw)}" style="width:150px;height:26px;margin-left:auto">
             </div>
           </div>
           <div class="fn-frow">
@@ -382,7 +381,6 @@
         });
       });
       const trk = box.querySelector('#fnTrack'); trk.onchange = () => { f.track = trk.value; this.paintCo(box); };
-      const kw = box.querySelector('#fnKw'); kw.oninput = () => { f.kw = kw.value.trim(); this.paintCo(box); const k2 = box.querySelector('#fnKw'); k2.focus(); k2.setSelectionRange(k2.value.length, k2.value.length); };
       box.querySelectorAll('[data-why]').forEach(el => el.onclick = e => { e.stopPropagation(); APP.go('plan', { co: el.dataset.why }); });
       box.querySelectorAll('[data-det]').forEach(b => b.onclick = e => { e.stopPropagation(); APP.go('company', { id: b.dataset.det }); });
       box.querySelectorAll('[data-sub]').forEach(b => b.onclick = e => {

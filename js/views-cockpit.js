@@ -8,7 +8,10 @@
   const M = () => window.MOCK, CH = window.CH;
   const S = APP.S;
 
-  /* ================= 管理视图（一级导航） ================= */
+    /* 统一 KPI 卡片（kpi-grid 子项，替代 kv 竖排） */
+  const mkpi = (l, v, foot, danger) => `<div class="kpi" style="padding:14px 16px"><div class="k-label">${l}</div><div class="k-value" style="font-size:22px;${danger ? 'color:var(--danger-500);' : ''}">${v}</div>${foot ? `<div style="font-size:11.5px;color:var(--t3);margin-top:2px">${foot}</div>` : ''}</div>`;
+  const poolCount = () => (APP.S.fn && APP.S.fn.admitted) ? APP.S.fn.admittedIds.length : 0;
+/* ================= 管理视图（一级导航） ================= */
   VIEWS.cockpit = {
     render(el) {
       el.innerHTML = `
@@ -48,11 +51,11 @@
       box.innerHTML = `
         <div class="kpi-grid mb3" style="grid-template-columns:repeat(5,1fr)">
           ${pjNote}
-          ${kv('储备项目', '<b style="font-size:22px">' + projs.length + '</b> 个', '六张网重大项目')}
-          ${kv('覆盖企业', '<b style="font-size:22px">' + new Set(projs.map(p => p.co)).size + '</b> 家', '项目关联客户')}
-          ${kv('客户清单储备', '<b style="font-size:22px">' + M().funnel.cos.length + '</b> 家', '企业总览全库')}
-          ${kv('已下发任务', '<b style="font-size:22px">' + st.tasks.length + '</b> 项', '产品经理下发中')}
-          ${kv('已反馈', '<b style="font-size:22px">' + st.tasks.filter(t => t.status === '已反馈').length + '</b> 项', '客户经理已反馈')}
+          ${mkpi('储备项目', projs.length + ' 个', '六张网重大项目')}
+          ${mkpi('覆盖企业', new Set(projs.map(p => p.co)).size + ' 家', '项目关联客户')}
+          ${mkpi('客户池企业', poolCount() + ' 家', '经准入放行')}
+          ${mkpi('已下发任务', st.tasks.length + ' 项', '产品经理下发中')}
+          ${mkpi('已反馈', st.tasks.filter(t => t.status === '已反馈').length + ' 项', '客户经理已反馈')}
         </div>
         <div class="card card-pad mb3">
           <div class="flex mb2" style="gap:8px"><b>储备转化漏斗</b><span class="text-xs text-muted">项目清单 + 客户清单 → 已下发 → 已反馈 → 已批复/投放</span></div>
@@ -84,13 +87,13 @@
       const overdue = t => +t.due.replace('-', '') < 1105 && t.status !== '已反馈' && t.status !== '已关闭';
       const needReview = t => t.log.some(l => l.t === '访客纪要') && !t.log.some(l => l.t === '协同留言' && l.by.indexOf('产品经理') >= 0);
       box.innerHTML = `
-
-          ${kv('在途任务', '<b style="font-size:22px">' + tasks.length + '</b> 项', '')}
-          ${kv('待接收', '<b style="font-size:22px">' + tasks.filter(t => t.status === '待接收').length + '</b> 项', '')}
-          ${kv('跟进中', '<b style="font-size:22px">' + tasks.filter(t => t.status === '跟进中').length + '</b> 项', '')}
-          ${kv('超期未反馈', '<b style="font-size:22px;color:var(--danger-500)">' + tasks.filter(overdue).length + '</b> 项', '截止日已过')}
-          ${kv('待复核纪要', '<b style="font-size:22px;color:var(--warn-500)">' + tasks.filter(needReview).length + '</b> 项', '待产品经理协同')}
-        </div>
+        <div class="kpi-grid mb3" style="grid-template-columns:repeat(5,1fr)">
+          ${mkpi('在途任务', tasks.length + ' 项')}
+          ${mkpi('待接收', tasks.filter(t => t.status === '待接收').length + ' 项')}
+          ${mkpi('跟进中', tasks.filter(t => t.status === '跟进中').length + ' 项')}
+          ${mkpi('超期未反馈', tasks.filter(overdue).length + ' 项', '截止日已过', true)}
+          ${mkpi('待复核纪要', tasks.filter(needReview).length + ' 项', '待产品经理协同', true)}
+</div>
         <div class="card">
           <div class="card-head"><div class="card-title">任务进度一览<span class="card-sub">全辖下发任务 · 访客纪要 / 协同留言 / 反馈 全留痕</span></div>
             <button class="btn btn-ghost btn-sm" onclick="APP.go('funnel',{tab:'task'})">任务下发与跟踪 ›</button></div>
@@ -116,10 +119,10 @@
       const per = S.rankPeriod, data = b.branchRank[per];
       box.innerHTML = `
         <div class="kpi-grid mb3" style="grid-template-columns:repeat(4,1fr)">
-          ${kv('参战支行', '<b style="font-size:22px">' + b.branchRank['月'].idx.length + '</b> 家', '')}
-          ${kv('参战客户经理', '<b style="font-size:22px">' + b.drill.branches.reduce((s2, x) => s2 + x.ms.length, 0) + '</b> 人', '')}
-          ${kv('平均任务完成率', '<b style="font-size:22px">' + Math.round(b.drill.branches.reduce((s2, x) => s2 + (x.rate || 0), 0) / b.drill.branches.length) + '%</b>', '')}
-          ${kv('支行贷款余额合计', '<b style="font-size:22px">' + b.branchRank['年'].loan.reduce((s2, x) => s2 + x, 0).toFixed(1) + '</b> 亿', '年口径')}
+          ${mkpi('参战支行', b.branchRank['月'].idx.length + ' 家')}
+          ${mkpi('参战客户经理', b.drill.branches.reduce((s2, x) => s2 + x.ms.length, 0) + ' 人')}
+          ${mkpi('平均任务完成率', Math.round(b.drill.branches.reduce((s2, x) => s2 + (x.rate || 0), 0) / b.drill.branches.length) + '%')}
+          ${mkpi('支行贷款余额合计', b.branchRank['年'].loan.reduce((s2, x) => s2 + x, 0).toFixed(1) + ' 亿', '年口径')}
         </div>
         <div class="card card-pad mb4">
           <div class="flex-between mb3" style="flex-wrap:wrap;gap:10px">
@@ -146,10 +149,10 @@
         </div>
         ${mg.summary ? `<div class="card card-pad mb4"><div class="card-title mb3" style="font-size:var(--fs-md)">储备与投放结果统计</div>
           <div class="grid-4 mb3" style="grid-template-columns:repeat(4,1fr)">
-            ${kv('项目批复数', mg.summary.approved + ' 个', '累计')}
-            ${kv('已投放金额', mg.summary.invested + ' 亿元', '累计')}
-            ${kv('储备覆盖率', mg.summary.cover + '%', '名单企业覆盖')}
-            ${kv('综合收益（年化）', mg.summary.income + ' 万元', '利息+中收 测算')}
+            ${mkpi('项目批复数', mg.summary.approved + ' 个', '累计')}
+            ${mkpi('已投放金额', mg.summary.invested + ' 亿元', '累计')}
+            ${mkpi('储备覆盖率', mg.summary.cover + '%', '名单企业覆盖')}
+            ${mkpi('综合收益（年化）', mg.summary.income + ' 万元', '利息+中收 测算')}
           </div>
           ${CH.hbars(mg.summary.byNet.map(x => ({ name: x.n, v: x.v, extra: x.c + ' 户' })), { unit: '亿' })}
           <div class="text-xs text-muted mt2">按六张网统计投放余额</div></div>` : ''}
