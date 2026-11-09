@@ -492,12 +492,22 @@ function pageOp(){
     '新一代通信网':[['通信设备与器件',c.cat==='建设运营商'?'通信网络建设运营，运营商集采与政企专网为主':'光模块/射频/卫星等器件供货，客户为设备商与运营商','#C0202C'],['AI 与算力带动','AI算力建设带动高速光模块/连接需求，订单能见度高','#2458F5'],['业务壁垒','技术认证与客户验证周期长，车规/高速率环节格局集中','#B08A00']]}[c.net]||[['主营业务',esc(c.track),'#C0202C'],['场景延伸','产业链上下游协同场景','#2458F5'],['业务壁垒','细分领域认证与客户壁垒','#B08A00']];
   var topics=opTopics(c);
   var CLS=['a','b','c'];
-  if (S.opView==='brief') return sw+
-    '<div class="card" style="text-align:center;padding:16px 14px"><div style="font-size:20px;font-weight:800;color:var(--t1)">' + esc(c.short) + '</div><div class="sub mt1">' + esc(c.net) + ' · ' + esc(c.track) + ' · ' + esc(c.prog) + '档</div></div>' +
-    '<div class="card mb2"><div class="bub-a" style="margin:0">' + esc(topics[0].ask) + '</div></div>' +
-    '<div class="card mb2"><div class="bub-a" style="margin:0">' + esc(topics[1].ask) + '</div></div>' +
-    '<div class="card"><div class="bub-a" style="margin:0;background:#FDF3F3;border:1px solid #F2D5D6;color:#8E0A20">切忌泛泛推销与低价竞争；他行合作、股价话题不主动评论；不承诺额度、利率、审批时限。</div></div>' +
-    '<div style="text-align:center" class="sub mt2">切「完整」查看全部</div>';
+  if (S.opView==='brief') {
+    var cos=[]; myTasks().forEach(function(t){ if(cos.indexOf(t.co)<0) cos.push(t.co); });
+    var pc={'突破':'tag-red','攻坚':'tag-orange','培育':'tag-blue','储备':'tag-gray'}[c.prog]||'tag-gray';
+    var desc='一家"'+esc(c.net)+'"方向的'+esc(c.nat)+esc(c.cat)+'——经营基本面看'+(c.cat==='建设运营商'?'项目核准与现金流':'链主订单与回款')+'，弹性看'+esc(c.track.split('·')[0])+'。';
+    var p0=(task0&&task0.prods&&task0.prods[0])||(c.prods&&c.prods[0])||'流动资金贷款';
+    var PRSN={'项目贷款':'在建与扩产项目的资本开支场景','项目贷':'在建项目的资本开支场景','供应链票据':'回款账期与上游货款结算场景','供应链金融':'上下游结算与账期场景','科技贷':'专精特新政策工具，利率有贴息优势','并购贷款':'产业整合与股权收购场景','绿色信贷':'碳减排支持工具，利率有贴息','绿色贷款':'绿色项目贴息支持','结算':'非信贷先行，绑定日常资金往来','代发工资':'员工服务切入，低成本建立粘性','对公理财':'闲置资金增值，门槛低易获批','政府存款':'财政性资金合作切入点','专项债配套':'政府项目资金配套服务','银团':'大额融资分险，同行合作','债券承销':'直接融资工具，降低综合成本','投行服务':'股债并举的综合金融服务','出口信贷':'海外订单的收汇与融资保障'};
+    return sw+
+      '<div style="display:flex;align-items:center;gap:6px;margin:2px 2px 6px"><span class="tag tag-red">今天</span><b style="font-size:13.5px">11-04 周三</b><span class="muted" style="font-size:11px">待访 '+cos.length+' 家</span></div>'+
+      '<div class="picker" style="margin-bottom:8px">'+cos.map(function(id2){ return '<span class="pitem '+(id2===c.id?'on':'')+'" onclick="openOp(\''+id2+'\')">'+esc(co(id2).short)+'</span>'; }).join('')+'</div>'+
+      '<div class="card" style="padding:11px 13px"><div style="display:flex;align-items:center;justify-content:space-between;gap:8px"><div style="font-size:19px;font-weight:800;color:var(--t1)">'+esc(c.short)+'</div><span class="tag '+pc+'">'+esc(c.prog)+'档</span></div><div class="sub" style="margin-top:2px">'+esc(c.net)+' · '+esc(c.track)+'</div><div style="font-size:12px;line-height:1.7;color:var(--t2);margin-top:5px">'+desc+'</div><div style="font-size:12px;line-height:1.7;color:var(--t2);margin-top:3px;border-top:1px dashed var(--line);padding-top:5px"><b>对接人</b>：王涛 · 董秘（首访第一对象）｜财务找周敏 · 财务总监</div></div>'+
+      '<div class="card mb2" style="padding:9px 12px"><div style="font-size:12px;line-height:1.7;color:#2B2350"><b style="color:#B08A00">必问① </b>'+esc(topics[0].ask)+'</div></div>'+
+      '<div class="card mb2" style="padding:9px 12px"><div style="font-size:12px;line-height:1.7;color:#2B2350"><b style="color:#B08A00">必问② </b>'+esc(topics[1].ask)+'</div></div>'+
+      '<div class="card mb2" style="padding:9px 12px"><div style="display:flex;align-items:center;gap:6px"><span class="tag tag-green">主推</span><b style="font-size:13.5px">'+esc(p0)+'</b></div><div class="sub" style="margin-top:3px">'+(PRSN[p0]||'与客户当前经营节奏最匹配的切入点')+(c.prog==='突破'?'；方案窗口在近期，抓紧递交':'；先建立往来再谈方案')+'</div></div>'+
+      (S.extMode?'':'<div class="card" style="padding:7px 11px;background:#FDF3F3;border:1px solid #F2D5D6"><div style="font-size:11.5px;line-height:1.7;color:#8E0A20"><b>别说：</b>切忌泛泛推销与低价竞争；他行合作、股价话题不主动评论；不承诺额度、利率、审批时限。</div></div>')+
+      '<div style="text-align:center" class="sub mt2">切「完整」查看全部</div>';
+  }
   return sw+'<div class="picker">'+
   +ts.map(function(t){ var cc=co(t.co); return '<div class="pitem '+(cc.id===selCo?'on':'')+'" onclick="openOp(\''+cc.id+'\')">'+esc(cc.short)+'</div>'; }).join('')+'</div>'+
   /* HERO */
