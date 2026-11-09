@@ -844,7 +844,7 @@
       const items = this.planItems(c);
       const doneCnt = items.filter(it => PC.items[it.k] && PC.items[it.k].state !== 'ai').length;
       const stage = PC.final ? 3 : (PC.submitted || doneCnt > 0) ? 2 : 1;
-      const picker = `<div class="picker">${tasks.map(x => `<div class="pitem ${x.id === sel.id ? 'on' : ''}" data-planpick="${x.id}">${esc(cName(x.co))}</div>`).join('')}</div>`;
+      const picker = `<div class="flex" style="gap:8px;align-items:center;margin-bottom:10px"><span class="text-xs text-muted">当前客户</span><select class="select" id="planPick" style="width:auto;height:30px;font-size:12px">${tasks.map(x => `<option value="${x.id}" ${x.id === sel.id ? 'selected' : ''}>${esc(cName(x.co))}（${x.status}）</option>`).join('')}</select></div>`;
       const steps = `
         <div class="card card-pad mb3"><b class="text-sm">方案形成过程</b><span class="text-xs text-muted" style="margin-left:8px">中台产品部门协同作战 · ${esc(c.short || '')}</span>
           <div class="flex mt2" style="gap:0;flex-wrap:wrap">
@@ -873,7 +873,8 @@
             ${PC.final ? '<span class="tag tag-solid-red" style="height:24px">V2.0 完整方案 · 中台产品经理 陈立 确认</span>' : ''}
             <button class="btn btn-ghost btn-sm" id="plDl2">下载服务方案</button></div></div>`;
       box.innerHTML = picker + steps + bar + `<div id="planBoardWrap">${this.planHtml(c)}</div>`;
-      box.querySelectorAll('[data-planpick]').forEach(d => d.onclick = () => { S.params.task = d.dataset.planpick; this.paintPlanTab(box, tasks, selId); });
+      const planPick = box.querySelector('#planPick');
+      if (planPick) planPick.onchange = () => { S.params.task = planPick.value; this.paintPlanTab(box, tasks, selId); };
       const sub = box.querySelector('#plSubmit');
       if (sub) sub.onclick = () => {
         PC.submitted = true;
