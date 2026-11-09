@@ -258,7 +258,6 @@
           ${kpi('战略客户（地位）', stat.pos, '原链主口径，地位=战略')}
           ${kpi('突破档（四线）', stat.brk, '突破/攻坚/培育 最高档')}
         </div>
-        ${!st.admitted ? `<div class="banner b-warn mb3" style="padding:12px 16px"><b>客户池尚未准入。</b>机会漏斗遵循总分行授信指引与正负面清单管理——由${ROLE_KEY() === 'pm' ? '您在右上角「导入企业（执行准入）」' : '产品经理在「导入企业（执行准入）」'}中完成筛选后，通过的企业与项目才会放行进入客户池；命中负面清单的企业（含 ST 上市公司）将被拦截。</div>` : ''}
         <div class="flex mb3" style="gap:10px;flex-wrap:wrap">
           <div class="fn-ai-engine" title="AI 数据引擎：每日 04:00 自动跑批，从工商公示、舆情监测、招投标、融资事件等公开渠道拉取并整理企业数据（24 小时更新）">
             <span class="ai-radar"></span>

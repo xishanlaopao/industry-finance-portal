@@ -42,7 +42,6 @@
       const mg = M().manage || {};
       const admitted = APP.S.fn && APP.S.fn.projAdmitted;
       const projs = admitted ? (mg.projects || []) : [];
-      const pjNote = admitted ? '' : '<div class="banner b-warn mb3" style="padding:10px 16px"><b>项目储备尚未准入。</b>由产品经理在机会漏斗「导入企业（执行准入）」中完成筛选后，' + (mg.projects || []).length + ' 个项目才会放行进入储备。</div>';
       const st = APP.S.fn || { tasks: M().funnel.tasksSeed, subs: M().funnel.subsSeed };
       const cName = id => { const c = M().funnel.cos.find(x => x.id === id); return c ? c.short : ''; };
       const stage = (lab, n, end) => `<div class="fn-stage ${end ? 'fn-stage-end' : ''}"><div class="fn-s-n fs-num">${n}</div><div class="fn-s-l">${lab}</div></div>${end ? '' : '<span class="fn-arrow">›</span>'}`;
@@ -50,7 +49,6 @@
       const stTag = s => ({ 储备: 'tag-gray', 前期对接: 'tag-blue', 方案阶段: 'tag-orange', 已批复: 'tag-green', 已投放: 'tag-solid-red' }[s] || 'tag-gray');
       box.innerHTML = `
         <div class="kpi-grid mb3" style="grid-template-columns:repeat(5,1fr)">
-          ${pjNote}
           ${mkpi('储备项目', projs.length + ' 个', '六张网重大项目')}
           ${mkpi('覆盖企业', new Set(projs.map(p => p.co)).size + ' 家', '项目关联客户')}
           ${mkpi('客户池企业', poolCount() + ' 家', '经准入放行')}
