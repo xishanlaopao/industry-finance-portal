@@ -242,7 +242,9 @@
       const all = pool();
       const list = filteredCos();
       if (!st.coSel) st.coSel = [];
-      const sel = st.coSel.filter(id => list.some(c => c.id === id) && !taskOf(id));
+      /* FT0 为工作台侧种子跟进任务，不计入客户清单的"已下发"判定（演示：朗新保持未下发可测试批量下发） */
+      const dispTaskOf = id => F().tasks.find(t => t.co === id && t.id !== 'FT0');
+      const sel = st.coSel.filter(id => list.some(c => c.id === id) && !dispTaskOf(id));
       const tracks = ['全部', ...new Set(all.filter(c => f.nets.length === 0 || f.nets.includes(c.net)).map(c => c.track))];
       const stat = {
         all: all.length, op: all.filter(c => c.cat === '建设运营商').length, up: all.filter(c => c.cat === '上游供应商').length,
@@ -338,12 +340,12 @@
           <th style="width:80px">营销进展</th><th style="width:70px">地位</th><th style="width:70px">权重</th>
           <th style="width:88px">综合评分</th><th style="min-width:190px">✦ 建议服务方案</th><th style="width:150px">操作</th></tr></thead><tbody>
         ${list.sort((a, b) => b.score - a.score).map(c => { const rk = ROLE_KEY();
-          const isClaimed = st.claims.includes(c.id) || taskOf(c.id);
+          const isClaimed = st.claims.includes(c.id) || dispTaskOf(c.id);
           const opHtml = rk === 'rm'
-            ? `<button class="btn btn-text btn-sm" data-claim="${c.id}" ${isClaimed ? 'disabled style="color:var(--t3)"' : ''}>${st.claims.includes(c.id) ? '✓ 已认领' : taskOf(c.id) ? '已承接' : '认领'}</button><button class="btn btn-text btn-sm" data-det="${c.id}">详情</button>`
-            : `<button class="btn btn-text btn-sm" data-one-disp="${c.id}" ${taskOf(c.id) ? 'disabled style="color:var(--t3)"' : ''}>${taskOf(c.id) ? '已下发' : '下发'}</button><button class="btn btn-text btn-sm" data-det="${c.id}">详情</button>`;
+            ? `<button class="btn btn-text btn-sm" data-claim="${c.id}" ${isClaimed ? 'disabled style="color:var(--t3)"' : ''}>${st.claims.includes(c.id) ? '✓ 已认领' : dispTaskOf(c.id) ? '已承接' : '认领'}</button><button class="btn btn-text btn-sm" data-det="${c.id}">详情</button>`
+            : `<button class="btn btn-text btn-sm" data-one-disp="${c.id}" ${dispTaskOf(c.id) ? 'disabled style="color:var(--t3)"' : ''}>${dispTaskOf(c.id) ? '已下发' : '下发'}</button><button class="btn btn-text btn-sm" data-det="${c.id}">详情</button>`;
           return `<tr data-co="${c.id}">
-          ${rk === 'pm' ? `<td onclick="event.stopPropagation()">${taskOf(c.id) ? '' : `<input type="checkbox" data-cosel="${c.id}" ${sel.includes(c.id) ? 'checked' : ''} style="accent-color:var(--brand-500)">`}</td>` : ''}
+          ${rk === 'pm' ? `<td onclick="event.stopPropagation()">${dispTaskOf(c.id) ? '' : `<input type="checkbox" data-cosel="${c.id}" ${sel.includes(c.id) ? 'checked' : ''} style="accent-color:var(--brand-500)">`}</td>` : ''}
           <td title="${esc(c.name)}">
             <b class="text-sm">${esc(c.short)}</b>${c.src && c.src !== 'AI' ? ' ' + srcTag(c) : ''}${c.listed.indexOf('是') === 0 ? ' <span class="tag tag-cyan" style="height:17px;font-size:10px;padding:0 5px" title="' + esc(c.listed.slice(2)) + '">' + esc(c.listed.slice(2).replace(/\(/, ' ').replace(/\)/, '')) + '</span>' : ''}
             <div class="text-xs text-muted" style="margin-top:2px">${esc(c.cat)} · ${esc(c.nat)}${pmTag(c.id) ? ' ' + pmTag(c.id) : ''}</div></td>
@@ -369,9 +371,9 @@
         this.paintCo(box);
       });
       const coAll = box.querySelector('#coAll');
-      if (coAll) coAll.onclick = () => { const disp = list.filter(c => !taskOf(c.id)); st.coSel = (sel.length === disp.length && disp.length) ? [] : disp.map(c => c.id); this.paintCo(box); };
+      if (coAll) coAll.onclick = () => { const disp = list.filter(c => !dispTaskOf(c.id)); st.coSel = (sel.length === disp.length && disp.length) ? [] : disp.map(c => c.id); this.paintCo(box); };
       const coDsp = box.querySelector('#coDsp');
-      if (coDsp) coDsp.onclick = () => { const ids = sel.filter(id => !taskOf(id)); if (!ids.length) return toast('请先勾选未下发企业', 'warn'); this.dispatchDlg(ids); };
+      if (coDsp) coDsp.onclick = () => { const ids = sel.filter(id => !dispTaskOf(id)); if (!ids.length) return toast('请先勾选未下发企业', 'warn'); this.dispatchDlg(ids); };
       box.querySelectorAll('[data-net]').forEach(b => b.onclick = () => {
         const n = b.dataset.net;
         if (n === '全部') f.nets = [];

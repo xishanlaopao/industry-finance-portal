@@ -81,6 +81,7 @@
     /* ---------- 企业画像卡（企业详情页调用，复用访前准备画像数据） ---------- */
     profileHtml(c) {
       if (!c || c.id[0] !== 'F') return '';
+      const isLX = c.name && c.name.indexOf('朗新') >= 0;
       const cl = (x, cls) => `<span class="wp-cl ${cls}">${esc(x)}</span>`;
       const BIZ = {
         '新型电网': [['核心业务（to G/B）', c.cat === '建设运营商' ? '电网/海风场投资建设运营，项目核准与并网节奏决定资本开支' : '电网装备与海缆/风电配套供货，客户以国网/南网、发电集团与整机厂为主', 1], ['场景延伸（to C/场景）', c.track.indexOf('海上风电') >= 0 ? '海上风电运维、绿电交易与碳资产场景延伸' : '分布式能源、虚拟电厂与充电场景', 2], ['业务壁垒', c.cat === '建设运营商' ? '特许经营与项目资源稀缺，省级平台卡位' : '电网认证周期1-2年构成置换壁垒', 3]],
@@ -862,6 +863,7 @@
     },
     /* 拜访注意事项（时机/姿态/合规 三卡，与访前一页纸同源口径） */
     attentionHtml(c) {
+      const isLX = c.name && c.name.indexOf('朗新') >= 0;
       return `<div class="grid-3">
           ${isLX
             ? '<div class="card card-pad"><b class="text-sm mb2" style="display:block">时机选择</b><ul class="text-sm text-sub" style="padding-left:18px;line-height:1.9"><li>三季报（10/29）刚披露亏损：以<b>"倾听+方案"</b>姿态切入，避开业绩敏感追问；</li><li>Q4为利润确认旺季——<b>年底前是授信落地黄金窗口</b>（3年期授信框架2026年内落地）；</li><li>节奏：首访锁财务总监+资金岗 → 两周内提交定制方案 → 纳入2027年度授信盘子。</li></ul></div><div class="card card-pad"><b class="text-sm mb2" style="display:block">姿态与话术</b><ul class="text-sm text-sub" style="padding-left:18px;line-height:1.9"><li>财务团队成熟、合作行15+家：<b>切忌泛泛推销与低价竞争</b>；</li><li>带具体方案上门：保函时效承诺、应收账款融资模型、跨境结算报价；</li><li>质押、减持话题<b>不主动评论</b>；对方提及则聚焦"银行看现金流与主体资质，不博弈股价"。</li></ul></div><div class="card card-pad"><b class="text-sm mb2" style="display:block">合规红线</b><ul class="text-sm text-sub" style="padding-left:18px;line-height:1.9"><li>内幕信息管理：接触未公开数据须按<b>内幕信息知情人管理</b>处理，不得用于营销对比；</li><li>调查数据以<b>审计报告与公告</b>为准，舆情仅作参考；</li><li>子公司授信（新耀）须穿透资金用途，防止资金回流集团补质押。</li></ul></div>'
