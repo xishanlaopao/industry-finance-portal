@@ -244,6 +244,8 @@ textarea.tarea { width:100%; min-height:88px; resize:vertical; line-height:1.7; 
 var D = {
   nets: ['新型电网', '算力网', '城市地下管网', '物流网', '新一代通信网', '海上风电'],
   cos: [
+    { id:'F159', short:'朗新科技', name:'朗新科技集团股份有限公司', cat:'上游供应商', net:'算力网', track:'IT服务与系统集成', city:'无锡', zone:'新吴区', score:82.5, prog:'攻坚', pos:'战略', wt:'主攻', listed:'是·深交所创业板(300682)', nat:'民营企业', rel:'一般相关', sigLv:'A',
+      prods:['分离式保函','应收保理/票据池','电力交易专项流贷','跨境结算主户'] },
     { id:'F001', short:'中天科技', name:'江苏中天科技股份有限公司', cat:'上游供应商', net:'新型电网', track:'海底电缆·高压海缆/海缆附件', city:'南通', zone:'如东县', score:100, prog:'突破', pos:'战略', wt:'主攻', listed:'是·上交所主板(600522)', nat:'民营企业', rel:'高度相关', sigLv:'A',
       recent:'海缆/风电塔筒龙头，在手订单充足，如东基地扩产在即',
       sig:['经营四线得分 100（A 级信号 · 高度相关）','客户大类：上游供应商 ｜ 海底电缆 ｜ 民营企业'],
@@ -282,6 +284,11 @@ var D = {
     { id:'rm-lx', name:'李晓', unit:'南京江阴支行' },
   ],
   tasks: [
+    { id:'FT0', co:'F159', rm:'rm-drz', type:'营销跟进', due:'11-10', status:'跟进中', d:'11-04',
+      note:'朗新科技集团——三季报披露后窗口期：倾听+方案切入，锁定董秘+财务总监，两周内提交保函T+0+应收保理+跨境结算定制方案包，争取纳入2027年度授信盘子',
+      prods:['分离式保函','应收保理/票据池','电力交易专项流贷','跨境结算主户'],
+      log:[
+        { d:'11-04', t:'任务下发', by:'分行产品经理 · 陈立', x:'下发朗新科技集团跟进清单：三季报（10-29）披露电力交易阶段性亏损-2.68亿，Q4为授信落地黄金窗口，首访锁定董秘王慎勇+财务总监鲁清芳。' } ] },
     { id:'FT1', co:'F001', rm:'rm-drz', type:'营销跟进', due:'11-08', status:'跟进中', d:'10-26',
       note:'海缆订单与扩产窗口，主推项目贷+供应链票据；同步摸排海风场建设资金安排',
       prods:['项目贷款','供应链票据','出口信贷'],
@@ -345,7 +352,7 @@ var D = {
 /* ============================================================
    应用状态与工具
    ============================================================ */
-var S = { role:'rm', tab:'task', selTask:'FT1', opCo:null, chat:[{a:'您好，我是工作台 AI 助手，可解答产品、政策与营销策略问题。'}] };
+var S = { role:'rm', tab:'task', selTask:'FT0', opCo:null, chat:[{a:'您好，我是工作台 AI 助手，可解答产品、政策与营销策略问题。'}] };
 function $(s){ return document.querySelector(s); }
 function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
 function co(id){ for (var i=0;i<D.cos.length;i++) if (D.cos[i].id===id) return D.cos[i]; return null; }
@@ -473,15 +480,23 @@ function opTopics(c){
     { q:'资本运作计划', ask:'问：是否有再融资、并购整合或资产证券化的中期安排？', why:c.listed.indexOf('是')===0?'上市主体有再融资与资产运作传统，商投行联动是提升综合回报的杠杆。':'Pre-IPO/股权融资窗口值得提前卡位，投行+私行服务可超越信贷关系。', plan:(c.prods||[]).filter(function(x){return /投行|并购|债券|承销/.test(x);})[0]||'投行服务', script:'「往后不管是再融资、并购还是资产证券化，我们投行条线都愿意提前介入、先把方案备着——哪怕暂时不动，顾问关系先建起来，节奏您定。」' }
   ];
 }
+var LXTOPICS=[
+  { q:'电力交易亏损的敞口结构与2027年合约重签', ask:'问：粤桂现货波动亏损规模、头寸管理方式、2027年度合约重签的定价机制与扭亏路径？', why:'这是2026年亏损2.68亿的直接原因，决定信用基本面何时修复；按"暂时性困难"还是"模式缺陷"定价，是额度上量的前提。', plan:'电力交易专项流贷+扭亏挂钩定价', script:'「三季报我们连夜做了功课——粤桂现货的事，我们理解是电力市场化过程中的阶段性敞口，不是商业模式出了问题。更关心2027年合约重签的定价机制何时明朗；四季度到明年初如果有个现金流过渡期，我们愿意备一笔用途限定购电和保证金的专项流贷，先把通道铺好，扭亏信号确认了再谈上量。」' },
+  { q:'应收账款257天与电网回款节奏', ask:'问：257天周转天数的账龄分布、确权流程、可否接受应收账款质押/保理？', why:'应收占款约20亿+是最大财务痛点，也是供应链金融天然入口；债务人若可确权为国网/南网省级公司，坏账风险极低。', plan:'电网应收保理+票据池', script:'「按45亿收入体量，应收占款应该在20亿上下——电网应收的债务人资质很好，能不能走保理或者应收质押？方便的话给我一份账龄结构表，两周之内我们出一份具体融资方案，价格放到桌面上谈。」' },
+  { q:'15+家银行授信格局与用信体验', ask:'问：2026年3月授信框架下各行份额、已用信品种、哪类产品响应最慢？', why:'正面拼价格无意义（四大行与股份行均已入场）；摸清"体验洼地"——保函时效、异地审批、系统对接——才能找到城商行差异化切入口。', plan:'保函T+0+专属服务团队', script:'「合作行十几家，我们今天不是来拼价格的，这个价我们也拼不起。哪类业务您用下来体验最差？您指哪里，我们改哪里——我们的优势是决策链条短：无锡当天就能约到审批人。」' },
+  { q:'新耀能源5亿元保函授信的落地进展', ask:'问：邦道拟为新耀申请的5亿分离式保函授信推进到哪家银行、偏好何种审批路径？', why:'需求已公告但未必落地=明确的业务机会；新耀自身负债率91%，须穿透集团现金流设计缓释结构——"需求明确+风控有解"的最佳首单场景。', plan:'新耀专项授信+收费权质押', script:'「邦道给新耀申请五个亿分离式保函额度，这个需求我们想接。新耀做充电桩和光伏投建营，投标保函是刚需——我们承诺开立时效，当天受理次日出函；担保结构建议邦道担保叠加项目收费权质押，方案先出一版给您参考。」' },
+  { q:'海外业务的结算币种与避险需求', ask:'问：尼泊尔、孟加拉、东南亚、非洲项目的收付币种、回款账期、汇兑避险安排？', why:'海外10余国带来跨境结算、外汇套保、内保外贷需求；本地行审批半径短、费率灵活可抢结算主户——结算绑定是最深的护城河。', plan:'跨境结算主户+锁汇额度', script:'「海外项目回款币种杂、账期长，避险成本是隐性问题。建议从存量项目切入：先挑一两个国家试点，跨境人民币结算和远期锁汇一起做起来。费率比股份行灵活，出了问题当天能找到人。」' },
+  { q:'资本运作：再融资 / 并购 / 资产证券化', ask:'问：是否有新一轮定增/可转债计划、充电桩收费权或电力资产的证券化意愿？', why:'IPO+2次重组+1次定增传统，2024年刚完成瘦身；商投行联动是提升综合回报（中收+存款）的杠杆，也便于建立超越信贷的关系层级。', plan:'承销+并购贷+收费权ABS', script:'「从IPO到两轮重组、一轮定增，公司资本运作经验很足。往后不管是再融资、并购整合还是充电桩收费权ABS，我们投行条线都愿意提前介入、先把方案备着——节奏你们定，我们做备份。」' }
+];
 function pageOp(){
   var ts=myTasks(); var selCo=S.opCo&&co(S.opCo)?S.opCo:(ts[0]?ts[0].co:D.cos[0].id);
-  var c=co(selCo);
+  var c=co(selCo); var isLX=(c.id==='F159');
   if (S.opView===undefined) S.opView='brief';
   if (S.extMode===undefined) S.extMode=false;
   var sw='<div class="opswitch"><div class="osw-l"><span class="osw-i '+(S.opView==='brief'?'on':'')+'" onclick="setOpView(\'brief\')">速览</span><span class="osw-i '+(S.opView==='full'?'on':'')+'" onclick="setOpView(\'full\')">完整</span></div><span class="osw-t'+(S.extMode?' on':'')+'" onclick="toggleExt()">'+(S.extMode?'外部版':'内部版')+'</span></div>';
   var task0=null; D.tasks.forEach(function(x){ if(x.co===c.id) task0=x; });
   var verdict=c.prog==='突破'?'重点介入':c.prog==='攻坚'?'适度介入':'培育跟踪';
-  var vSub=c.pos+'客户 · '+c.prog+'档 · 授信评估';
+  var vSub=isLX?'授信评估 · 支持类':c.pos+'客户 · '+c.prog+'档 · 授信评估';
   var kpi=function(k,v){ return '<div class="opb-kpi"><div class="k">'+k+'</div><div class="v">'+v+'</div></div>'; };
   var cl=function(x,cls){ return '<span class="opb-cl '+cls+'">'+esc(x)+'</span>'; };
   var BIZ={'新型电网':[['核心业务（to G/B）',c.cat==='建设运营商'?'电网/海风场投资建设运营，项目核准与并网节奏决定资本开支':'电网装备与海缆/风电配套供货，客户以国网/南网、发电集团与整机厂为主','#C0202C'],['场景延伸（to C/场景）',c.track.indexOf('海上风电')>=0?'海上风电运维、绿电交易与碳资产场景延伸，运营期现金流稳定':'分布式能源、虚拟电厂与充电场景，负荷资源入口','#2458F5'],['业务壁垒',c.cat==='建设运营商'?'特许经营与项目资源稀缺，省级平台卡位构成先发壁垒':'电网认证周期1-2年构成置换壁垒，批中标份额集中','#B08A00']],
@@ -490,22 +505,23 @@ function pageOp(){
     '水网':[['水利工程与供水',c.cat==='建设运营商'?'原水/调水/供水枢纽建设运营，水费与政府购买服务双现金流':'水务装备与工程配套，跟随水利专项投资周期','#C0202C'],['节水与水环境','节水改造、水环境治理延伸场景，绑定国家水网重大工程','#2458F5'],['业务壁垒','水利特许经营与水源地资源稀缺，区域垄断明显','#B08A00']],
     '物流网':[['物流枢纽运营',c.cat==='建设运营商'?'机场/铁路/港口/园区枢纽建设运营，吞吐量决定收益':'物流装备与多式联运服务，客户为枢纽与货主','#C0202C'],['供应链延伸','冷链、跨境与供应链增值服务，绑定产业带货量','#2458F5'],['业务壁垒','枢纽资源与航线/班列时刻稀缺，网络效应显著','#B08A00']],
     '新一代通信网':[['通信设备与器件',c.cat==='建设运营商'?'通信网络建设运营，运营商集采与政企专网为主':'光模块/射频/卫星等器件供货，客户为设备商与运营商','#C0202C'],['AI 与算力带动','AI算力建设带动高速光模块/连接需求，订单能见度高','#2458F5'],['业务壁垒','技术认证与客户验证周期长，车规/高速率环节格局集中','#B08A00']]}[c.net]||[['主营业务',esc(c.track),'#C0202C'],['场景延伸','产业链上下游协同场景','#2458F5'],['业务壁垒','细分领域认证与客户壁垒','#B08A00']];
-  var topics=opTopics(c);
+  var bizRows=isLX?[['能源数智化（to G/B）','电力营销2.0、用电采集、负控、数据中台、AI应用、市场化交易结算。客户为国家电网、南方电网、发电能源集团——收入压舱石，利润集中Q4确认。','#C0202C'],['能源互联网（to C/场景）','生活缴费平台5亿+表计用户、日活近2000万；"新电途"聚合充电1800万+注册用户；虚拟电厂接入25GW；电力市场化交易——流量与负荷资源入口。','#2458F5'],['业务闭环（护城河）','"负荷聚合→充电服务→电力交易→能源优化"：以充电负荷为基础汇聚可调负荷资产，反向支撑电力交易与需求侧响应——场景稀缺性构成竞争壁垒。','#B08A00']]:(BIZ[c.net]||[['主营业务',esc(c.track),'#C0202C'],['场景延伸','产业链上下游协同场景','#2458F5'],['业务壁垒','细分领域认证与客户壁垒','#B08A00']]);
+  var topics=isLX?LXTOPICS:opTopics(c);
   var CLS=['a','b','c'];
   if (S.opView==='brief') {
     var cos=[]; myTasks().forEach(function(t){ if(cos.indexOf(t.co)<0) cos.push(t.co); });
     var pc={'突破':'tag-red','攻坚':'tag-orange','培育':'tag-blue','储备':'tag-gray'}[c.prog]||'tag-gray';
-    var desc='一家"'+esc(c.net)+'"方向的'+esc(c.nat)+esc(c.cat)+'——经营基本面看'+(c.cat==='建设运营商'?'项目核准与现金流':'链主订单与回款')+'，弹性看'+esc(c.track.split('·')[0])+'。';
+    var desc=isLX?'一家"国家队客户+互联网流量+AI叙事"三重基因的能源数字化公司——信用基本面看电网（稳），成长弹性看电力交易与充电（波动大）。':'一家"'+esc(c.net)+'"方向的'+esc(c.nat)+esc(c.cat)+'——经营基本面看'+(c.cat==='建设运营商'?'项目核准与现金流':'链主订单与回款')+'，弹性看'+esc(c.track.split('·')[0])+'。';
     var p0=(task0&&task0.prods&&task0.prods[0])||(c.prods&&c.prods[0])||'流动资金贷款';
-    var PRSN={'项目贷款':'在建与扩产项目的资本开支场景','项目贷':'在建项目的资本开支场景','供应链票据':'回款账期与上游货款结算场景','供应链金融':'上下游结算与账期场景','科技贷':'专精特新政策工具，利率有贴息优势','并购贷款':'产业整合与股权收购场景','绿色信贷':'碳减排支持工具，利率有贴息','绿色贷款':'绿色项目贴息支持','结算':'非信贷先行，绑定日常资金往来','代发工资':'员工服务切入，低成本建立粘性','对公理财':'闲置资金增值，门槛低易获批','政府存款':'财政性资金合作切入点','专项债配套':'政府项目资金配套服务','银团':'大额融资分险，同行合作','债券承销':'直接融资工具，降低综合成本','投行服务':'股债并举的综合金融服务','出口信贷':'海外订单的收汇与融资保障'};
+    var PRSN={'分离式保函':'投标保函刚需+新耀5亿保函需求已公告，承诺当天受理次日出函','应收保理/票据池':'应收周转257天、占用20亿+，电网应收确权后坏账风险极低','电力交易专项流贷':'购电保证金用途限定，设2027扭亏挂钩分档利率','跨境结算主户':'海外10余国回款币种杂账期长，结算绑定是最深的护城河','项目贷款':'在建与扩产项目的资本开支场景','项目贷':'在建项目的资本开支场景','供应链票据':'回款账期与上游货款结算场景','供应链金融':'上下游结算与账期场景','科技贷':'专精特新政策工具，利率有贴息优势','并购贷款':'产业整合与股权收购场景','绿色信贷':'碳减排支持工具，利率有贴息','绿色贷款':'绿色项目贴息支持','结算':'非信贷先行，绑定日常资金往来','代发工资':'员工服务切入，低成本建立粘性','对公理财':'闲置资金增值，门槛低易获批','政府存款':'财政性资金合作切入点','专项债配套':'政府项目资金配套服务','银团':'大额融资分险，同行合作','债券承销':'直接融资工具，降低综合成本','投行服务':'股债并举的综合金融服务','出口信贷':'海外订单的收汇与融资保障'};
     return sw+
       '<div style="display:flex;align-items:center;gap:6px;margin:2px 2px 6px"><span class="tag tag-red">今天</span><b style="font-size:13.5px">11-04 周三</b><span class="muted" style="font-size:11px">待访 '+cos.length+' 家</span></div>'+
       '<div class="picker" style="margin-bottom:8px">'+cos.map(function(id2){ return '<span class="pitem '+(id2===c.id?'on':'')+'" onclick="openOp(\''+id2+'\')">'+esc(co(id2).short)+'</span>'; }).join('')+'</div>'+
-      '<div class="card" style="padding:11px 13px"><div style="display:flex;align-items:center;justify-content:space-between;gap:8px"><div style="font-size:19px;font-weight:800;color:var(--t1)">'+esc(c.short)+'</div><span class="tag '+pc+'">'+esc(c.prog)+'档</span></div><div class="sub" style="margin-top:2px">'+esc(c.net)+' · '+esc(c.track)+'</div><div style="font-size:12px;line-height:1.7;color:var(--t2);margin-top:5px">'+desc+'</div><div style="font-size:12px;line-height:1.7;color:var(--t2);margin-top:3px;border-top:1px dashed var(--line);padding-top:5px"><b>对接人</b>：王涛 · 董秘（首访第一对象）｜财务找周敏 · 财务总监</div></div>'+
+      '<div class="card" style="padding:11px 13px"><div style="display:flex;align-items:center;justify-content:space-between;gap:8px"><div style="font-size:19px;font-weight:800;color:var(--t1)">'+esc(c.short)+'</div><span class="tag '+pc+'">'+esc(c.prog)+'档</span></div><div class="sub" style="margin-top:2px">'+esc(c.net)+' · '+esc(c.track)+'</div><div style="font-size:12px;line-height:1.7;color:var(--t2);margin-top:5px">'+desc+'</div><div style="font-size:12px;line-height:1.7;color:var(--t2);margin-top:3px;border-top:1px dashed var(--line);padding-top:5px"><b>对接人</b>：'+(isLX?'王慎勇 · 董秘（首访第一对象）｜财务找鲁清芳 · 财务总监':'王涛 · 董秘（首访第一对象）｜财务找周敏 · 财务总监')+'</div></div>'+
       '<div class="card mb2" style="padding:9px 12px"><div style="font-size:12px;line-height:1.7;color:#2B2350"><b style="color:#B08A00">必问① </b>'+esc(topics[0].ask)+'</div></div>'+
       '<div class="card mb2" style="padding:9px 12px"><div style="font-size:12px;line-height:1.7;color:#2B2350"><b style="color:#B08A00">必问② </b>'+esc(topics[1].ask)+'</div></div>'+
-      '<div class="card mb2" style="padding:9px 12px"><div style="display:flex;align-items:center;gap:6px"><span class="tag tag-green">主推</span><b style="font-size:13.5px">'+esc(p0)+'</b></div><div class="sub" style="margin-top:3px">'+(PRSN[p0]||'与客户当前经营节奏最匹配的切入点')+(c.prog==='突破'?'；方案窗口在近期，抓紧递交':'；先建立往来再谈方案')+'</div></div>'+
-      (S.extMode?'':'<div class="card" style="padding:7px 11px;background:#FDF3F3;border:1px solid #F2D5D6"><div style="font-size:11.5px;line-height:1.7;color:#8E0A20"><b>别说：</b>切忌泛泛推销与低价竞争；他行合作、股价话题不主动评论；不承诺额度、利率、审批时限。</div></div>')+
+      '<div class="card mb2" style="padding:9px 12px"><div style="display:flex;align-items:center;gap:6px"><span class="tag tag-green">主推</span><b style="font-size:13.5px">'+esc(p0)+'</b></div><div class="sub" style="margin-top:3px">'+(PRSN[p0]||'与客户当前经营节奏最匹配的切入点')+(isLX?'；年底前是授信落地黄金窗口，两周内提交定制方案包':(c.prog==='突破'?'；方案窗口在近期，抓紧递交':'；先建立往来再谈方案'))+'</div></div>'+
+      (S.extMode?'':'<div class="card" style="padding:7px 11px;background:#FDF3F3;border:1px solid #F2D5D6"><div style="font-size:11.5px;line-height:1.7;color:#8E0A20"><b>别说：</b>'+(isLX?'切忌泛泛推销与低价竞争（合作行15+家）；质押、减持话题不主动评论；接触未公开数据按内幕信息管理；不承诺额度、利率、审批时限。':'切忌泛泛推销与低价竞争；他行合作、股价话题不主动评论；不承诺额度、利率、审批时限。')+'</div></div>')+
       '<div style="text-align:center" class="sub mt2">切「完整」查看全部</div>';
   }
   return sw+'<div class="picker">'+
@@ -525,14 +541,19 @@ function pageOp(){
     cl(c.net+' · '+c.track,'b')+cl(c.cat,'a')+cl(c.nat,'c')+cl(c.pos+'客户','a')+
     cl('营销进展：'+c.prog,'b')+cl('权重：'+c.wt,'c')+cl(c.rel,'a')+cl('四线得分 '+c.score,'b')+cl(c.city+'属地','c')+
   '</div>'+
-  BIZ.map(function(b2){ return '<div class="opb-biz mb2" style="border-top:3px solid '+b2[2]+'"><div class="t">'+esc(b2[0])+'</div><div class="s">'+esc(b2[1])+'</div></div>'; }).join('')+
-  '<div class="opb-note"><b>画像小结：</b>一家"'+esc(c.net)+'"方向的'+esc(c.nat)+esc(c.cat)+'——经营基本面看'+(c.cat==='建设运营商'?'项目核准与现金流':'链主订单与回款')+'，成长弹性看'+esc(c.track.split('·')[0])+'，信用观察点看'+(c.cat==='上游供应商'?'客户集中度与账期变化':'资本开支与资本金到位节奏')+'。</div></div>'+
+  bizRows.map(function(b2){ return '<div class="opb-biz mb2" style="border-top:3px solid '+b2[2]+'"><div class="t">'+esc(b2[0])+'</div><div class="s">'+esc(b2[1])+'</div></div>'; }).join('')+
+  '<div class="opb-note">'+(isLX?'<b>画像小结：</b>一家"国家队客户+互联网流量+AI叙事"三重基因的能源科技公司——信用基本面看电网（稳），成长弹性看电力交易与充电（波动大），股东看蚂蚁与实控人（背书强但减持/质押并存）。':'<b>画像小结：</b>一家"'+esc(c.net)+'"方向的'+esc(c.nat)+esc(c.cat)+'——经营基本面看'+(c.cat==='建设运营商'?'项目核准与现金流':'链主订单与回款')+'，成长弹性看'+esc(c.track.split('·')[0])+'，信用观察点看'+(c.cat==='上游供应商'?'客户集中度与账期变化':'资本开支与资本金到位节奏')+'。')+'</div></div>'+
   /* §2 建议对接人 */
   '<div class="opb-sec"><span class="no">2</span><b>建议对接人</b></div>'+
   '<div class="mb2">'+
+  (isLX?
+  '<div class="opb-person"><div class="nm">王慎勇</div><div class="rl">副总经理 · 董事会秘书（任职13年+）</div><div class="pt">对外信息与授信框架的统一接口人；历次授信、担保、并购公告均经其手——<b>首次拜访第一对象</b>。</div></div>'+
+  '<div class="opb-person" style="margin-top:8px"><div class="nm">鲁清芳</div><div class="rl">财务总监（任职10年+）</div><div class="pt">资金安排、保函/流贷需求、应收账款与回款、结算方案的实际决策参与者——<b>方案落地的关键人</b>。</div></div>'+
+  '<div class="opb-person" style="margin-top:8px"><div class="nm">彭知平</div><div class="rl">副董事长 · 总经理</div><div class="pt">战略层对话对象：华为合作、海外拓展、电力交易布局——<b>二次拜访升级</b>谈综合合作框架。</div></div></div>'
+  :
   '<div class="opb-person"><div class="nm">周敏</div><div class="rl">财务总监</div><div class="pt">资金安排、融资需求、应收与回款、结算方案的实际决策者——<b>方案落地的关键人</b>。</div></div>'+
   '<div class="opb-person" style="margin-top:8px"><div class="nm">王涛</div><div class="rl">董事会秘书 / 综合管理部负责人</div><div class="pt">对外信息与授信框架的统一接口人——<b>首次拜访第一对象</b>。</div></div>'+
-  '<div class="opb-person" style="margin-top:8px"><div class="nm">陈志强</div><div class="rl">总经理 / 董事长</div><div class="pt">'+esc(c.net)+'布局、资本运作的战略层对话对象——<b>二次拜访升级</b>谈综合合作框架。</div></div></div>'+
+  '<div class="opb-person" style="margin-top:8px"><div class="nm">陈志强</div><div class="rl">总经理 / 董事长</div><div class="pt">'+esc(c.net)+'布局、资本运作的战略层对话对象——<b>二次拜访升级</b>谈综合合作框架。</div></div></div>')+
   /* §3 六个核心交流议题 */
   '<div class="opb-sec"><span class="no">3</span><b>六个核心交流议题（附交流理由）</b></div>'+
   topics.map(function(tp,i){
