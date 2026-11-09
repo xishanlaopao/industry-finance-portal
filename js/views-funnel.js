@@ -44,7 +44,7 @@
       subs: [...M().funnel.subsSeed],
       tasks: M().funnel.tasksSeed.map(t => Object.assign({}, t, { log: t.log.map(x => Object.assign({}, x)) })),
       tags: {},                /* coId -> [{t, by, d}] 产品经理备注标签 */
-      f: { nets: [], track: '全部', prog: '全部', pos: '全部', wt: '全部', src: '全部', score: '全部', cat: '全部', sig: '全部', lst: '全部', rel: '全部', kw: '', acc: '全部', plist: '全部' },
+      f: { nets: [], city: '全部', credit: '全部', track: '全部', prog: '全部', pos: '全部', wt: '全部', src: '全部', score: '全部', cat: '全部', sig: '全部', lst: '全部', rel: '全部', kw: '', acc: '全部', plist: '全部' },
       conds: [],               /* 自然语言解析出的筛选条件 chips */
       accChips: [],            /* 已选准入标准 chips（多选） */
       claims: [],              /* 客户经理/支行自认领的企业 id（留痕） */
@@ -123,6 +123,8 @@
       (f.sig === '全部' || c.sigLv === f.sig) &&
       (f.rel === '全部' || c.rel === f.rel) &&
       (f.lst === '全部' || (f.lst === '上市' ? c.listed.indexOf('是') === 0 : c.listed.indexOf('是') !== 0)) &&
+      (f.city === '全部' || c.city === f.city) &&
+      (f.credit === '全部' || (f.credit === '无存量授信' ? !(c.internal && c.internal.credit) : !!(c.internal && c.internal.credit))) &&
       (c.score >= minScore) &&
       (!f.kw || (c.name + c.short + c.track).includes(f.kw)) &&
       accOk(c) && listOk(c) &&
@@ -220,10 +222,9 @@
       const tabs = [
         { id: 'co', name: '客户清单', count: st.admitted ? pool().length : 0 },
         { id: 'proj', name: '项目清单', count: st.projAdmitted ? (M().manage || { projects: [] }).projects.length : 0 },
-        { id: 'sub', name: '订阅的企业', count: st.admitted ? st.subs.filter(id => st.admittedIds.includes(id)).length : 0 },
         { id: 'task', name: '任务下发与跟踪', count: st.tasks.length }];
       let act = S.params.tab;
-      if (!['co', 'sub', 'task', 'proj'].includes(act)) act = 'co';
+      if (!['co', 'task', 'proj'].includes(act)) act = 'co';
       delete S.params.tab;   /* 一次性消费，避免角色切换后残留 */
       renderTabs($('#fnTabs'), tabs, act, t => { act = t; S.params.tab = t; paint(); });
       const paint = () => {
@@ -293,6 +294,8 @@
             <div class="fn-fgroup">${netChip('全部')}${NETS().map(netChip).join('')}
               <span class="fn-sep"></span><span class="f-label">赛道</span>
               <select class="select" id="fnTrack" style="width:126px;height:26px">${tracks.map(t => `<option ${f.track === t ? 'selected' : ''}>${t}</option>`).join('')}</select>
+              <span class="fn-sep"></span><span class="f-label">地区</span>
+              <select class="select" id="fnCity" style="width:96px;height:26px">${['全部', ...new Set(all.map(c => c.city))].map(ct => `<option ${f.city === ct ? 'selected' : ''}>${ct}</option>`).join('')}</select>
             </div>
           </div>
           <div class="fn-frow">
@@ -311,6 +314,7 @@
               <span class="fn-sep"></span><span class="f-label">上市</span>${['全部', '上市', '未上市'].map(x => `<button class="chip ${f.lst === x ? 'on' : ''}" data-dim="lst" data-v="${x}" style="height:24px;font-size:11px;padding:0 10px">${x}</button>`).join('')}
               <span class="fn-sep"></span><span class="f-label">相关度</span>${dimChip('rel', RELS)}
               <span class="fn-sep"></span><span class="f-label">来源</span>${['全部', 'AI', 'IMP', 'CLAIM'].map(x => `<button class="chip ${f.src === x ? 'on' : ''}" data-dim="src" data-v="${x}" style="height:24px;font-size:11px;padding:0 10px">${x === 'AI' ? 'AI筛选' : x === 'IMP' ? '导入' : x === 'CLAIM' ? '自认领' : '全部'}</button>`).join('')}
+              <span class="fn-sep"></span><span class="f-label">存量授信</span>${['全部', '无存量授信', '有存量授信'].map(x => `<button class="chip ${f.credit === x ? 'on' : ''}" data-dim="credit" data-v="${x}" style="height:24px;font-size:11px;padding:0 10px">${x}</button>`).join('')}
             </div>
           </div>
           <div class="fn-frow">
@@ -399,6 +403,7 @@
         });
       });
       const trk = box.querySelector('#fnTrack'); trk.onchange = () => { f.track = trk.value; this.paintCo(box); };
+      const cty = box.querySelector('#fnCity'); if (cty) cty.onchange = () => { f.city = cty.value; this.paintCo(box); };
       box.querySelectorAll('[data-why]').forEach(el => el.onclick = e => { e.stopPropagation(); APP.go('plan', { co: el.dataset.why }); });
       box.querySelectorAll('[data-det]').forEach(b => b.onclick = e => { e.stopPropagation(); APP.go('company', { id: b.dataset.det }); });
       box.querySelectorAll('[data-sub]').forEach(b => b.onclick = e => {
@@ -406,7 +411,7 @@
         const id = b.dataset.sub, c = coById(id), i = F().subs.indexOf(id);
         if (i >= 0 && taskOf(id)) { toast(`「${c.short}」已下发跟进任务，不可取消订阅`, 'warn'); return; }
         if (i >= 0) { F().subs.splice(i, 1); toast(`已取消订阅「${c.short}」`); }
-        else { F().subs.push(id); toast(`已订阅「${c.short}」，请在"订阅的企业"中统一下发跟进`); }
+        else { F().subs.push(id); toast(`已订阅「${c.short}」，可在客户清单勾选后批量下发跟进`); }
         this.paintCo(box);
       });
       /* 产品经理：客户清单行内直接下发 */
