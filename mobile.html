@@ -216,6 +216,13 @@ textarea.tarea { width:100%; min-height:88px; resize:vertical; line-height:1.7; 
 .pitem.on { background:var(--brand-500); border-color:var(--brand-500); color:#fff; font-weight:600; }
 .empty { text-align:center; padding:34px 16px; color:var(--t3); font-size:12px; }
 .empty .e { font-size:30px; margin-bottom:6px; }
+</style>.opswitch { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:8px; }
+.osw-l { display:flex; gap:0; background:#fff; border:1px solid var(--line-strong); border-radius:9px; overflow:hidden; }
+.osw-i { padding:5px 12px; font-size:12px; cursor:pointer; color:var(--t2); }
+.osw-i.on { background:var(--brand-500); color:#fff; font-weight:700; }
+.osw-t { font-size:11px; padding:4px 10px; border-radius:999px; background:var(--blue-50,#EAF3FE); color:var(--brand-600); cursor:pointer; border:1px solid var(--line); }
+.osw-t.on { background:#FFF6E8; color:#A2661A; border-color:#F2DEC0; }
+#aiFab2 { position:fixed; right:14px; bottom:76px; z-index:80; width:48px; height:48px; border-radius:50%; border:none; background:linear-gradient(135deg,#6D3BF5,#0090FF); color:#fff; font-size:12px; font-weight:700; box-shadow:0 6px 18px rgba(47,70,220,.4); }
 </style>
 </head>
 <body>
@@ -224,6 +231,7 @@ textarea.tarea { width:100%; min-height:88px; resize:vertical; line-height:1.7; 
   <div class="mkpis" id="mKpis"></div>
   <div class="mbody" id="mBody"></div>
   <div class="mtab" id="mTab"></div>
+  <button id="aiFab2" onclick="openAiSheet()">✦ AI</button>
   <div id="toast"></div>
   <div id="roleMask" style="display:none;position:absolute;inset:0;background:rgba(10,20,40,.45);z-index:90" onclick="toggleRoleSheet()"></div>
   <div id="roleSheet" style="display:none;position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:16px 16px 0 0;z-index:95;padding:6px 12px calc(14px + env(safe-area-inset-bottom));box-shadow:0 -8px 30px rgba(10,20,40,.2)"></div>
@@ -408,7 +416,7 @@ function renderKpis(){
   }).join('');
 }
 function renderTab(){
-  var tabs=[['task','📋','任务'],['op','📄','一页纸'],['visit','🎙','纪要'],['ai','✦','AI'],['my','👤','我的']];
+  var tabs=[['task','📋','任务'],['op','🎯','准备'],['visit','🎙','纪要'],['my','👤','我的']];
   $('#mTab').innerHTML=tabs.map(function(t){ return '<div class="ti '+(S.tab===t[0]?'on':'')+'" data-t="'+t[0]+'"><span class="ic">'+t[1]+'</span>'+t[2]+'</div>'; }).join('');
   Array.prototype.forEach.call($('#mTab').children,function(el){ el.onclick=function(){ switchTab(el.dataset.t); }; });
 }
@@ -439,7 +447,7 @@ function pageTask(){
     h+='<div class="card"><div class="tcard"><div class="tdoc">'+esc(c.short.slice(0,2))+'</div><div class="tbody">'+
       '<div class="tr1"><div class="tn">'+esc(c.short)+'</div><span class="tag '+stTag(t.status)+'">'+t.status+'</span>'+(isOverdueM(t)?'<span class="tag tag-red">超期</span>':'')+((S.role==='pm'&&needAccM(t))?'<span class="tag tag-orange">待陪访</span>':'')+((S.role==='pm'&&needReviewM(t))?'<span class="tag tag-violet">待复核</span>':'')+'</div>'+
       '<div class="tmeta">'+esc(t.type)+' · 截止 '+t.due+' · '+esc(rm(t.rm).name)+' · '+esc(c.net)+'</div>'+
-      '<div class="tmeta">重点：'+esc(t.prods.join(' / '))+'</div>'+
+      '<div class="tmeta">重点：'+esc(t.prods.join(' / '))+(t.nextVisit?' ｜ 下次跟进：<b>'+esc(t.nextVisit)+'</b>':'')+'</div>'+
       (t.log[0]?'<div class="tlast"><b style="color:var(--t1)">'+esc(t.log[0].d)+' '+esc(t.log[0].t)+'</b> — '+esc(t.log[0].x.slice(0,52))+'…</div>':'<div class="tlast" style="color:var(--warn-500)">尚无跟进记录，请尽快接收并拜访</div>')+
       '<div class="tacts">'+
         '<button class="mbtn" onclick="openOp(\''+c.id+'\')">📄 访前一页纸</button>'+
@@ -468,6 +476,9 @@ function opTopics(c){
 function pageOp(){
   var ts=myTasks(); var selCo=S.opCo&&co(S.opCo)?S.opCo:(ts[0]?ts[0].co:D.cos[0].id);
   var c=co(selCo);
+  if (S.opView===undefined) S.opView='brief';
+  if (S.extMode===undefined) S.extMode=false;
+  var sw='<div class="opswitch"><div class="osw-l"><span class="osw-i '+(S.opView==='brief'?'on':'')+'" onclick="setOpView(\'brief\')">速览</span><span class="osw-i '+(S.opView==='full'?'on':'')+'" onclick="setOpView(\'full\')">完整</span></div><span class="osw-t'+(S.extMode?' on':'')+'" onclick="toggleExt()">'+(S.extMode?'外部版':'内部版')+'</span></div>';
   var task0=null; D.tasks.forEach(function(x){ if(x.co===c.id) task0=x; });
   var verdict=c.prog==='突破'?'重点介入':c.prog==='攻坚'?'适度介入':'培育跟踪';
   var vSub=c.pos+'客户 · '+c.prog+'档 · 授信评估';
@@ -481,7 +492,14 @@ function pageOp(){
     '新一代通信网':[['通信设备与器件',c.cat==='建设运营商'?'通信网络建设运营，运营商集采与政企专网为主':'光模块/射频/卫星等器件供货，客户为设备商与运营商','#C0202C'],['AI 与算力带动','AI算力建设带动高速光模块/连接需求，订单能见度高','#2458F5'],['业务壁垒','技术认证与客户验证周期长，车规/高速率环节格局集中','#B08A00']]}[c.net]||[['主营业务',esc(c.track),'#C0202C'],['场景延伸','产业链上下游协同场景','#2458F5'],['业务壁垒','细分领域认证与客户壁垒','#B08A00']];
   var topics=opTopics(c);
   var CLS=['a','b','c'];
-  return '<div class="picker">'+ts.map(function(t){ var cc=co(t.co); return '<div class="pitem '+(cc.id===selCo?'on':'')+'" onclick="openOp(\''+cc.id+'\')">'+esc(cc.short)+'</div>'; }).join('')+'</div>'+
+  if (S.opView==='brief') return sw+
+    '<div class="card" style="text-align:center;padding:16px 14px"><div style="font-size:20px;font-weight:800;color:var(--t1)">' + esc(c.short) + '</div><div class="sub mt1">' + esc(c.net) + ' · ' + esc(c.track) + ' · ' + esc(c.prog) + '档</div></div>' +
+    '<div class="card mb2"><div class="bub-a" style="margin:0">' + esc(topics[0].ask) + '</div></div>' +
+    '<div class="card mb2"><div class="bub-a" style="margin:0">' + esc(topics[1].ask) + '</div></div>' +
+    '<div class="card"><div class="bub-a" style="margin:0;background:#FDF3F3;border:1px solid #F2D5D6;color:#8E0A20">切忌泛泛推销与低价竞争；他行合作、股价话题不主动评论；不承诺额度、利率、审批时限。</div></div>' +
+    '<div style="text-align:center" class="sub mt2">切「完整」查看全部</div>';
+  return sw+'<div class="picker">'+
+  +ts.map(function(t){ var cc=co(t.co); return '<div class="pitem '+(cc.id===selCo?'on':'')+'" onclick="openOp(\''+cc.id+'\')">'+esc(cc.short)+'</div>'; }).join('')+'</div>'+
   /* HERO */
   '<div class="opb-hero"><div><div class="ey">访前准备 · 客户经理速览</div><h2>'+esc(c.name)+'</h2>'+
     '<div class="sb">'+(c.listed.indexOf('是')===0?esc(c.listed.slice(2))+' ｜ ':'')+esc(c.city)+'·'+esc(c.zone)+(c.opp?'（机会地：'+esc(c.opp)+'）':'')+' ｜ '+esc(c.net)+'·'+esc(c.track)+' ｜ 数据基准日 2026-11-04 ｜ 配套：《综合服务方案》</div></div>'+
@@ -489,7 +507,7 @@ function pageOp(){
   /* KPI */
   '<div class="opb-kpis mt2">'+
     kpi('综合评分',c.score)+kpi('客户大类',c.cat==='建设运营商'?'运营商':'供应商')+kpi('上市情况',c.listed.indexOf('是')===0?'是':'否')+
-    kpi('营销进展',c.prog)+kpi('AI 信号',c.sigLv+' 级')+kpi('建议切入',(c.prods||[]).length+' 项')+'</div>'+
+    kpi('营销进展',c.prog)+(S.extMode?'':kpi('AI 信号',c.sigLv+' 级'))+kpi('建议切入',(c.prods||[]).length+' 项')+'</div>'+
   /* §1 客户画像 */
   '<div class="opb-sec"><span class="no">1</span><b>客户画像</b></div>'+
   '<div class="card"><div class="opb-cloud mb2">'+
@@ -511,8 +529,8 @@ function pageOp(){
     var noBg=i<2?'#B08A00':i<4?'#2458F5':'#C0202C';
     return '<div class="opb-topic mb2"><div class="hd"><span class="no2" style="background:'+noBg+'">'+'①②③④⑤⑥'[i]+'</span><span class="q">'+esc(tp.q)+'</span></div>'+
       '<div class="ask">'+esc(tp.ask)+'</div>'+
-      '<div class="why"><b>为什么谈：</b>'+esc(tp.why)+'→ 对应方案：<b>'+esc(tp.plan)+'</b>。</div>'+
-      '<div class="script"><span class="sl">话术示范 · 可照读</span>'+esc(tp.script)+'</div></div>';
+      (S.extMode?'</div>':'<div class="why"><b>为什么谈：</b>'+esc(tp.why)+'→ 对应方案：<b>'+esc(tp.plan)+'</b>。</div>'+
+      '<div class="script"><span class="sl">话术示范 · 可照读</span>'+esc(tp.script)+'</div></div>');
   }).join('')+
   /* §4 拜访注意事项 */
   '<div class="opb-sec"><span class="no">4</span><b>拜访注意事项</b></div>'+
@@ -541,12 +559,12 @@ function pageOp(){
     '<ul style="padding-left:18px;font-size:12px;color:var(--t2);line-height:2"><li>非上市主体——关注 '+(c.prog==='突破'?'Pre-IPO/上市辅导进展（募集资金监管预案提前卡位）':'股权融资轮次与估值变化')+'；</li><li>员工持股与股权激励带来配套金融服务机会。</li></ul>')+'</div>'+
   '<div class="opb-sec"><span class="no">9</span><b>行业景气与公司地位</b></div>'+
   '<div class="card mb2"><ul style="padding-left:18px;font-size:12px;color:var(--t2);line-height:2"><li><span class="tag tag-green" style="height:19px">政策强β</span>江苏省六张网专项持续投入，'+esc(c.net)+'环节订单能见度高；</li><li><span class="tag tag-blue" style="height:19px">公司卡位</span>'+esc(c.track)+'细分环节'+(c.pos==='战略'?'龙头':c.pos==='腰部'?'成长':'参与者')+'，'+c.rel+'；</li><li><span class="tag tag-orange" style="height:19px">竞争压力</span>四大行与股份行均在跟进六张网名单，建议两周内递交方案。</li></ul></div>'+
-  '<div class="opb-sec"><span class="no">10</span><b>风险排查与综合评分</b></div>'+
+  (S.extMode?'':'<div class="opb-sec"><span class="no">10</span><b>风险排查与综合评分</b></div>'+
   '<div class="card"><div class="kvrow"><span class="k">失信/处罚</span><span class="v" style="color:#0F6E56">正常 · 公开信息未见异常</span></div>'+
     '<div class="kvrow"><span class="k">客户集中度</span><span class="v">'+(c.cat==='上游供应商'?'关注 · 前五大集中度需核实':'正常 · 业主以政府/国企为主')+'</span></div>'+
     '<div class="kvrow"><span class="k">同业竞争</span><span class="v" style="color:#C77700">关注 · 比拼方案与服务时效</span></div>'+
     '<div class="opb-hbar" style="margin-top:8px"><span class="bl">四线得分</span><div class="bt"><i style="width:'+c.score+'%"></i></div><span class="bn">'+c.score+' / 100（'+c.sigLv+' 级）</span></div></div>'+
-  '</div></details>'+
+  '</div></details>')+
   '<button class="mbtn pri" style="width:100%;height:38px" onclick="toastMsg(\'访前准备看板已下载（PDF）\')">下载访前准备</button>';
 }
 /* ---------- 纪要页 ---------- */
@@ -575,13 +593,13 @@ function pageVisit(){
     '<button class="mic" id="micBtn" onclick="toggleMic()">●</button>'+
     '<div class="rwave" id="rWave">'+'<i></i>'.repeat(14)+'</div>'+
     '<div class="rt" id="rTime">00:00</div>'+
-    '<div class="rtip" id="rTip">点击录音：口述拜访过程，停止后自动转文字并整理归档<br>（录音不上传）</div>'+
+    '<div class="rtip" id="rTip">点击录音：口述拜访过程，停止后自动转文字并整理归档<br>（离线也能记，不上传）</div>'+
   '</div>'+
   '<div class="card">'+
     '<div class="fgrid">'+
       '<div class="fitem"><label>拜访日期</label><input type="date" id="vDate" value="2026-11-04"></div>'+
       '<div class="fitem"><label>拜访方式</label><select id="vWay"><option>上门走访</option><option>视频会议</option><option>电话沟通</option></select></div>'+
-      '<div class="fitem"><label>关键人</label><input id="vPeer" placeholder="张总·财务总监"></div>'+
+      '<div class="fitem"><label>关键人</label><input id="vPeer" placeholder="张总·财务总监"></div><div class="fitem"><label>下次跟进时间 *</label><input type="date" id="vNext"></div>'+
     '</div>'+
     '<div class="fitem" style="margin:2px 0 6px"><label>交流要点（转写原文，可修改）</label>'+
     '<textarea class="tarea" id="vNote" placeholder="点击上方录音按钮，转写文字将自动填入；也可直接输入"></textarea></div>'+
@@ -707,10 +725,13 @@ function saveVisit(){
   if (!note) { toastMsg('请先录入交流要点'); return; }
   var aiOK=$('#aiOut').dataset.done==='1';
   var peer=$('#vPeer').value.trim()||'关键人';
+  var vNext=$('#vNext').value;
+  if (!vNext) { toastMsg('请当场敲定下次跟进时间（必填）'); return; }
+  t.nextVisit=vNext;
   t.log.unshift({ d:'11-04', t:'访客纪要（第'+(t.log.filter(function(l){return l.t.indexOf('访客纪要')>=0;}).length+1)+'次）', by:user().name, x:'【'+$('#vWay').value+' · '+peer+'】'+note+'（AI 已整理'+(aiOK?'：需求识别+综合方案（含非信贷服务）':'')+'）' });
   S._justSaved=true;
   if (t.status==='待接收') t.status='跟进中';
-  toastMsg('第 '+(t.log.filter(function(l){return l.t.indexOf('访客纪要')>=0;}).length)+' 次拜访纪要已归档 · 任务更新为「跟进中」，待中后台协同后方案迭代');
+  toastMsg('纪要已归档 · 下次跟进 '+vNext+' 已确认 · 待中后台协同后方案迭代');
   renderHead(); renderBody();
   renderKpis();
   var nl=document.querySelector('.logitem'); if(nl&&S._justSaved){ nl.style.animation='mLogIn .7s both'; S._justSaved=false; }
@@ -729,8 +750,15 @@ function askAI(i){
   var x=D.qa[i]; S.chat.push({q:x.q,a:x.a,src:x.src}); renderBody();
   setTimeout(function(){ var b=$('#chatBox'); if (b) b.parentElement.scrollTop=1e5; var cb=$('#chatBox'); if(cb) cb.scrollIntoView({block:'end'}); },30);
 }
+function curCtxCo(){ var t=task(S.selTask); return t?co(t.co):null; }
+function ctxAns(c, q){
+  if (/注意|风险|别说/.test(q)) return '注意：'+(c.prog==='突破'?'方案窗口在近期，抓紧递交；':'以建立联系为主，不急于报价；')+'不承诺额度、利率、审批时限。';
+  return '围绕「'+c.short+'」（'+c.net+' · '+c.track+'，'+c.prog+'档）：可主推 '+((c.prods||[]).slice(0,3).join('、')||'流动资金贷款')+'；非信贷先行（结算/代发）建立往来。完整建议见「准备」页。';
+}
 function askFree(){
   var q=$('#aiQ').value.trim(); if(!q) return;
+  var ctx=curCtxCo();
+  if (/这个客户|该客户/.test(q) && ctx) { S.chat.push({q:q,a:ctxAns(ctx,q)}); renderBody(); return; }
   var hit=null; D.qa.forEach(function(x){ if (!hit && (x.q.indexOf(q.slice(0,4))>=0||q.indexOf(x.q.slice(0,4))>=0)) hit=x; });
   S.chat.push({q:q,a:hit?hit.a:'已收到您的问题，建议点击下方推荐问题。',src:hit?hit.src:''});
   renderBody();
@@ -741,7 +769,7 @@ function pageMy(){
   var u=user();
   return '<div class="card"><div class="sec-t">关于</div><div class="kvrow"><span class="k">平台</span><span class="v">北斗·产融智航系统 · 移动工作台</span></div>'+
   '<div class="kvrow"><span class="k">数据时点</span><span class="v">2026-11-04</span></div>'+
-  '<div class="kvrow"><span class="k">功能</span><span class="v">任务列表 · 访前一页纸 · 访客纪要（语音转写+AI整理）· AI问答</span></div>'+
+  '<div class="kvrow"><span class="k">功能</span><span class="v">任务 · 准备（速览/完整/外部版）· 纪要（离线可记+下次跟进）· AI助手（带客户上下文） · 跟进台账</span></div>'+
   '<div class="kvrow"><span class="k">说明</span><span class="v">停止录音后自动转写并整理归档</span></div></div>';
 }
 function toggleRoleSheet(){
@@ -756,7 +784,8 @@ function toggleRoleSheet(){
     '<div class="mbtn" style="width:100%;margin-top:6px" onclick="toggleRoleSheet()">取消</div>';
 }
 function pickRole(r){ toggleRoleSheet(); setRole(r); }
-function setRole(r){ S.role=r; var ts=myTasks(); S.selTask=ts[0]?ts[0].id:null; S.opCo=null; renderHead(); renderTab(); renderBody(); toastMsg('已切换：'+user().name+'（'+user().role+'）'); }
+function setRole(r){ S.role=r; var ts=myTasks(); S.selTask=ts[0]?ts[0].id:null; S.opCo=null; renderHead(); renderTab(); renderBody();
+var fab=document.createElement('button'); fab.id='aiFab2'; fab.innerHTML='✦ AI'; fab.onclick=openAiSheet; document.querySelector('.phone').appendChild(fab); toastMsg('已切换：'+user().name+'（'+user().role+'）'); }
 /* 通用底部弹层（访后报告上传等复用角色切换的遮罩与容器） */
 function openSheet(title, bodyHtml, footHtml){
   var mask=document.querySelector('#roleMask'), sheet=document.querySelector('#roleSheet');
@@ -772,6 +801,31 @@ function closeSheet(){
   mask.onclick=toggleRoleSheet;
 }
 
+/* ---------- 总渲染 ---------- *//* ---------- AI 全局浮层 + 一页纸开关 ---------- */
+function setOpView(v){ S.opView=v; renderBody(); }
+function toggleExt(){ S.extMode=!S.extMode; renderBody(); toastMsg(S.extMode?'外部版：仅公开信息与提问清单':'内部版：完整作战信息'); }
+function curCtxCo(){ var t=task(S.selTask); return t?co(t.co):null; }
+function openAiSheet(){
+  var c=curCtxCo();
+  var head=c?'<div class="sub" style="margin-bottom:6px">当前客户：<b>'+esc(c.short)+'</b> · '+esc(c.net)+'</div><div class="sugs"><span class="sug" onclick="aiSheetAsk(\'这个客户能做什么？\')">这个客户能做什么？</span><span class="sug" onclick="aiSheetAsk(\'这个客户注意什么？\')">这个客户注意什么？</span></div>':'<div class="sub" style="margin-bottom:6px">先在任务或准备页选择客户，即可问“这个客户能做什么”。</div>';
+  var body='<div style="max-height:44vh;overflow-y:auto" id="aiShChat">'+S.chat.map(function(m){ return m.q?('<div class="bub-q">'+esc(m.q)+'</div><div class="bub-a">'+m.a+'</div>'):('<div class="bub-a">'+m.a+'</div>'); }).join('')+'</div>'+
+    '<div class="sugs">'+D.qa.map(function(x,i){ return '<span class="sug" onclick="aiSheetAskQA('+i+')">'+esc(x.q)+'</span>'; }).join('')+'</div>'+
+    '<div class="askrow"><input id="aiShQ" placeholder="提问，或问“这个客户能做什么”…" onkeydown="if(event.key===\'Enter\')aiSheetFree()"><button onclick="aiSheetFree()">提问</button></div>';
+  openSheet('✦ AI 助手'+(c?' · '+esc(c.short):''), head+body, '<button class="mbtn" style="width:100%" onclick="closeSheet()">收起</button>');
+}
+function aiSheetAsk(q){
+  var c=curCtxCo(); var a;
+  if (/这个客户|该客户/.test(q) && c) a = /注意|风险|别说/.test(q)
+    ? '注意：'+(c.prog==='突破'?'方案窗口在近期，抓紧递交；':'以建立联系为主，不急于报价；')+'不承诺额度、利率、审批时限。'
+    : '围绕「'+esc(c.short)+'」（'+esc(c.net)+' · '+esc(c.track)+'，'+esc(c.prog)+'档）：可主推 '+esc((c.prods||[]).slice(0,3).join('、')||'流动资金贷款')+'；非信贷先行（结算/代发）建立往来。';
+  else { var hit=null; D.qa.forEach(function(x){ if(!hit&&(x.q.indexOf(q.slice(0,4))>=0||q.indexOf(x.q.slice(0,4))>=0)) hit=x; }); a=hit?hit.a:'已收到问题，结合当前客户与产品政策回答。'; }
+  S.chat.push({q:q,a:a});
+  var cb=document.querySelector("#aiShChat");
+  if (cb) { cb.innerHTML=S.chat.map(function(m){ return m.q?('<div class="bub-q">'+esc(m.q)+'</div><div class="bub-a">'+m.a+'</div>'):('<div class="bub-a">'+m.a+'</div>'); }).join(''); cb.scrollTop=cb.scrollHeight; }
+  var ip=document.querySelector("#aiShQ"); if (ip) ip.value='';
+}
+function aiSheetAskQA(i){ aiSheetAsk(D.qa[i].q); }
+function aiSheetFree(){ var q=($("#aiShQ")||{}).value||""; q=q.trim(); if(!q){ toastMsg("请输入问题"); return; } aiSheetAsk(q); }
 /* ---------- 总渲染 ---------- */
 function renderBody(){
   var h='';
