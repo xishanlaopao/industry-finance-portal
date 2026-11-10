@@ -319,9 +319,7 @@
     },
     paintChain(box) {
       const m = M(), cd = m.chainData;
-      /* 朗新上下文：访前报告(S.reportCo)或企业研报(S._rschCo)选中的企业 */
-      const ctxId = S.reportCo || S._rschCo;
-      const ctxCo = ctxId && m.coById(ctxId);
+      const ctxCo = S.reportCo && m.coById(S.reportCo);
       if (ctxCo && ctxCo.name.indexOf('朗新') >= 0) {
         box.innerHTML = `
         <div class="card card-pad mb4">
