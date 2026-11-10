@@ -467,7 +467,7 @@
         <div class="rpt-form mb4" style="flex-direction:column;align-items:stretch;gap:10px;${fullRpt ? 'display:none' : ''}">
           <div class="flex" style="gap:10px">
             <div style="position:relative;flex:1;min-width:260px">
-              <input id="rptQ" class="rf-ctl" placeholder="企业名称 · 支持模糊搜索，如：晶汇封测 / 晶封" autocomplete="off" value="${esc(F.kw)}" style="width:100%">
+              <input id="rptQ" class="rf-ctl" placeholder="企业名称 / 统一社会信用代码 · 支持模糊搜索，如：晶汇封测 / 晶封" autocomplete="off" value="${esc(F.kw)}" style="width:100%">
               <div id="rptSug" style="display:none;position:absolute;top:40px;left:0;width:100%;background:#fff;border-radius:10px;box-shadow:0 14px 36px rgba(0,0,0,.22);padding:6px;z-index:40"></div>
             </div>
             ${S._rptCoId && m.coById(S._rptCoId) ? `<span class="tag tag-green" style="height:38px;display:inline-flex;align-items:center;gap:6px;flex-shrink:0">✓ ${esc(m.coById(S._rptCoId).short)}</span>` : ''}
@@ -525,8 +525,9 @@
       if (rsBtn) rsBtn.onclick = () => { const f = box.querySelector('.rpt-form'); if (f) f.style.display = 'flex'; rsBtn.style.display = 'none'; };
       /* 搜索表单绑定（行业 + 模糊搜索 + 补充要求 → 生成） */
       const q = box.querySelector('#rptQ'), sug = box.querySelector('#rptSug');
+      const usccOfD = co => { if (!co.uscc || co.uscc === '—') { const df = fnDemoFill(co); if (df && df.uscc) co.uscc = df.uscc; } return co.uscc || ''; };
       const fuzzy = (co, kw) => {
-        const hay = co.name + co.short + co.seg + co.industry;
+        const hay = co.name + co.short + co.seg + co.industry + usccOfD(co);
         const words = kw.split(/\s+/).filter(Boolean);
         if (words.every(w => hay.includes(w))) return true;
         return [...kw].every(ch => hay.includes(ch));
@@ -772,14 +773,14 @@
     },
     /* ---- 我的报告 ---- */
     paintMine(box) {
-      const kindTag = k => k === '访后报告' ? 'tag-orange' : k === '产业链报告' ? 'tag-violet' : 'tag-blue';
+      const kindTag = k => k === '访后报告' ? 'tag-orange' : k === '产业链报告' ? 'tag-violet' : k === '企业研报' ? 'tag-cyan' : 'tag-blue';
       const nameOf = r => {
         if (r.kind === '产业链报告') return r.title ? r.title.replace('产业分析报告', '') : '集成电路';
         const c = M().coById(r.co); return c ? c.short : '—';
       };
       if (!S._mineFilter) S._mineFilter = { kw: '', kind: '全部' };
       const F = S._mineFilter;
-      const kinds = ['全部', '企业报告', '产业链报告', '访后报告'];
+      const kinds = ['全部', '企业报告', '产业链报告', '访后报告', '企业研报'];
       let filtered = S.rptMy.filter(r => {
         if (F.kind !== '全部' && (r.kind || '企业报告') !== F.kind) return false;
         if (F.kw) {
@@ -802,7 +803,7 @@
           <td>${r.t}</td><td>${r.by}</td>
           <td>
             <button class="btn btn-text btn-sm" data-v="${idx}">查看</button>
-            ${r.kind === '访后报告' ? `<button class="btn btn-text btn-sm" data-wd="${idx}">下载Word</button>` : r.kind === '产业链报告' ? `<button class="btn btn-text btn-sm" data-e="${idx}">导出</button>` : `<button class="btn btn-text btn-sm" data-bf="${idx}">访前一页纸</button><button class="btn btn-text btn-sm" data-e="${idx}">导出PDF</button>`}
+            ${r.kind === '访后报告' ? `<button class="btn btn-text btn-sm" data-wd="${idx}">下载Word</button>` : r.kind === '产业链报告' ? `<button class="btn btn-text btn-sm" data-e="${idx}">导出</button>` : r.kind === '企业研报' ? `<button class="btn btn-text btn-sm" data-e="${idx}">导出PDF</button>` : `<button class="btn btn-text btn-sm" data-bf="${idx}">访前一页纸</button><button class="btn btn-text btn-sm" data-e="${idx}">导出PDF</button>`}
             <button class="btn btn-text btn-sm" style="color:var(--danger-500)" data-d="${idx}">删除</button>
           </td></tr>`; }).join('') ||
         '<tr><td colspan="5"><div class="empty"><div class="e-ico">📄</div><div class="e-title">暂无报告</div></div></td></tr>'}</tbody></table></div>`;
@@ -813,6 +814,7 @@
         const r = S.rptMy[+b.dataset.v];
         if (r.kind === '访后报告') { S._visitId=r.id; S.params.tab='visit'; this.render(document.querySelector('#viewRoot')); return; }
         if (r.kind === '产业链报告') { S._chainView = 'report'; S._chainSel = '集成电路与电子材料'; S.params.tab = 'chain'; this.render(document.querySelector('#viewRoot')); return; }
+        if (r.kind === '企业研报') { S._rschCo = r.co; S.params.tab = 'research'; this.render(document.querySelector('#viewRoot')); return; }
         S.reportCo = r.co; S.params.tab = 'detail'; this.render(document.querySelector('#viewRoot'));
       });
       box.querySelectorAll('[data-bf]').forEach(b => b.onclick = () => this.briefDlg(S.rptMy[+b.dataset.bf].co));
@@ -829,6 +831,190 @@
         toast(`已删除「${nameOf(r)}」的报告`); this.render(document.querySelector('#viewRoot'));
       }));
     },
+    /* ---- 企业研报（投资机构视角） ---- */
+    paintResearch(box) {
+      const m = M();
+      if (S._rschCo && !m.coById(S._rschCo)) S._rschCo = null;
+      const c = S._rschCo ? m.coById(S._rschCo) : null;
+      const F = S._rschForm = S._rschForm || { kw: '' };
+      /* 统一社会信用代码检索：漏斗池(F开头)企业 uscc 由 fnDemoFill 确定性补齐 */
+      const usccOf = co => { if (!co.uscc || co.uscc === '—') { const df = fnDemoFill(co); if (df && df.uscc) co.uscc = df.uscc; } return co.uscc || ''; };
+      /* 研报数据：晶汇封测完整示例；其余企业按四维评分确定性生成演示数据（未选企业时跳过） */
+      const d = !c ? null : (() => {
+        if (c.id === 'JH') return {
+          rating: 'A · 建议积极关注', tgt: '45～54亿元（PS 4.9～5.9x）', cagr: '25%～30%', gpm: '24%～26%', npm: '11%～13%',
+          pts: [['赛道β', '先进封装2026-2028年CAGR约21%，Chiplet国产替代处于0→1窗口期'],
+            ['公司α', '成长性（营收+28% vs 行业+9%）与盈利质量（净利率12.2% vs 行业8.5%）显著跑赢同业'],
+            ['订单验证', '在手订单覆盖4个季度产能，两家头部设计客户3年框架协议锁定基本盘'],
+            ['估值判断', '可比公司法给出45～54亿区间，IPO发行价预计锚定区间下沿，上市后6-12个月存在修复空间']],
+          tam: [['中国先进封装市场', '2026年约1,310亿元，2028年预计突破1,900亿元', '+21% CAGR'], ['全球SiP/模组类封装', '约86亿美元，AI终端与射频驱动持续扩容', '+17% CAGR'], ['Chiplet生态（国产）', '2028年国内约300亿元，国产替代窗口期', '+35% CAGR']],
+          drivers: 'AI算力芯片向2.5D/3D先进封装迁移、国产设计公司Fabless化带动封测外包比例提升、汽车电子（座舱/智驾）放量带来车规封测长单，三条主线共同支撑赛道景气。',
+          comps: [['长电科技', 'A股上市', '312.0亿', '+11%', 'PS 1.6x', '全球封测头部，估值锚'], ['华宇封测', 'A股上市', '38.0亿', '+9%', 'PS 2.1x', '规模龙头，2.5D/3D量产成熟'], ['晶汇封测（本企业）', 'IPO已受理', '9.2亿', '+28%', 'PS 3.0～3.6x', '成长性与盈利质量溢价'], ['金桥封测', '新三板', '6.8亿', '+6%', 'PS 1.2x', '传统封装为主，流动性折价']],
+          fin: [['2024A', '7.2亿', '+18.0%', '23.1%', '10.8%'], ['2025A', '9.2亿', '+28.4%', '24.6%', '12.2%'], ['2026E', '12.1亿', '+31.5%', '25.2%', '12.5%'], ['2027E', '15.6亿', '+28.9%', '25.8%', '13.0%'], ['2028E', '20.1亿', '+28.8%', '26.2%', '13.4%']],
+          rounds: [['A轮', '2018-06', '8,000万元', '5.0亿', '国科投资（领投）'], ['B轮', '2020-09', '2.0亿元', '14亿', '中芯聚源（领投）'], ['B+轮', '2022-03', '3.5亿元', '28亿', '毅达资本（领投）'], ['C轮', '2024-11', '5.0亿元', '45亿', '大基金三期（领投）']],
+          holders: '创始团队及一致行动人合计持股46.2%；机构股东：大基金三期18.5%、中芯聚源9.2%、毅达资本7.1%、国科投资5.5%；员工持股平台6.8%。IPO申报前无执行中的对赌回购条款，股权结构清晰。',
+          team: [['实际控制人 / 创始人', '董事长兼总经理，20年封测行业经验，曾任华宇封测运营副总裁'], ['CTO', '前长电科技先进封装研发负责人，2.5D/3D工艺专家'], ['CFO', '注册会计师，主导两轮股权融资与IPO申报'], ['治理结构', '董事会7席（创始团队4席、机构3席），近三年无治理僵局与诉讼记录']],
+          hls: [['卡位Chiplet国产化', '2.5D中试线已通线，国内少数具备Chiplet量产过渡能力的独立封测厂'], ['成长确定性强', '在手订单覆盖未来4个季度产能，两家头部设计客户签订3年框架协议'], ['盈利质量优', '净利率12.2%高于行业均值3.7pct，经营性现金流连续3年为正'], ['资本路径清晰', '科创板IPO已受理，预计募资22亿元扩产2.5D/3D产线']],
+          risks: [['客户集中度', '前五大客户收入占比68%，头部客户砍单将直接冲击营收'], ['技术路线迭代', 'Chiplet若转向混合键合路线，现有中试线设备面临二次投入'], ['资本开支压力', 'IPO前扩产依赖债务融资，资产负债率已升至58%'], ['估值消化风险', '上市进度不及预期时，一级市场估值存在倒挂可能']],
+          path: ['2026-09 科创板IPO受理', '2027-H1 过会并发行（预计募资22亿）', '2027-H2 2.5D/3D扩产线投产', '2028E 营收突破20亿，进入国内封测前六'],
+          bank: 'IPO募资账户监管与资金托管是天然切入点；扩产期设备融资租赁、并购贷可与大基金形成投贷联动；上市后募集资金沉淀带来主结算行谈判窗口。',
+        };
+        const sc = c.score || 68, rev = 3 + sc % 7;
+        const A = sc >= 85 ? 'A · 建议积极关注' : sc >= 72 ? 'B+ · 建议关注' : 'B · 持续观察';
+        const g = 18 + sc % 12;
+        const escD = s => esc(String(s == null ? '' : s));
+        const f1 = (rev / 1.28).toFixed(1), f2 = rev.toFixed(1), f3 = (rev * 1.29).toFixed(1), f4 = (rev * 1.66).toFixed(1), f5 = (rev * 2.14).toFixed(1);
+        return {
+          rating: A, tgt: `${(rev * 3).toFixed(0)}～${(rev * 3.7).toFixed(0)}亿元（PS 3.0～3.7x）`, cagr: `18%～${g + 6}%`, gpm: `21%～${21 + sc % 5}%`, npm: `${7 + sc % 3}%～${8 + sc % 5}%`,
+          pts: [['赛道β', `${escD(c.industry || '所属产业')}景气度向上，细分环节国产替代加速`],
+            ['公司α', `四维评分${sc}分，成长性与客户结构优于同业均值`],
+            ['订单验证', c.opp ? `机会区域落地：${escD(c.opp)}，区域产能与订单可交叉验证` : '在手订单覆盖未来12个月产能需求'],
+            ['估值判断', `可比公司法给出${(rev * 3).toFixed(0)}～${(rev * 3.7).toFixed(0)}亿区间，Pre-IPO轮估值处于区间中位`]],
+          tam: [[escD(c.industry || '集成电路与电子材料') + '（国内）', '市场空间与国产替代双轮驱动，细分环节扩容快于整体', '+15% CAGR'], [escD(c.seg || '细分环节') + '细分市场', '头部客户渗透率提升，外包比例持续上行', '+18% CAGR'], ['下游新兴应用', '新能源车 / AI终端 / 算力基建带来增量需求', '+22% CAGR']],
+          drivers: `${escD(c.short)}所处的${escD(c.seg || c.industry || '细分')}环节受益于国产替代与下游新兴应用放量，行业景气向上；企业自身凭借${sc >= 80 ? '技术卡位与头部客户绑定' : '性价比与快速响应'}获取超额增速。`,
+          comps: [['行业龙头', 'A股上市', `${(rev * 4).toFixed(1)}亿`, '+10%', 'PS 1.8x', '规模龙头，估值锚'], ['同业可比公司A', 'IPO申报中', `${(rev * 1.5).toFixed(1)}亿`, '+16%', 'PS 2.6x', '同赛道直接可比'], [escD(c.short) + '（本企业）', 'Pre-IPO', `${f2}亿`, `+${g}%`, 'PS 3.0～3.7x', '成长性溢价'], ['区域同业B', '新三板', `${(rev * 0.8).toFixed(1)}亿`, '+6%', 'PS 1.2x', '流动性折价']],
+          fin: [['2024A', `${f1}亿`, `+${g - 6}%`, `${20 + sc % 4}.0%`, `${8 + sc % 3}.0%`], ['2025A', `${f2}亿`, `+${g}%`, `${21 + sc % 4}.4%`, `${9 + sc % 3}.2%`], ['2026E', `${f3}亿`, '+29%', `${21 + sc % 4}.8%`, `${9 + sc % 3}.6%`], ['2027E', `${f4}亿`, '+28%', `${22 + sc % 4}.2%`, `${10 + sc % 3}.0%`], ['2028E', `${f5}亿`, '+29%', `${22 + sc % 4}.6%`, `${10 + sc % 3}.4%`]],
+          rounds: [['天使轮', '2017-03', '2,000万元', '1.2亿', '天使投资基金'], ['A轮', '2019-08', '8,000万元', '5亿', '区域产业基金（领投）'], ['B轮', '2022-05', '2.5亿元', '18亿', '产业资本（领投）'], ['C轮', '2025-06', '4.0亿元', `${(rev * 3).toFixed(0)}亿`, '国家级产业基金（领投）']],
+          holders: `创始团队及一致行动人合计持股50%以上；机构股东合计约${35 - sc % 10}%；员工持股平台约7%。股权结构清晰，无执行中的对赌回购条款。`,
+          team: [['实际控制人 / 创始人', '董事长兼总经理，行业经验15年以上，技术出身'], ['核心技术团队', '来自行业头部厂商，覆盖研发 / 工艺 / 质量关键岗位'], ['CFO', '主导历轮股权融资与上市筹备'], ['治理结构', '董事会创始团队与机构股东席位数均衡，近三年无重大治理事件']],
+          hls: [['细分环节卡位', `${escD(c.seg || c.industry || '细分')}环节区域内领先，客户结构优质`], ['成长确定性强', `四维评分${sc}分${c.opp ? '，机会区域：' + escD(c.opp) : ''}，在手订单支撑未来12个月增长`], ['盈利质量改善', '毛利率与净利率稳中有升，经营性现金流为正'], ['资本路径清晰', '已启动上市辅导，预计两年内申报']],
+          risks: [['客户集中度', '前五大客户收入占比偏高，头部客户砍单直接冲击营收'], ['技术路线迭代', '下游技术路线切换时现有产能面临二次投入'], ['资本开支压力', '扩产期依赖债务融资，资产负债率上行'], ['估值消化风险', '上市进度不及预期时，一级市场估值存在倒挂可能']],
+          path: ['当期：股份制改造与上市辅导', 'T+1年：申报材料受理', 'T+2年：过会并发行', 'T+3年：募投项目落地，进入下一成长曲线'],
+          bank: '上市前以"股权融资对接 + 上市贷"切入，锁定成长期资金需求；扩产期设备融资租赁与项目贷可与产业基金投贷联动；上市后募资账户监管与现金管理带来主结算行机会。',
+        };
+      })();
+      const secs = [['r1', '1 · 投资要点'], ['r2', '2 · 赛道与市场空间'], ['r3', '3 · 竞争格局与可比估值'], ['r4', '4 · 财务表现与预测'], ['r5', '5 · 融资历史与股权'], ['r6', '6 · 团队与治理'], ['r7', '7 · 投资亮点'], ['r8', '8 · 风险提示'], ['r9', '9 · 资本路径与银行协同']];
+      const sec = (no, t) => `<div class="rpt-sec" id="r${no}"><div class="rs-head"><span class="rs-no">${no}</span><span class="rs-title">${t}</span></div>`;
+      const formHtml = `
+        <div class="rpt-form mb4" id="rschForm" style="flex-direction:column;align-items:stretch;gap:10px;display:${c ? 'none' : 'flex'}">
+          <div class="flex" style="gap:10px">
+            <div style="position:relative;flex:1;min-width:260px">
+              <input id="rschQ" class="rf-ctl" placeholder="企业名称 / 统一社会信用代码 · 支持模糊搜索，如：晶汇封测 / 晶封" autocomplete="off" value="${esc(F.kw)}" style="width:100%">
+              <div id="rschSug" style="display:none;position:absolute;top:40px;left:0;width:100%;background:#fff;border-radius:10px;box-shadow:0 14px 36px rgba(0,0,0,.22);padding:6px;z-index:40"></div>
+            </div>
+            <button class="btn" id="rschGen" style="background:#C0202C;color:#fff;font-weight:700;flex-shrink:0">生成研报</button>
+          </div>
+        </div>`;
+      let body = '';
+      if (!c) {
+        body = `<div class="card"><div class="empty" style="padding:56px 20px"><div class="e-ico">🔍</div><div class="e-title">请先搜索企业生成研报</div></div></div>`;
+      } else {
+        body = `
+        <div class="card card-pad mb4">
+          <div class="flex-between wrap" style="gap:12px">
+            <div class="flex" style="gap:14px;align-items:center">
+              ${scoreRing(c.score || 75, 40)}
+              <div><div style="font-size:var(--fs-xl);font-weight:700;line-height:1.2">${esc(c.short)} · 企业研报</div>
+              <div class="flex mt1" style="gap:8px;align-items:center;flex-wrap:wrap"><span class="tag tag-solid-red">投资评级 ${esc(d.rating)}</span><span class="text-xs text-muted">数据时点 2026-09-28</span><span class="src-tip">来源<span class="src-pop" style="left:0;right:auto"><span class="sp-t text-sm">数据来源</span><span class="sp-l text-xs text-sub">· 企业公开披露信息与工商登记　截至2026-09</span><span class="sp-l text-xs text-sub">· 一级市场融资数据库（Wind / IT桔子）　截至2026-09</span><span class="sp-l text-xs text-sub">· 行业协会白皮书与券商可比公司研报　2026-08</span><span class="sp-l text-xs text-sub">· 在手订单与产能验证（企业调研）　2026-09</span></span></span></div></div>
+            </div>
+            <div class="flex" style="gap:8px">
+              <button class="btn btn-ghost" id="rschRe">检索其他企业</button>
+              <button class="btn btn-ghost" id="rschDl">导出PDF</button></div>
+          </div>
+          <div class="text-xs text-muted mt2" style="line-height:1.7">研究视角：投资机构（股权投资） ｜ 估值方法：可比公司法 + 在手订单交叉验证 ｜ ${esc(c.name)}</div>
+        </div>
+        <div class="rpt-layout">
+          <aside class="ns-side" style="position:sticky;top:80px">
+            <div class="ns-g">报告模块</div>
+            ${secs.map(([id, n]) => `<div class="ns-i" data-rs="${id}">${n}</div>`).join('')}
+            <div class="ns-g" style="margin-top:10px">快捷操作</div>
+            <div class="ns-i" id="rschDl2">导出PDF</div>
+          </aside>
+          <div>
+        ${sec(1, '投资要点')}
+          <div class="kv-grid mb3" style="grid-template-columns:repeat(4,1fr);gap:10px">
+            ${[['目标估值区间', d.tgt], ['预计营收CAGR（3年）', d.cagr], ['毛利率中枢', d.gpm], ['净利率中枢', d.npm]].map(([k, v]) => `<div class="kv"><div class="kv-k">${k}</div><div class="kv-v" style="font-size:13px;font-weight:700">${v}</div></div>`).join('')}
+          </div>
+          ${d.pts.map(([t, x]) => `<div class="flex mb2" style="gap:8px;align-items:flex-start"><span class="rank-pill" style="background:var(--brand-100);color:var(--brand-600);flex-shrink:0">•</span><span class="text-sm text-sub" style="line-height:1.8"><b>${t}</b> · ${x}</span></div>`).join('')}</div>
+        ${sec(2, '赛道与市场空间')}
+          <div class="grid-3 mb3" style="gap:10px">
+            ${d.tam.map(([t, x, g2]) => `<div style="padding:12px 14px;background:#F8FAFD;border-radius:8px"><div class="flex-between"><b class="text-sm">${t}</b><span class="tag tag-green" style="height:20px;font-size:10px;flex-shrink:0">${g2}</span></div><div class="text-xs text-sub mt2" style="line-height:1.7">${x}</div></div>`).join('')}
+          </div>
+          <div class="banner b-note">核心增长驱动：${d.drivers}</div></div>
+        ${sec(3, '竞争格局与可比估值')}
+          <table class="tbl"><thead><tr><th>公司</th><th>资本阶段</th><th>营收（2025）</th><th>增速</th><th>估值水平</th><th>备注</th></tr></thead><tbody>
+          ${d.comps.map(r => { const self = r[0].indexOf('本企业') >= 0; return `<tr ${self ? 'style="background:var(--brand-50)"' : ''}><td><b class="text-sm">${r[0]}</b></td><td class="text-xs text-sub">${r[1]}</td><td class="text-xs text-sub">${r[2]}</td><td class="text-xs" style="color:var(--ok-500)">${r[3]}</td><td class="text-xs" style="font-weight:700;color:${self ? 'var(--brand-600)' : 'var(--t1)'}">${r[4]}</td><td class="text-xs text-sub">${r[5]}</td></tr>`; }).join('')}</tbody></table>
+          <div class="text-xs text-muted mt2">估值方法：可比公司法（PS倍数区间） + 最近一轮融资估值交叉验证</div></div>
+        ${sec(4, '财务表现与预测')}
+          <table class="tbl"><thead><tr><th>年度</th><th>营业收入</th><th>同比增速</th><th>毛利率</th><th>净利率</th></tr></thead><tbody>
+          ${d.fin.map(r => `<tr><td><b class="text-sm">${r[0]}</b>${r[0].indexOf('E') > 0 ? ' <span class="tag tag-blue" style="height:17px;font-size:9px;padding:0 4px">预测</span>' : ''}</td><td class="text-xs text-sub">${r[1]}</td><td class="text-xs" style="color:var(--ok-500)">${r[2]}</td><td class="text-xs text-sub">${r[3]}</td><td class="text-xs text-sub">${r[4]}</td></tr>`).join('')}</tbody></table>
+          <div class="text-xs text-muted mt2">口径说明：A为审计/披露口径，E为投资机构预测口径；预测基于在手订单、产能爬坡与客户框架协议。</div></div>
+        ${sec(5, '融资历史与股权')}
+          <table class="tbl"><thead><tr><th>轮次</th><th>时间</th><th>金额</th><th>投后估值</th><th>领投方</th></tr></thead><tbody>
+          ${d.rounds.map(r => `<tr><td><b class="text-sm">${r[0]}</b></td><td class="text-xs text-sub">${r[1]}</td><td class="text-xs text-sub">${r[2]}</td><td class="text-xs" style="font-weight:700">${r[3]}</td><td class="text-xs text-sub">${r[4]}</td></tr>`).join('')}</tbody></table>
+          <div class="text-sm text-sub mt3" style="line-height:1.8"><b>股权结构：</b>${d.holders}</div></div>
+        ${sec(6, '团队与治理')}
+          <div class="grid-2" style="gap:8px">${d.team.map(([t, x]) => `<div style="padding:10px 12px;background:#F8FAFD;border-radius:8px"><b class="text-sm">${t}</b><div class="text-xs text-sub mt1" style="line-height:1.7">${x}</div></div>`).join('')}</div></div>
+        ${sec(7, '投资亮点')}
+          <div class="grid-2" style="gap:8px">${d.hls.map(([t, x], i) => `<div style="padding:10px 12px;background:var(--brand-50);border-radius:8px"><b class="text-sm" style="color:var(--brand-600)">亮点${i + 1} · ${t}</b><div class="text-xs text-sub mt1" style="line-height:1.7">${x}</div></div>`).join('')}</div></div>
+        ${sec(8, '风险提示')}
+          <table class="tbl"><thead><tr><th style="width:160px">风险类型</th><th>主要表现</th></tr></thead><tbody>
+          ${d.risks.map(r => `<tr><td><b class="text-sm">${r[0]}</b></td><td class="text-xs text-sub" style="line-height:1.7">${r[1]}</td></tr>`).join('')}</tbody></table></div>
+        ${sec(9, '资本路径与银行协同')}
+          <b class="text-sm mb2" style="display:block">资本路径推演</b>
+          <div class="mb3">${d.path.map((x, i) => `<div class="flex mb2" style="gap:10px;align-items:flex-start"><span class="rank-pill" style="background:#F0F2F7;color:var(--t3);flex-shrink:0">${i + 1}</span><span class="text-sm text-sub" style="line-height:1.8">${x}</span></div>`).join('')}</div>
+          <b class="text-sm mb2" style="display:block">银行协同视角（投贷联动）</b>
+          <div class="banner b-note" style="line-height:1.9">${d.bank}</div></div>
+          </div>
+        </div`;
+      }
+      box.innerHTML = formHtml + body;
+      const dlB = box.querySelector('#rschDl'), dlB2 = box.querySelector('#rschDl2');
+      if (dlB) dlB.onclick = () => toast('研报已导出为 PDF');
+      if (dlB2) dlB2.onclick = () => toast('研报已导出为 PDF');
+      const re = box.querySelector('#rschRe');
+      if (re) re.onclick = () => { const f = box.querySelector('#rschForm'); if (f) f.style.display = 'flex'; re.style.display = 'none'; const q0 = box.querySelector('#rschQ'); if (q0) q0.focus(); };
+      const q = box.querySelector('#rschQ'), sug = box.querySelector('#rschSug');
+      const fuzzy = (co, kw) => {
+        const hay = co.name + co.short + co.seg + co.industry + usccOf(co);
+        const words = kw.split(/\s+/).filter(Boolean);
+        if (words.every(w => hay.includes(w))) return true;
+        return [...kw].every(ch => hay.includes(ch));
+      };
+      if (q && sug) {
+        const bindRows = () => sug.querySelectorAll('[data-co]').forEach(s => {
+          s.onmouseenter = () => s.style.background = 'var(--brand-50)';
+          s.onmouseleave = () => s.style.background = '';
+          s.onmousedown = () => { S._rschCo = s.dataset.co; F.kw = m.coById(s.dataset.co).short; this.paintResearch(box); };
+        });
+        const rowHtml = x => `<div data-co="${x.id}" style="padding:8px 10px;border-radius:8px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:8px">
+          <span class="text-sm" style="font-weight:600;color:var(--t1)">${esc(x.short)}</span>
+          <span class="text-xs text-muted">${x.seg} · ${x.city || '无锡'}</span></div>`;
+        q.oninput = () => {
+          F.kw = q.value.trim();
+          const hits = F.kw ? m.companies.filter(x => fuzzy(x, F.kw)).slice(0, 8) : [];
+          if (!hits.length) { sug.style.display = 'none'; sug.innerHTML = ''; return; }
+          sug.innerHTML = hits.map(rowHtml).join('');
+          sug.style.display = 'block'; bindRows();
+        };
+        q.onblur = () => setTimeout(() => { sug.style.display = 'none'; }, 160);
+      }
+      const gb = box.querySelector('#rschGen');
+      if (gb) gb.onclick = () => {
+        const kw = (F.kw || '').trim();
+        if (!kw) { toast('请输入企业名称', 'warn'); return; }
+        const target = m.companies.find(x => x.short === kw || x.name === kw) || m.companies.find(x => fuzzy(x, kw));
+        if (!target) { toast('未匹配到企业，请调整关键词后重试', 'warn'); return; }
+        openModal({ small: true, title: `正在生成研报 · ${esc(target.short)}`, body: `
+          <div style="padding:10px 4px">${['采集公开披露 / 一级市场融资 / 可比公司数据', '可比公司法估值与成长性交叉验证', '生成投资机构视角的企业研报'].map((x, i) => `
+          <div class="flex mb3" style="gap:10px"><span class="rank-pill" style="background:#F0F2F7;color:var(--t3)" id="rgs${i}">${i + 1}</span>
+          <span class="text-sm" style="line-height:24px">${x}</span></div>`).join('')}</div>`, foot: '' });
+        const done = i => { const p = $('#rgs' + i); if (p) { p.textContent = '✓'; p.style.background = 'var(--ok-50)'; p.style.color = 'var(--ok-500)'; } };
+        setTimeout(() => done(0), 700); setTimeout(() => done(1), 1400); setTimeout(() => done(2), 2000);
+        setTimeout(() => {
+          APP.closeModal(); S._rschCo = target.id; F.kw = target.short;
+          S.rptMy = [{ co: target.id, kind: '企业研报', title: `${target.short}企业研报`, t: '2026-09-28 ' + new Date().toTimeString().slice(0, 5), by: '邓瑞忠' }, ...(S.rptMy || [])];
+          toast(`「${target.short}」企业研报已生成`);
+          this.render(document.querySelector('#viewRoot'));
+        }, 2500);
+      };
+      box.querySelectorAll('.ns-i[data-rs]').forEach(n => n.onclick = () => {
+        const tg = box.querySelector('#' + n.dataset.rs);
+        if (tg) tg.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        box.querySelectorAll('.ns-i[data-rs]').forEach(x => x.classList.remove('on'));
+        n.classList.add('on');
+      });
+    },
     /* ---- 拜访前一页纸 / 综合服务方案（新版看板结构 · 抽屉双 Tab） ---- */
     briefDlg(coId, side) {
       const c = M().coById(coId); if (!c) return;
@@ -841,19 +1027,17 @@
     },
   };
 
-  /* ================= 旧 AI智能分析 路由别名（隐藏路由 → 访前作战包） =================
-     深度分析已并入作战包四Tab（客户画像/行业分析/访前话术/推荐服务方案）；企业AI报告仅保留"我的报告"入口直达 */
+  /* ================= 报告中心 一级导航（原AI智能分析，置于市场洞察之后） =================
+     页签：访前报告 / 访后尽调报告 / 产业链报告 / 企业研报；
+     「我的报告」为页签行最右侧按钮（与页签区分开） */
   VIEWS.report.render = function (el) {
     const S = APP.S;
-    const cur = S.packCo && M().coById(S.packCo);
     el.innerHTML = `
-        <div class="page-head"><div class="page-title">我的报告</div>
-          <div class="flex" style="gap:8px">
-            <button class="btn btn-ghost" onclick="APP.go('insight')">← 返回市场洞察</button>
-            <button class="btn btn-ghost" onclick="APP.go('workbench')">返回工作台</button></div></div>
+        <div class="page-head"><div class="page-title">报告中心</div></div>
         <div id="rptTabs"></div>`;
-    if (!S.rptMy) S.rptMy = [
+    if (!S.rptMy || !S.rptMy.length) S.rptMy = [
       { co: 'JH', kind: '企业报告', t: '2026-09-28 10:32', by: '李晓' },
+      { co: 'JH', kind: '企业研报', title: '晶汇封测企业研报', t: '2026-09-28 09:15', by: '邓瑞忠' },
       { co: 'TH', kind: '企业报告', t: '2026-09-26 16:05', by: '陈斌' },
       { co: 'SX', kind: '企业报告', t: '2026-09-25 09:40', by: '王倩' },
       { co: 'ic', kind: '产业链报告', title: '集成电路产业分析报告', t: '2026-09-22 14:10', by: '李晓' },
@@ -861,13 +1045,29 @@
     if (S.visitReports && S.visitReports.length) {
       S.visitReports.forEach(v => { if (!S.rptMy.some(x => x.id === v.id)) S.rptMy.unshift({ id: v.id, co: v.co, kind: '访后报告', title: v.title, t: v.t, by: v.by }); });
     }
-    const tabs = [{ id: 'detail', name: '企业分析报告' }, { id: 'chain', name: '产业链报告' }, { id: 'mine', name: '我的报告', count: S.rptMy.length }];
-    let act = ['mine', 'chain'].includes(S.params.tab) ? S.params.tab : 'detail';
-    renderTabs($('#rptTabs'), tabs, act, t => { act = t; S.params.tab = t; paint(); });
+    const tabs = [
+      { id: 'detail', name: '访前报告' },
+      { id: 'visit', name: '访后尽调报告' },
+      { id: 'chain', name: '产业链报告' },
+      { id: 'research', name: '企业研报' }];
+    let act = ['mine', 'chain', 'visit', 'research'].includes(S.params.tab) ? S.params.tab : 'detail';
+    const noAct = act === 'mine' ? '__mine' : act;
+    renderTabs($('#rptTabs'), tabs, noAct, t => { act = t; S.params.tab = t; paint(); });
+    /* 我的报告：页签行最右侧按钮 */
+    const tabsEl = document.querySelector('#rptTabs .tabs');
+    const mineBtn = document.createElement('button');
+    mineBtn.style.cssText = 'margin-left:auto';
+    mineBtn.innerHTML = `我的报告<span class="t-count" style="font-size:11px;background:var(--bg);color:var(--t3);border-radius:8px;padding:0 6px;margin-left:4px">${S.rptMy.length}</span>`;
+    mineBtn.onclick = () => { act = 'mine'; S.params.tab = 'mine'; paint(); };
+    tabsEl.appendChild(mineBtn);
     const paint = () => {
-      const box = switchTab($('#rptTabs'), tabs, act, paint);
+      const box = switchTab($('#rptTabs'), tabs, act === 'mine' ? '__mine' : act, paint);
+      tabsEl.querySelectorAll('.tab').forEach(t => t.classList.toggle('on', t.dataset.tab === act));
+      mineBtn.className = act === 'mine' ? 'btn btn-primary btn-sm' : 'btn btn-ghost btn-sm';
       if (act === 'detail') this.paintDetail(box);
+      if (act === 'visit') VIEWS.visitReport.renderInline(box);
       if (act === 'chain') { this.paintChain(box); }
+      if (act === 'research') this.paintResearch(box);
       if (act === 'mine') this.paintMine(box);
     }; paint();
   };

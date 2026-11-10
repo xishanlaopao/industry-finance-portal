@@ -91,7 +91,6 @@ window.APP = (function () {
     /* 面包屑：一级导航页不显示层级（导航即层级）；跳转页/明细页显示「父级 › 当前」可点击返回 */
     const CRUMB_PARENT = {
       news: { v: 'insight', n: '市场洞察' },
-      report: { v: 'insight', n: '市场洞察' },
       company: { v: 'funnel', n: '客户清单' },
       plan: { v: 'funnel', n: '客户清单' },
       visitReport: { v: 'workbench', n: '个人工作台' },
@@ -154,8 +153,8 @@ window.APP = (function () {
   /* ---------- 顶部导航 / 用户（V4：五大一级导航） ---------- */
   function renderNav() {
     const nav = $('#pnav');
-    /* 主导航：隐藏路由（dashboard/report/news/cockpit/company 等）按别名归入对应一级项高亮 */
-    const ALIAS = { dashboard: 'insight', news: 'insight', report: 'insight', cockpit: 'manage', pack: 'workbench' };
+    /* 主导航：隐藏路由（dashboard/news/cockpit/company 等）按别名归入对应一级项高亮 */
+    const ALIAS = { dashboard: 'insight', news: 'insight', cockpit: 'manage', pack: 'workbench' };
     const active = ALIAS[S.view] || S.view;
     nav.innerHTML = window.NAV.filter(it => it.id !== 'workbench' || true).map(it => `
       <div class="pnav-item ${active === it.id ? 'active' : ''}" data-view="${it.id}">${it.name}</div>`).join('');
