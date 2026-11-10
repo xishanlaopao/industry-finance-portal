@@ -33,6 +33,12 @@
   const srcTip = key => { const a = RPT_SRC[key]; if (!a || !a.length) return '';
     return `<span class="src-tip text-xs text-muted" style="margin-left:auto;font-weight:400">来源<span class="src-pop"><span class="sp-t text-sm">数据来源</span>${a.map(([title, time, publisher]) => `<span class="sp-l text-xs text-sub" style="display:block;line-height:1.7;padding:5px 0;border-bottom:1px solid var(--line)"><b>发布方/平台：</b>${esc(publisher)}<br><b>原文章标题：</b>${esc(title)}<br><b>时间：</b>${esc(time)}</span>`).join('')}</span></span>`; };
 
+  /* 报告中心企业检索池：主库 + 机会漏斗客户池（去重），跟随漏斗准入口径（如朗新F159） */
+  const rptCoPool = m => {
+    const all = [...m.companies, ...(((m.funnel || {}).cos) || []).filter(c => !m.companies.some(y => y.id === c.id))];
+    return (APP.S.fn && APP.S.fn.admitted) ? all.filter(c => APP.S.fn.admittedIds.includes(c.id)) : all;
+  };
+
   /* ================= 访前作战包（一级导航） =================
      首屏：承接任务列表 + 企业模糊搜索；点击任务/搜索 → 进入该企业四Tab作战包
      Tab1 客户画像：企业全部信息（工商/标签/股权/上下游/合作历史）
@@ -313,7 +319,9 @@
     },
     paintChain(box) {
       const m = M(), cd = m.chainData;
-      const ctxCo = S.reportCo && m.coById(S.reportCo);
+      /* 朗新上下文：访前报告(S.reportCo)或企业研报(S._rschCo)选中的企业 */
+      const ctxId = S.reportCo || S._rschCo;
+      const ctxCo = ctxId && m.coById(ctxId);
       if (ctxCo && ctxCo.name.indexOf('朗新') >= 0) {
         box.innerHTML = `
         <div class="card card-pad mb4">
@@ -554,7 +562,7 @@
           sug.querySelector('#rptHistClr').onclick = () => { S.rptHist = []; showSug(); };
           return;
         }
-        const hits = m.companies.filter(x => fuzzy(x, F.kw)).slice(0, 8);
+        const hits = rptCoPool(m).filter(x => fuzzy(x, F.kw)).slice(0, 8);
         if (!hits.length) { sug.style.display = 'none'; sug.innerHTML = ''; S._rptCoId = null; return; }
         sug.innerHTML = hits.map(rowHtml).join('');
         sug.style.display = 'block';
@@ -581,7 +589,7 @@
       };
       q.addEventListener('keydown', e => { if (e.key === 'Enter') {
         if (!S._rptCoId && q.value.trim()) {
-          const hits = m.companies.filter(x => fuzzy(x, q.value.trim()));
+          const hits = rptCoPool(m).filter(x => fuzzy(x, q.value.trim()));
           if (hits.length) { S._rptCoId = hits[0].id; F.kw = hits[0].short; this.paintDetail(box); const b = box.querySelector('#genRpt'); if (b) setTimeout(() => b.click(), 80); return; }
         }
         box.querySelector('#genRpt').click();
@@ -839,9 +847,29 @@
       const F = S._rschForm = S._rschForm || { kw: '' };
       /* 统一社会信用代码检索：漏斗池(F开头)企业 uscc 由 fnDemoFill 确定性补齐 */
       const usccOf = co => { if (!co.uscc || co.uscc === '—') { const df = fnDemoFill(co); if (df && df.uscc) co.uscc = df.uscc; } return co.uscc || ''; };
-      /* 研报数据：晶汇封测完整示例；其余企业按四维评分确定性生成演示数据（未选企业时跳过） */
+      /* 研报数据：朗新/晶汇封测完整示例；其余企业按四维评分确定性生成演示数据（未选企业时跳过） */
       const d = !c ? null : (() => {
+        if (c.id === 'F159' || (c.name || '').indexOf('朗新') >= 0) return {
+          ts: '2026-10-29',
+          rating: 'B+ · 关注2027扭亏兑现', tgt: '市值 85～105亿（PS 1.9～2.3x）', cagr: '8%～12%', gpm: '29%～32%', npm: '扭亏后 3%～5%',
+          pts: [['赛道β', '"十五五"市场化交易电量占比约70%，交易放量+充电倍增+虚拟电厂三线叠加，能源数字化从项目型软件转向"交易+运营"'],
+            ['公司α', '电力营销2.0覆盖31省/2.7亿+终端，缴费5亿+用户，新电途1800万+注册/充电量75亿度(+65%)，虚拟电厂接入25GW——"负荷聚合→充电→交易→优化"闭环稀缺'],
+            ['拐点观察', '2026电力交易合约性亏损2.68亿（Q1-3归母-2.68亿），交易电量5倍增长至150亿度；2027年度合约重签是扭亏第一信号'],
+            ['估值判断', 'PB 1.42、PE(TTM)为负，年初至今股价-43.9%已较充分定价亏损；2027扭亏确认+虚拟电厂商业化=估值修复双击窗口']],
+          tam: [['电力市场化交易', '"十五五"市场化交易电量占比约70%，交易服务/结算系统与辅助决策需求放量', '+25% CAGR'], ['聚合充电生态', '充电设施"三年倍增"——2027年底2800万个、拉动投资2000亿+，聚合平台卡位流量入口', '+30% CAGR'], ['虚拟电厂', '2025年项目470个/调节能力1685万kW(+70%)，市场约百亿，2030年有望破千亿', '+40% CAGR']],
+          drivers: '电力市场化把朗新从项目型软件商推向"交易+运营"角色（交易电量150亿度）；充电"三年倍增"放大新电途流量与运营价值；虚拟电厂政策常态化打开聚合运营收入空间——三线叠加决定收入弹性，波动也随交易敞口放大。',
+          comps: [['远光软件', 'A股上市', '39.5亿', '+20.5%', 'PS 4.2x', '电力ERP龙头，国资云背景'], ['东方电子', 'A股上市', '52.3亿', '+7.8%', 'PS 2.1x', '电网自动化老牌，增长平稳'], ['国能日新', 'A股上市', '4.8亿', '+25%', 'PS 7.5x', '电力交易辅助决策稀缺标的'], ['朗新科技（本企业）', '创业板300682', '45.17亿', '-5.9%', 'PS 2.0x / PB 1.42', '亏损压制估值，扭亏即修复']],
+          fin: [['2025A', '45.17亿', '+2.5%', '30.6%', '2.4%'], ['2026E', '46.0亿', '+1.8%', '29.4%', '-5.8%（亏2.68亿）'], ['2027E', '50.6亿', '+10%', '30.5%', '3.0%'], ['2028E', '56.7亿', '+12%', '31.2%', '4.5%']],
+          rounds: [['IPO上市', '2017', '首发募资', '—', '深交所创业板(300682)'], ['重大资产重组', '2020', '发行股份收购核心资产', '—', '能源互联网业务整体注入'], ['战略入股', '2020', '云鑫创投（蚂蚁集团）', '—', '受让成为第二大股东（14.5%）'], ['当前市值', '2026-11', '收盘价 8.40 元', '90.6亿', 'PB 1.42 ｜ PE(TTM)为负']],
+          holders: '创始团队及一致行动人为控股股东；第二大股东云鑫创投（蚂蚁集团）持股14.5%——背书强但质押/减持并存，是股价与信用观察点；合作银行15+家，授信格局分散；35维风险扫描28项为零（无失信/被执行/行政处罚）。',
+          team: [['副董事长 · 总经理', '彭知平——战略层对话对象：华为合作、海外拓展、电力交易布局'], ['董事会秘书', '王慎勇（任职13年+）——对外信息与授信框架的统一接口人'], ['财务总监', '鲁清芳（任职10年+）——资金安排、保函/流贷需求与应收回款的实际决策参与者'], ['股权与治理', '蚂蚁集团（云鑫）14.5%为第二大股东；利润集中Q4确认，现金流季节性强']],
+          hls: [['双入口卡位', 'G端：营销2.0核心系统31省/2.7亿+终端；C端：缴费5亿+用户、日活近2000万'], ['闭环壁垒', '"负荷聚合→充电服务→电力交易→能源优化"场景稀缺；虚拟电厂25GW接入'], ['AI+海外', '"朗新九功"AI能源大模型（昇腾底座/华为生态签约）；海外10余国交付（尼泊尔全国电力营销系统约1000万美元）'], ['交易放量', '电力交易电量5倍增长至150亿度；蚂蚁集团14.5%二股东生态背书']],
+          risks: [['电力交易亏损', '2026合约性亏损2.68亿；现货价格波动直接冲击盈亏，2027合约重签是扭亏关键'], ['应收占款', '应收周转257天、占款约20亿+；债务人多为电网省级公司资质优，但占用营运资金'], ['股价与质押链', '年初至今-43.9%（52周8.16–20.36），PE(TTM)为负；股东质押/减持与股价回撤形成传导压力'], ['现金流波动', '2025经营现金流+4.78亿 → 2026Q1-3 -4.15亿；收入与回款集中Q4，季节性强']],
+          path: [['2026-Q4', '利润与回款确认旺季，全年亏损收敛情况验证；新耀5亿分离式保函落地'], ['2027-H1', '电力交易年度合约重签落地——扭亏路径确认的第一信号'], ['2027', '虚拟电厂聚合商业化(25GW)与充电运营放量，第二曲线收入兑现'], ['2028E', '"交易+运营"模式定型，估值向电力信息化可比公司中枢修复']],
+          bank: '新耀5亿分离式保函（需求已公告）是最佳首单——邦道担保+项目收费权质押缓释；应收257天对应电网应收保理/票据池（债务人可确权为国网/南网省级公司）；电力交易专项流贷（扭亏挂钩定价）+跨境结算主户（海外10余国）构成综合方案；Q4是授信落地黄金窗口，建议2026年内落地3年期授信框架。',
+        };
         if (c.id === 'JH') return {
+          ts: '2026-09-28',
           rating: 'A · 建议积极关注', tgt: '45～54亿元（PS 4.9～5.9x）', cagr: '25%～30%', gpm: '24%～26%', npm: '11%～13%',
           pts: [['赛道β', '先进封装2026-2028年CAGR约21%，Chiplet国产替代处于0→1窗口期'],
             ['公司α', '成长性（营收+28% vs 行业+9%）与盈利质量（净利率12.2% vs 行业8.5%）显著跑赢同业'],
@@ -865,6 +893,7 @@
         const escD = s => esc(String(s == null ? '' : s));
         const f1 = (rev / 1.28).toFixed(1), f2 = rev.toFixed(1), f3 = (rev * 1.29).toFixed(1), f4 = (rev * 1.66).toFixed(1), f5 = (rev * 2.14).toFixed(1);
         return {
+          ts: '2026-09-28',
           rating: A, tgt: `${(rev * 3).toFixed(0)}～${(rev * 3.7).toFixed(0)}亿元（PS 3.0～3.7x）`, cagr: `18%～${g + 6}%`, gpm: `21%～${21 + sc % 5}%`, npm: `${7 + sc % 3}%～${8 + sc % 5}%`,
           pts: [['赛道β', `${escD(c.industry || '所属产业')}景气度向上，细分环节国产替代加速`],
             ['公司α', `四维评分${sc}分，成长性与客户结构优于同业均值`],
@@ -905,7 +934,7 @@
             <div class="flex" style="gap:14px;align-items:center">
               ${scoreRing(c.score || 75, 40)}
               <div><div style="font-size:var(--fs-xl);font-weight:700;line-height:1.2">${esc(c.short)} · 企业研报</div>
-              <div class="flex mt1" style="gap:8px;align-items:center;flex-wrap:wrap"><span class="tag tag-solid-red">投资评级 ${esc(d.rating)}</span><span class="text-xs text-muted">数据时点 2026-09-28</span><span class="src-tip">来源<span class="src-pop" style="left:0;right:auto"><span class="sp-t text-sm">数据来源</span><span class="sp-l text-xs text-sub">· 企业公开披露信息与工商登记　截至2026-09</span><span class="sp-l text-xs text-sub">· 一级市场融资数据库（Wind / IT桔子）　截至2026-09</span><span class="sp-l text-xs text-sub">· 行业协会白皮书与券商可比公司研报　2026-08</span><span class="sp-l text-xs text-sub">· 在手订单与产能验证（企业调研）　2026-09</span></span></span></div></div>
+              <div class="flex mt1" style="gap:8px;align-items:center;flex-wrap:wrap"><span class="tag tag-solid-red">投资评级 ${esc(d.rating)}</span><span class="text-xs text-muted">数据时点 ${d.ts || '2026-09-28'}</span><span class="src-tip">来源<span class="src-pop" style="left:0;right:auto"><span class="sp-t text-sm">数据来源</span><span class="sp-l text-xs text-sub">· 企业公开披露信息与工商登记　截至2026-09</span><span class="sp-l text-xs text-sub">· 一级市场融资数据库（Wind / IT桔子）　截至2026-09</span><span class="sp-l text-xs text-sub">· 行业协会白皮书与券商可比公司研报　2026-08</span><span class="sp-l text-xs text-sub">· 在手订单与产能验证（企业调研）　2026-09</span></span></span></div></div>
             </div>
             <div class="flex" style="gap:8px">
               <button class="btn btn-ghost" id="rschRe">检索其他企业</button>
@@ -982,7 +1011,7 @@
           <span class="text-xs text-muted">${x.seg} · ${x.city || '无锡'}</span></div>`;
         q.oninput = () => {
           F.kw = q.value.trim();
-          const hits = F.kw ? m.companies.filter(x => fuzzy(x, F.kw)).slice(0, 8) : [];
+          const hits = F.kw ? rptCoPool(m).filter(x => fuzzy(x, F.kw)).slice(0, 8) : [];
           if (!hits.length) { sug.style.display = 'none'; sug.innerHTML = ''; return; }
           sug.innerHTML = hits.map(rowHtml).join('');
           sug.style.display = 'block'; bindRows();
@@ -993,7 +1022,8 @@
       if (gb) gb.onclick = () => {
         const kw = (F.kw || '').trim();
         if (!kw) { toast('请输入企业名称', 'warn'); return; }
-        const target = m.companies.find(x => x.short === kw || x.name === kw) || m.companies.find(x => fuzzy(x, kw));
+        const P = rptCoPool(m);
+        const target = P.find(x => x.short === kw || x.name === kw) || P.find(x => fuzzy(x, kw));
         if (!target) { toast('未匹配到企业，请调整关键词后重试', 'warn'); return; }
         openModal({ small: true, title: `正在生成研报 · ${esc(target.short)}`, body: `
           <div style="padding:10px 4px">${['采集公开披露 / 一级市场融资 / 可比公司数据', '可比公司法估值与成长性交叉验证', '生成投资机构视角的企业研报'].map((x, i) => `
